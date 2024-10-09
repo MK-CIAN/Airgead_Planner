@@ -1,19 +1,41 @@
 import { PieChart } from '@mui/x-charts/PieChart';
+import React, { useEffect, useState } from 'react';
 
-export default function MyPieChart() {
+interface BranchData {
+  id: string;       // The unique identifier for each branch
+  total_sales: string; // The total sales value as a string
+}
+
+interface ChartData {
+  id: string;      // Unique id for the chart slice
+  value: number;   // Sales value for the chart slice
+  label: string;   // Label for the chart slice
+}
+
+export default function MyPieChart({ myData }: { myData: BranchData[] }) {
+  const [chartData, setChartData] = useState<ChartData[]>([]);
+
+  useEffect(() => {
+    // Transform incoming data to the format expected by PieChart
+    const transformedData = myData.map(branch => ({
+      id: branch.id, // Use the branch id
+      value: parseFloat(branch.total_sales), // Convert string sales to float
+      label: `Branch ${branch.id}`, // Create a label for the branch
+    }));
+    
+    setChartData(transformedData); // Update state with transformed data
+  }, [myData]);
+
   return (
     <PieChart
       series={[
         {
-          data: [
-            { id: 0, value: 10, label: 'series A' },
-            { id: 1, value: 15, label: 'series B' },
-            { id: 2, value: 20, label: 'series C' },
-          ],
+          data: chartData, // Use the transformed chart data
         },
       ]}
       width={400}
       height={200}
+      //label={(d) => `${d.label}: $${d.value.toFixed(2)}`} // Format label for display
     />
   );
 }
