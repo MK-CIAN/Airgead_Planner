@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres
+    container_name: Airgead_Planner-Postgres
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password123
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks:
+      - postgres-db-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: Airgead_Planner-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: 'cian.mck01@gmail.com'
+      PGADMIN_DEFAULT_PASSWORD: 'password'
+    ports:
+      - 16543:80
+    volumes:
+      - ./servers.json:/pgadmin4/servers.json
+    networks:
+      - postgres-db-network
+
+volumes:
+  postgres-db-volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /Users/cianmckenna/Documents/Year4/Final_Year_Project/Airgead_Planner/database/data
+
+networks:
+  postgres-db-network:
+    driver: bridge
