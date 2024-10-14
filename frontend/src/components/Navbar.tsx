@@ -55,7 +55,7 @@ export default function NavBar({ content }: NavBarProps) {
             </ListItem>
 
             <ListItem key={2} disablePadding>
-                <ListItemButton component={Link} to={"dashboard2"} selected={"/dashboard2" === location.pathname}>
+                <ListItemButton component={Link} to={"budget"} selected={"/budget" === location.pathname}>
                     <ListItemIcon>
                         <PieChartIcon />
                     </ListItemIcon>

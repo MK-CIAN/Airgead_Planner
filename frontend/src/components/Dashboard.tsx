@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Axios from './Axios';
 import MyPieChart from './charts/PieChart';
 
-const Dashboard1 = () => {
+const Dashboard = () => {
   const [myBrancheData, setMyBrancheData] = useState([]);
   const [error, setError] = useState<string | null>(null); // State to handle errors
   const [loading, setLoading] = useState(true); // State to manage loading
@@ -40,4 +40,4 @@ const Dashboard1 = () => {
   );
 }
 
-export default Dashboard1;
+export default Dashboard;

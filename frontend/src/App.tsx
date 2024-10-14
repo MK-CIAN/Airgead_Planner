@@ -1,7 +1,7 @@
 import './App.css'
 import {Routes, Route} from 'react-router-dom'
-import Dashboard1 from './components/Dashboard1'
-import Dashboard2 from './components/Dashboard2'
+import Dashboard from './components/Dashboard'
+import Budget from './components/Budget'
 import Loans from './components/Loans'
 import Pensions from './components/Pensions'
 import Investmets from './components/Investments'
@@ -14,8 +14,8 @@ function App() {
       <Navbar
         content = {
           <Routes>
-            <Route path="" element={<Dashboard1/>}/>
-            <Route path="/dashboard2" element={<Dashboard2/>}/>
+            <Route path="" element={<Dashboard/>}/>
+            <Route path="/budget" element={<Budget/>}/>
             <Route path="/loans" element={<Loans/>}/>
             <Route path="/pensions" element={<Pensions/>}/>
             <Route path="/investments" element={<Investmets/>}/>
