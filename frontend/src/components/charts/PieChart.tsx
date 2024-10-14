@@ -1,5 +1,6 @@
 import { PieChart } from '@mui/x-charts/PieChart';
 import React, { useEffect, useState } from 'react';
+import { Box } from '@mui/material';
 
 interface BranchData {
   id: string;       // The unique identifier for each branch
@@ -27,15 +28,23 @@ export default function MyPieChart({ myData }: { myData: BranchData[] }) {
   }, [myData]);
 
   return (
-    <PieChart
-      series={[
-        {
-          data: chartData, // Use the transformed chart data
-        },
-      ]}
-      width={400}
-      height={200}
-      //label={(d) => `${d.label}: $${d.value.toFixed(2)}`} // Format label for display
-    />
+    <Box 
+      sx={{
+        display: 'flex', // Use flexbox
+        justifyContent: 'center', // Center horizontally
+        alignItems: 'center', // Center vertically
+        height: '30vh', // Full viewport height (adjust as needed)
+      }}
+    >
+      <PieChart
+        series={[
+          {
+            data: chartData, // Use the transformed chart data
+          },
+        ]}
+        width={400}
+        height={200} // Make it square for symmetry
+      />
+    </Box>
   );
 }

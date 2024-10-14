@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Axios from './Axios';
 import MyPieChart from './charts/PieChart';
+import "../App.css";
 
 const Dashboard = () => {
   const [myBrancheData, setMyBrancheData] = useState([]);
