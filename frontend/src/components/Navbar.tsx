@@ -9,7 +9,12 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import AutoGraph from '@mui/icons-material/AutoGraph';
+import SsidChartIcon from '@mui/icons-material/SsidChart';
+import NewspaperIcon from '@mui/icons-material/Newspaper';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import PieChartIcon from '@mui/icons-material/PieChart';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import HomeIcon from '@mui/icons-material/Home';
 import { Link, useLocation } from 'react-router-dom';
 
 const drawerWidth = 240;
@@ -43,7 +48,7 @@ export default function NavBar({ content }: NavBarProps) {
             <ListItem key={1} disablePadding>
                 <ListItemButton component={Link} to={"/"} selected={"/" === location.pathname}>
                     <ListItemIcon>
-                        <AutoGraph />
+                        <HomeIcon />
                     </ListItemIcon>
                     <ListItemText primary="Home" />
                 </ListItemButton>
@@ -52,43 +57,43 @@ export default function NavBar({ content }: NavBarProps) {
             <ListItem key={2} disablePadding>
                 <ListItemButton component={Link} to={"dashboard2"} selected={"/dashboard2" === location.pathname}>
                     <ListItemIcon>
-                        <AutoGraph />
+                        <PieChartIcon />
                     </ListItemIcon>
                     <ListItemText primary="Budget" />
                 </ListItemButton>
             </ListItem>
 
-            <ListItem key={2} disablePadding>
+            <ListItem key={3} disablePadding>
                 <ListItemButton component={Link} to={"loans"} selected={"/loans" === location.pathname}>
                     <ListItemIcon>
-                        <AutoGraph />
+                        <TrendingDownIcon />
                     </ListItemIcon>
                     <ListItemText primary="Loan Repayment Calculator" />
                 </ListItemButton>
             </ListItem>
 
-            <ListItem key={2} disablePadding>
+            <ListItem key={4} disablePadding>
                 <ListItemButton component={Link} to={"pensions"} selected={"/pensions" === location.pathname}>
                     <ListItemIcon>
-                        <AutoGraph />
+                        <TrendingUpIcon />
                     </ListItemIcon>
                     <ListItemText primary="Pension Strategies" />
                 </ListItemButton>
             </ListItem>
 
-            <ListItem key={2} disablePadding>
+            <ListItem key={5} disablePadding>
                 <ListItemButton component={Link} to={"investments"} selected={"/investments" === location.pathname}>
                     <ListItemIcon>
-                        <AutoGraph />
+                        <SsidChartIcon />
                     </ListItemIcon>
                     <ListItemText primary="Investment Guides"/>
                 </ListItemButton>
             </ListItem>
 
-            <ListItem key={2} disablePadding>
+            <ListItem key={6} disablePadding>
                 <ListItemButton component={Link} to={"news"} selected={"/news" === location.pathname}>
                     <ListItemIcon>
-                        <AutoGraph />
+                        <NewspaperIcon />
                     </ListItemIcon>
                     <ListItemText primary="News For You" />
                 </ListItemButton>
