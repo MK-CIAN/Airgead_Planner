@@ -16,21 +16,25 @@ import PieChartIcon from '@mui/icons-material/PieChart';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import HomeIcon from '@mui/icons-material/Home';
 import { Link, useLocation } from 'react-router-dom';
+import '../App.css';
 
-const drawerWidth = 240;
+
+const drawerWidth = 300;
 
 interface NavBarProps {
   content: React.ReactNode;
 }
 
 export default function NavBar({ content }: NavBarProps) {
-    const location = useLocation();
+  const location = useLocation();
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1,
+      backgroundColor: 'rgb(7, 148, 0)',
+      }}>
         <Toolbar>
-          <Typography variant="h6" noWrap component="div">
+          <Typography variant="h5" noWrap component="div">
             Airgead Planner
           </Typography>
         </Toolbar>
