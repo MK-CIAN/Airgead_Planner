@@ -26,7 +26,7 @@ export default function NavBar({ content }: NavBarProps) {
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar>
           <Typography variant="h6" noWrap component="div">
-            Clipped drawer
+            Airgead Planner
           </Typography>
         </Toolbar>
       </AppBar>
@@ -45,7 +45,7 @@ export default function NavBar({ content }: NavBarProps) {
                     <ListItemIcon>
                         <AutoGraph />
                     </ListItemIcon>
-                    <ListItemText primary="Dashboard 1" />
+                    <ListItemText primary="Home" />
                 </ListItemButton>
             </ListItem>
 
@@ -54,7 +54,43 @@ export default function NavBar({ content }: NavBarProps) {
                     <ListItemIcon>
                         <AutoGraph />
                     </ListItemIcon>
-                    <ListItemText primary="Dashboard 2" />
+                    <ListItemText primary="Budget" />
+                </ListItemButton>
+            </ListItem>
+
+            <ListItem key={2} disablePadding>
+                <ListItemButton component={Link} to={"loans"} selected={"/loans" === location.pathname}>
+                    <ListItemIcon>
+                        <AutoGraph />
+                    </ListItemIcon>
+                    <ListItemText primary="Loan Repayment Calculator" />
+                </ListItemButton>
+            </ListItem>
+
+            <ListItem key={2} disablePadding>
+                <ListItemButton component={Link} to={"pensions"} selected={"/pensions" === location.pathname}>
+                    <ListItemIcon>
+                        <AutoGraph />
+                    </ListItemIcon>
+                    <ListItemText primary="Pension Strategies" />
+                </ListItemButton>
+            </ListItem>
+
+            <ListItem key={2} disablePadding>
+                <ListItemButton component={Link} to={"investments"} selected={"/investments" === location.pathname}>
+                    <ListItemIcon>
+                        <AutoGraph />
+                    </ListItemIcon>
+                    <ListItemText primary="Investment Guides"/>
+                </ListItemButton>
+            </ListItem>
+
+            <ListItem key={2} disablePadding>
+                <ListItemButton component={Link} to={"news"} selected={"/news" === location.pathname}>
+                    <ListItemIcon>
+                        <AutoGraph />
+                    </ListItemIcon>
+                    <ListItemText primary="News For You" />
                 </ListItemButton>
             </ListItem>
         </Box>
