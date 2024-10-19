@@ -2,6 +2,7 @@ import * as React from 'react';
 import { PieChart } from '@mui/x-charts/PieChart';
 import { useDrawingArea } from '@mui/x-charts/hooks';
 import { styled } from '@mui/material/styles';
+import Box from '@mui/material/Box';
 
 // Define the prop types for BudgetChart
 interface BudgetChartProps {
@@ -12,8 +13,8 @@ interface BudgetChartProps {
 }
 
 const size = {
-  width: 400,
-  height: 200,
+  width: 600,
+  height: 400,
 };
 
 const StyledText = styled('text')(({ theme }) => ({
@@ -34,9 +35,18 @@ function PieCenterLabel({ children }: { children: React.ReactNode }) {
 
 const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
   return (
-    <PieChart series={[{ data, innerRadius: 80 }]} {...size}>
-      <PieCenterLabel>Monthly Budget</PieCenterLabel>
-    </PieChart>
+    <Box 
+      sx={{
+        margin: 'auto', // Center the chart
+        display: 'flex', // Use flexbox
+        justifyContent: 'center', // Center horizontally
+        alignItems: 'center', // Center vertically
+      }}
+    >
+        <PieChart series={[{ data, innerRadius: 140 }]} {...size}>
+        <PieCenterLabel>Monthly Budget</PieCenterLabel>
+        </PieChart>
+    </Box>
   );
 };
 

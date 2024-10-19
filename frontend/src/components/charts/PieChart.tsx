@@ -34,6 +34,7 @@ export default function MyPieChart({ myData }: { myData: BranchData[] }) {
         justifyContent: 'center', // Center horizontally
         alignItems: 'center', // Center vertically
         height: '30vh', // Full viewport height (adjust as needed)
+        margin: '5%', // Center the chart
       }}
     >
       <PieChart

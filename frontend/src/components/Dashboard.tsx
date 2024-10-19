@@ -34,7 +34,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div>
+    <div className='container'>
       <h1>Sales Dashboard</h1>
       <MyPieChart myData={myBrancheData} />
     </div>
