@@ -3,12 +3,13 @@ import { PieChart } from '@mui/x-charts/PieChart';
 import { useDrawingArea } from '@mui/x-charts/hooks';
 import { styled } from '@mui/material/styles';
 
-const data = [
-  { value: 5, label: 'A' },
-  { value: 10, label: 'B' },
-  { value: 15, label: 'C' },
-  { value: 20, label: 'D' },
-];
+// Define the prop types for BudgetChart
+interface BudgetChartProps {
+  data: {
+    value: number;
+    label: string;
+  }[];
+}
 
 const size = {
   width: 400,
@@ -31,10 +32,12 @@ function PieCenterLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function BudgetChart() {
+const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
   return (
     <PieChart series={[{ data, innerRadius: 80 }]} {...size}>
-      <PieCenterLabel>Center label</PieCenterLabel>
+      <PieCenterLabel>Monthly Budget</PieCenterLabel>
     </PieChart>
   );
-}
+};
+
+export default BudgetChart;

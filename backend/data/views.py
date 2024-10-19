@@ -40,3 +40,8 @@ class BranchDataViewset(viewsets.ViewSet):
         # Serialize the aggregated data
         serializer = BranchDataSerializer(serialized_data, many=True)
         return Response(serializer.data)
+
+
+class MonthlyBudgetViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = MonthlyBudget.objects.all()
+    serializer_class = MonthlyBudgetSerializer
