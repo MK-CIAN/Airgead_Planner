@@ -58,6 +58,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]
 
+AUTH_USER_MODEL = 'users.CustomUser'
+
 ROOT_URLCONF = 'dashboard.urls'
 
 TEMPLATES = [
@@ -91,7 +93,7 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '5432',
         'OPTIONS': {
-            'options': '-c search_path=test_data'
+            'options': '-c search_path=airgead_planner'
         }
     }
 }
