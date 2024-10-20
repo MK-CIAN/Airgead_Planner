@@ -50,7 +50,7 @@ export default function NavBar({ content }: NavBarProps) {
         <Toolbar />
         <Box sx={{ overflow: 'auto' }}>
             <ListItem key={1} disablePadding>
-                <ListItemButton component={Link} to={"/"} selected={"/" === location.pathname}>
+                <ListItemButton component={Link} to={"/home"} selected={"/home" === location.pathname}>
                     <ListItemIcon>
                         <HomeIcon />
                     </ListItemIcon>

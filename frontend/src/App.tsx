@@ -1,5 +1,5 @@
 import './App.css'
-import {Routes, Route} from 'react-router-dom'
+import {Routes, Route, useLocation} from 'react-router-dom'
 import Dashboard from './components/Dashboard'
 import Budget from './components/Budget'
 import Loans from './components/Loans'
@@ -7,22 +7,38 @@ import Pensions from './components/Pensions'
 import Investmets from './components/Investments'
 import News from './components/News'
 import Navbar from './components/Navbar'
+import Login from './components/Login'
+import Register from './components/Register'
 
 function App() {
+  const location = useLocation()
+  const noNavbar = location.pathname === "/" || location.pathname === "/register"
+
   return (
     <>
-      <Navbar
-        content = {
-          <Routes>
-            <Route path="" element={<Dashboard/>}/>
-            <Route path="/budget" element={<Budget/>}/>
-            <Route path="/loans" element={<Loans/>}/>
-            <Route path="/pensions" element={<Pensions/>}/>
-            <Route path="/investments" element={<Investmets/>}/>
-            <Route path="/news" element={<News/>}/>
-          </Routes>
-        }
-      />
+      {
+        noNavbar ?
+
+        <Routes>
+          <Route path="/" element={<Login/>}/>
+          <Route path="/register" element={<Register/>}/>
+        </Routes>
+
+        :
+
+        <Navbar
+          content = {
+            <Routes>
+              <Route path="/home" element={<Dashboard/>}/>
+              <Route path="/budget" element={<Budget/>}/>
+              <Route path="/loans" element={<Loans/>}/>
+              <Route path="/pensions" element={<Pensions/>}/>
+              <Route path="/investments" element={<Investmets/>}/>
+              <Route path="/news" element={<News/>}/>
+            </Routes>
+          }
+        />
+      }
     </>
   )
 }
