@@ -11,17 +11,16 @@
     background-color: white;
     padding: 20px;
     min-width: 300px;
-    height: 70%;
+    height: 50%;
     width: 25%;
-    border: 1px solid rgba(0, 0, 0, 0.268);
+    border: 5px solid rgba(0, 0, 0, 0.654);
 }
 .itemBox {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    background-color: red;
-    height: 100px;
+    height: 80px;
 }
 .title {
     font-size: 30px;
@@ -29,8 +28,14 @@
     color: black;
     text-align: center;
 }
-.myForm {
+.myForm,
+.myButton {
     width: 100%;
+}
+
+.myButton {
+    background: rgb(132,250,142);
+    background: linear-gradient(333deg, rgba(132,250,142,0.710504270067402) 0%, rgba(6,170,19,0.8477591720281863) 50%, rgba(21,94,27,1) 100%); 
 }
 
 

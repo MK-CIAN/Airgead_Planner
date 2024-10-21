@@ -2,6 +2,8 @@ import '../App.css';
 import { Box } from '@mui/system';
 import MyTextField from './forms/MyTextField';
 import MyPassField from './forms/MyPassField';
+import MyButton from './forms/MyButton';
+import { Link } from 'react-router-dom';
 
 const Login = () => {
     return (
@@ -17,10 +19,10 @@ const Login = () => {
                     <MyPassField label={"Password"} />
                 </Box>
                 <Box className={"itemBox"}>
-                    Submit Button
+                    <MyButton label={"Login"} />
                 </Box>
                 <Box className={"itemBox"}>
-                    Link to Register Page
+                    <Link to="/register">Don't have an account? Register here</Link>
                 </Box>
                 
             </Box>
