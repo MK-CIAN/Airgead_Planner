@@ -11,7 +11,7 @@ const Budget: React.FC = () => {
   const [budgetData, setBudgetData] = useState<BudgetItem[]>([]);
 
   const getBudgetData = () => {
-    Axios.get('budget/')
+    Axios.get('data/budget/')
       .then((response) => {
         // Format the budget data into a structure for the chart
         const formattedData = response.data.map((item: { amount: string; category: string }) => ({

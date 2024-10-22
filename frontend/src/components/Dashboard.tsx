@@ -9,7 +9,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true); // State to manage loading
 
   const GetData = () => {
-    Axios.get('branchdata/')
+    Axios.get('data/branchdata/')
       .then((response) => {
         setMyBrancheData(response.data); // Update the branch data state
         setLoading(false); // Stop loading when data is fetched
