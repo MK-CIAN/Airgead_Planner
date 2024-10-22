@@ -8,7 +8,3 @@ router.register('supermarketsales', SuperMarketSalesViewset, basename='supermark
 router.register('branchdata', BranchDataViewset, basename='branchdata')
 router.register('budget', MonthlyBudgetViewSet, basename='budget')
 urlpatterns = router.urls
-
-urlpatterns = [
-    path('', include(router.urls)),
-]
