@@ -23,7 +23,7 @@ const Login = () => {
             password: data.password
         }).then((response) => {
             console.log(response)
-            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('Token', response.data.token);
             navigate(`/home`);
         })
         .catch((error) => {
