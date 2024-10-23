@@ -7,9 +7,7 @@ from django.db.models import F, Sum
 
 # Create your views here.
 class SuperMarketSalesViewset(viewsets.ViewSet):
-    permission_classes = [
-        permissions.AllowAny
-    ]
+    permission_classes = [permissions.IsAuthenticated]
 
     queryset = Supermarketsales.objects.all()
     serializer_class = SupermarketsalesSerializer
@@ -20,7 +18,7 @@ class SuperMarketSalesViewset(viewsets.ViewSet):
         return Response(serializer.data)
     
 class BranchDataViewset(viewsets.ViewSet):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def list(self, request):
         # Calculate total sales by branch: unit_price * quantity
@@ -43,5 +41,6 @@ class BranchDataViewset(viewsets.ViewSet):
 
 
 class MonthlyBudgetViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [permissions.IsAuthenticated]
     queryset = MonthlyBudget.objects.all()
     serializer_class = MonthlyBudgetSerializer
