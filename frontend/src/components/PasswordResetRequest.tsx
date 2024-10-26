@@ -7,36 +7,35 @@ import { Link } from 'react-router-dom';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import Axios from './Axios';
 import { useNavigate } from 'react-router-dom';
+import MyMessage from './Message';
+import { useState } from 'react';
 
 interface IFormInput {
     email: string;
     password: string;
 }
 
-const Login = () => {
+const PasswordResetRequest = () => {
     const { handleSubmit, control } = useForm<IFormInput>();
     const navigate = useNavigate();
 
+    const [ShowMessage, setShowMessage] = useState(false);
+
     const submission: SubmitHandler<IFormInput> = (data) => {
-        Axios.post(`login/`, {
+        Axios.post(`api/password_reset/`, {
             email: data.email,
-            password: data.password
         }).then((response) => {
-            console.log(response)
-            localStorage.setItem('Token', response.data.token);
-            navigate(`/home`);
-        })
-        .catch((error) => {
-            console.log("Error during login", error)
+            setShowMessage(true);
         });
     }
-    return (
+    return(
         <div className={"myBackground"}>
+            {ShowMessage ? <MyMessage text={"Password Reset Request Sent"} /> : null}
             <form onSubmit={handleSubmit(submission)}>
 
             <Box className={"whiteBox"}>
                 <Box className={"itemBox"}>
-                    <Box className={"title"}>Login for Airgead Planner</Box>
+                    <Box className={"title"}>Request Password Reset</Box>
                 </Box>
                 <Box className={"itemBox"}>
                     <MyTextField 
@@ -45,24 +44,18 @@ const Login = () => {
                     control = {control} />
                 </Box>
                 <Box className={"itemBox"}>
-                    <MyPassField 
-                    label={"Password"}
-                    name = {"password"}
-                    control = {control} />
-                </Box>
-                <Box className={"itemBox"}>
                     <MyButton 
-                    label={"Login"}
+                    label={"Request Password Reset"}
                     type={"submit"} />
                 </Box>
                 <Box className={"itemBox"} sx={{flexDirection:'column'}}>
-                    <Link to="/register">Don't have an account? Register here</Link>
-                    <Link to="/request/password_reset">Forgot your password? Reset here</Link>
+    
                 </Box>  
             </Box>
         </form>
         </div>
-    );
+    )
 }
 
-export default Login;
+export default PasswordResetRequest;
+
