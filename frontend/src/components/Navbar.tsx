@@ -17,6 +17,9 @@ import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import HomeIcon from '@mui/icons-material/Home';
 import { Link, useLocation } from 'react-router-dom';
 import '../App.css';
+import LogoutIcon from '@mui/icons-material/Logout';
+import Axios from './Axios';
+import { useNavigate } from 'react-router-dom';
 
 
 const drawerWidth = 300;
@@ -27,6 +30,16 @@ interface NavBarProps {
 
 export default function NavBar({ content }: NavBarProps) {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const logoutUser = () => {
+    Axios.post(`logoutall/`, {
+    }).then(() => {
+        localStorage.removeItem('Token');
+        navigate(`/`);
+    })
+  }
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -101,6 +114,14 @@ export default function NavBar({ content }: NavBarProps) {
                         <NewspaperIcon />
                     </ListItemIcon>
                     <ListItemText primary="News For You" />
+                </ListItemButton>
+            </ListItem>
+            <ListItem key={7} disablePadding>
+                <ListItemButton onClick={logoutUser}>
+                    <ListItemIcon>
+                        <LogoutIcon/>
+                    </ListItemIcon>
+                    <ListItemText primary="Logout" />
                 </ListItemButton>
             </ListItem>
         </Box>
