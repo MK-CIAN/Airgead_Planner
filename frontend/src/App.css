@@ -12,8 +12,10 @@
     padding: 20px;
     min-width: 300px;
     height: 50%;
-    width: 25%;
+    width: 30%;
     border: 5px solid rgba(0, 0, 0, 0.654);
+    justify-content: center;
+    margin-left: 5%;
 }
 .itemBox {
     display: flex;

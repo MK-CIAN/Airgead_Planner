@@ -32,12 +32,12 @@ const PasswordReset = () => {
             setShowMessage(true);
             setTimeout(() => {
                 navigate(`/`);
-            }, 2000);
+            }, 6000);
         });
     }
     return(
         <div className={"myBackground"}>
-            {ShowMessage ? <MyMessage text={"Your Password Reset Was Successfull"} /> : null}
+            {ShowMessage ? <MyMessage text={"Your Password Reset Was Successfull"} color={"rgba(21,94,27,1)"}/> : null}
             <form onSubmit={handleSubmit(submission)}>
 
             <Box className={"whiteBox"}>

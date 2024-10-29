@@ -7,6 +7,8 @@ import { Link } from 'react-router-dom';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import Axios from './Axios';
 import { useNavigate } from 'react-router-dom';
+import MyMessage from './Message';
+import { useState } from 'react';
 
 interface IFormInput {
     email: string;
@@ -16,6 +18,7 @@ interface IFormInput {
 const Login = () => {
     const { handleSubmit, control } = useForm<IFormInput>();
     const navigate = useNavigate();
+    const [ShowMessage, setShowMessage] = useState(false);
 
     const submission: SubmitHandler<IFormInput> = (data) => {
         Axios.post(`login/`, {
@@ -27,11 +30,13 @@ const Login = () => {
             navigate(`/home`);
         })
         .catch((error) => {
+            setShowMessage(true);
             console.log("Error during login", error)
         });
     }
     return (
         <div className={"myBackground"}>
+            {ShowMessage ? <MyMessage text={"Login Failed, Please Try Again"} color={"#EC5A76"}/> : null}
             <form onSubmit={handleSubmit(submission)}>
 
             <Box className={"whiteBox"}>
