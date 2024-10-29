@@ -7,7 +7,8 @@ import { Link } from 'react-router-dom';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import Axios from './Axios';
 import { useNavigate } from 'react-router-dom';
-
+import {yupResolver} from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 
 interface IFormInput {
     email: string;
@@ -16,8 +17,23 @@ interface IFormInput {
 
 const Register = () => {
     const navigate = useNavigate();
-    const { handleSubmit, control } = useForm<IFormInput>();
+    
 
+    const schema = yup.object({
+        email: yup.string().email('Field expects an email address').required('Email is a required field'),
+        password: yup.string()
+                    .required('Password is a required field')
+                    .min(8, 'Password must be at least 8 characters')
+                    .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+                    .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
+                    .matches(/[0-9]/, 'Password must contain at least one number')
+                    .matches(/[!@#$%&*(),.?":;{}|<>+]/, 'Password must contain at least one special character'),
+        password2: yup.string().required('Password confirmation is a required field')
+                    .oneOf([yup.ref('password')], 'Passwords must match')
+    })
+
+    const { handleSubmit, control } = useForm({resolver: yupResolver(schema)});
+    
     const submission: SubmitHandler<IFormInput> = (data) => {
         Axios.post(`register/`, {
             email: data.email,
