@@ -12,9 +12,11 @@ const useDrawingArea = () => ({
 });
 
 interface BudgetData {
+
+  id: number;
   value: number;
   label: string;
-  transaction_type: string;
+  type: string;
 }
 
 interface BudgetChartProps {
@@ -44,9 +46,10 @@ function PieCenterLabel({ children }: { children: React.ReactNode }) {
 
 const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
   // Add color property to each data point based on type
+  console.log("Chart Data:", data)
   const chartData = data.map(item => ({
     ...item,
-    color: item.transaction_type === 'income' ? 'green' : 'red', // Adjust based on your criteria
+    color: item.type === 'income' ? 'green' : 'red', // Adjust based on your criteria
   }));
   return (
     <Box 
