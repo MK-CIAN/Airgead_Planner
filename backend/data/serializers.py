@@ -14,4 +14,5 @@ class BranchDataSerializer(serializers.Serializer):
 class MonthlyBudgetSerializer(serializers.ModelSerializer):
     class Meta:
         model = MonthlyBudget
-        fields = ['category', 'amount', 'month']
+        fields = ['category', 'amount', 'month', 'user', 'transaction_type']
+        read_only_fields = ['user']

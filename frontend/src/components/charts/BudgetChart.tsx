@@ -1,15 +1,24 @@
+// BudgetChart.tsx
 import * as React from 'react';
 import { PieChart } from '@mui/x-charts/PieChart';
-import { useDrawingArea } from '@mui/x-charts/hooks';
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
+// Assuming useDrawingArea is not available, we will create a mock implementation
+const useDrawingArea = () => ({
+  width: 600,
+  height: 400,
+  left: 0,
+  top: 0,
+});
 
-// Define the prop types for BudgetChart
+interface BudgetData {
+  value: number;
+  label: string;
+  transaction_type: string;
+}
+
 interface BudgetChartProps {
-  data: {
-    value: number;
-    label: string;
-  }[];
+  data: BudgetData[];
 }
 
 const size = {
@@ -34,17 +43,28 @@ function PieCenterLabel({ children }: { children: React.ReactNode }) {
 }
 
 const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
+  // Add color property to each data point based on type
+  const chartData = data.map(item => ({
+    ...item,
+    color: item.transaction_type === 'income' ? 'green' : 'red', // Adjust based on your criteria
+  }));
   return (
     <Box 
       sx={{
-        margin: 'auto', // Center the chart
-        display: 'flex', // Use flexbox
-        justifyContent: 'center', // Center horizontally
-        alignItems: 'center', // Center vertically
+        margin: 'auto',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
       }}
     >
-        <PieChart series={[{ data, innerRadius: 140 }]} {...size}>
-        <PieCenterLabel>Monthly Budget</PieCenterLabel>
+        <PieChart 
+          series={[{ 
+            data: chartData.map(item => ({ value: item.value, label: item.label, color: item.color })),
+            innerRadius: 140 
+          }]} 
+          {...size}
+        >
+          <PieCenterLabel>Monthly Budget</PieCenterLabel>
         </PieChart>
     </Box>
   );

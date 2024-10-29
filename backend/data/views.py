@@ -40,7 +40,16 @@ class BranchDataViewset(viewsets.ViewSet):
         return Response(serializer.data)
 
 
-class MonthlyBudgetViewSet(viewsets.ReadOnlyModelViewSet):
+class MonthlyBudgetViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
-    queryset = MonthlyBudget.objects.all()
     serializer_class = MonthlyBudgetSerializer
+
+    def get_queryset(self):
+        month = self.request.query_params.get('month')
+        queryset = MonthlyBudget.objects.filter(user=self.request.user)
+        if month:
+            queryset = queryset.filter(month__startswith=month)
+        return queryset
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

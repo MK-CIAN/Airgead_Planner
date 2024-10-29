@@ -47,6 +47,13 @@
     margin-top: 20px;
     text-align: center;
 }
- .container h1 {
+.container h1 {
     margin-right: 5%;
- }
+}
+
+.budget-form {
+    padding: 2%;
+}
+.budget-input {
+    padding: 2%;
+}

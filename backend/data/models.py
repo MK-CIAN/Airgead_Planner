@@ -7,6 +7,8 @@
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 
+from dashboard import settings
+
 
 class AuthGroup(models.Model):
     name = models.CharField(unique=True, max_length=150)
@@ -123,12 +125,17 @@ class DjangoSession(models.Model):
 
 
 class MonthlyBudget(models.Model):
+    CATEGORY_CHOICES = [
+        ('income', 'Income'),
+        ('expense', 'Expense'),
+    ]
     category = models.CharField(max_length=50, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     month = models.DateField(blank=True, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,null=True, blank=True)
+    transaction_type = models.CharField(max_length=7, choices=CATEGORY_CHOICES, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'monthly_budget'
 
 
