@@ -45,12 +45,23 @@ function PieCenterLabel({ children }: { children: React.ReactNode }) {
 }
 
 const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
+  // Calculate totals for income and expenses
+  const totalIncome = data
+    .filter(item => item.type === 'income')
+    .reduce((total, item) => total + item.value, 0);
+
+  const totalExpenses = data
+    .filter(item => item.type === 'expense')
+    .reduce((total, item) => total + item.value, 0);
   // Add color property to each data point based on type
   console.log("Chart Data:", data)
   const chartData = data.map(item => ({
     ...item,
-    color: item.type === 'income' ? 'green' : 'red', // Adjust based on your criteria
+    color: item.type === 'income' ? 'rgba(6,170,19,0.8477591720281863)' : 'red', // Adjust based on your criteria
   }));
+
+  // Calculate total budget (income - expenses)
+  const totalBudget = totalIncome - totalExpenses;
   return (
     <Box 
       sx={{
@@ -67,7 +78,7 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
           }]} 
           {...size}
         >
-          <PieCenterLabel>Monthly Budget</PieCenterLabel>
+          <PieCenterLabel>€{totalBudget.toFixed(2)}</PieCenterLabel>
         </PieChart>
     </Box>
   );
