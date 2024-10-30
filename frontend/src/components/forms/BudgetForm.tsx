@@ -76,7 +76,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget, month }) => {
         <Controller
           name="transaction_type"
           control={control}
-          defaultValue="income"  // Default value for transaction type
+          defaultValue=""  // Default value for transaction type
           render={({ field }) => (
             <FormControl fullWidth required>
               <InputLabel>Transaction Type</InputLabel>

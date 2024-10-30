@@ -7,6 +7,7 @@ import { Button, IconButton, List, ListItem, ListItemText, Typography } from '@m
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import dayjs, { Dayjs } from 'dayjs';
+import '../App.css';
 
 interface BudgetData {
   id: number;
@@ -50,29 +51,45 @@ const Budget: React.FC = () => {
   };
 
   const handleAddBudget = (newItem: { amount: string; category: string; transaction_type: string }) => {
-    const newBudgetData: BudgetData = {
-      id: Math.floor(Math.random() * 1000000), // Generate a unique numeric ID for simplicity
-      value: parseFloat(newItem.amount),
-      label: newItem.category,
-      type: newItem.transaction_type,
+    // Prepare the data to send to the backend
+    const budgetItem = {
+      amount: newItem.amount,
+      category: newItem.category,
+      transaction_type: newItem.transaction_type,
     };
-    setBudgetData(prevData => [...prevData, newBudgetData]);
+  
+    // Send POST request to backend to save the item
+    Axios.post('data/budget/', budgetItem)
+      .then((response) => {
+        // Extract the saved item with the backend-generated ID
+        const savedItem = response.data;
+  
+        // Update the frontend state with the item, including the backend-generated ID
+        setBudgetData((prevData) => [
+          ...prevData,
+          {
+            id: savedItem.id, // Use the backend-generated ID
+            value: parseFloat(savedItem.amount),
+            label: savedItem.category,
+            type: savedItem.transaction_type,
+          },
+        ]);
+      })
+      .catch((error) => {
+        console.error("Error adding budget item:", error);
+      });
   };
   
   // New function to remove an item
   const handleRemoveBudget = (id: number) => {
-    console.log("Attempting to remove budget item with ID:", id);
-    if (id !== undefined) {
-      Axios.delete(`data/budget/${id}/`)  // Ensure this URL is correct
-        .then(() => {
-          setBudgetData(prevData => prevData.filter(item => item.id !== id));
-        })
-        .catch((error) => {
-          console.error("Error removing budget item:", error);
-        });
-    } else {
-      console.error("Cannot remove budget item: ID is undefined.");
-    }
+    Axios.delete(`data/budget/${id}/`)
+      .then(() => {
+        // Remove item from the frontend state only after successful deletion on the backend
+        setBudgetData((prevData) => prevData.filter((item) => item.id !== id));
+      })
+      .catch((error) => {
+        console.error("Error removing budget item:", error);
+      });
   };
   return (
     <div>
@@ -91,28 +108,34 @@ const Budget: React.FC = () => {
         </IconButton>
       </div>
 
-      {/* Budget Form */}
-      <BudgetForm onAddBudget={handleAddBudget} month={currentMonth} />
+      {/* Side-by-side container */}
+      <div className="budget-container">
+        {/* Budget Form */}
+        <div className="budget-form">
+          <BudgetForm onAddBudget={handleAddBudget} month={currentMonth} />
+        </div>
 
+        {/* List of Budget Items */}
+        <div className="budget-list">
+          {budgetData.length > 0 ? (
+            <>
+              <Typography variant="h6" style={{ marginTop: '20px' }}>Budget Items</Typography>
+              <List>
+                {budgetData.map(item => (
+                  <ListItem key={item.id}>
+                    <ListItemText primary={`${item.label} - $${item.value.toFixed(2)} (${item.type})`} />
+                    <Button onClick={() => handleRemoveBudget(item.id)}>
+                      Remove
+                    </Button>
+                  </ListItem>
+                ))}
+              </List>
+            </>
+          ) : null}
+        </div>
+      </div>
       {/* Budget Chart */}
       <BudgetChart data={budgetData} />
-
-      {/* List of Budget Items */}
-      {budgetData.length > 0 ? (
-        <>
-          <Typography variant="h6" style={{ marginTop: '20px' }}>Budget Items</Typography>
-          <List>
-            {budgetData.map(item => (
-              <ListItem key={item.id}>
-                <ListItemText primary={`${item.label} - $${item.value.toFixed(2)} (${item.type})`} />
-                <Button variant="outlined" color="secondary" onClick={() => handleRemoveBudget(item.id)}>
-                  Remove
-                </Button>
-              </ListItem>
-            ))}
-          </List>
-        </>
-      ) : null}
     </div>
   );
 };
