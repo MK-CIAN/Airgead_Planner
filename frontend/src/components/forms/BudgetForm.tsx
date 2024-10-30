@@ -18,7 +18,7 @@ interface FormData {
 }
 
 const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget, month }) => {
-  const { control, handleSubmit, reset } = useForm<FormData>();
+  const { control, handleSubmit, reset, watch } = useForm<FormData>();
 
   const onSubmit = (data: FormData) => {
     const formData = { 
@@ -35,6 +35,8 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget, month }) => {
         console.error("Error adding budget:", error);
       });
   };
+
+  const transactionTypeValue = watch("transaction_type");
 
   return (
     <div className="budget-form">
@@ -73,21 +75,26 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget, month }) => {
       </div>
 
       <div className="budget-form">
-        <Controller
-          name="transaction_type"
-          control={control}
-          defaultValue=""  // Default value for transaction type
-          render={({ field }) => (
-            <FormControl fullWidth required>
-              <InputLabel>Transaction Type</InputLabel>
-              <Select {...field}>
-                <MenuItem value="income">Income</MenuItem>
-                <MenuItem value="expense">Expense</MenuItem>
-              </Select>
-            </FormControl>
-          )}
-        />
-      </div>
+          <Controller
+            name="transaction_type"
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <FormControl fullWidth required>
+                <InputLabel shrink={!!transactionTypeValue}>Transaction Type</InputLabel>
+                <Select
+                  {...field}
+                  displayEmpty
+                  fullWidth
+                  label="Transaction Type"
+                >
+                  <MenuItem value="income">Income</MenuItem>
+                  <MenuItem value="expense">Expense</MenuItem>
+                </Select>
+              </FormControl>
+            )}
+          />
+        </div>
       
       <div className='budget-submit'>
         <Button type="submit" variant="contained" color="primary">
