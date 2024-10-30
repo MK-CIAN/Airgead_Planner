@@ -45,6 +45,23 @@ function PieCenterLabel({ children }: { children: React.ReactNode }) {
 }
 
 const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
+  // When there's no data, display only the "€0.00" label with an empty pie chart
+  if (data.length === 0) {
+    return (
+      <Box 
+        sx={{
+          margin: 'auto',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <PieChart series={[{ data: [], innerRadius: 140 }]} {...size}>
+          <PieCenterLabel> </PieCenterLabel>
+        </PieChart>
+      </Box>
+    );
+  }
   // Calculate totals for income and expenses
   const totalIncome = data
     .filter(item => item.type === 'income')

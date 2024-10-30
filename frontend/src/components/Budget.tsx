@@ -98,17 +98,21 @@ const Budget: React.FC = () => {
       <BudgetChart data={budgetData} />
 
       {/* List of Budget Items */}
-      <Typography variant="h6" style={{ marginTop: '20px' }}>Budget Items</Typography>
-      <List>
-        {budgetData.map(item => (
-          <ListItem key={item.id}>
-            <ListItemText primary={`${item.label} - $${item.value.toFixed(2)} (${item.type})`} />
-            <Button variant="outlined" color="secondary" onClick={() => handleRemoveBudget(item.id)}>
-              Remove
-            </Button>
-          </ListItem>
-        ))}
-      </List>
+      {budgetData.length > 0 ? (
+        <>
+          <Typography variant="h6" style={{ marginTop: '20px' }}>Budget Items</Typography>
+          <List>
+            {budgetData.map(item => (
+              <ListItem key={item.id}>
+                <ListItemText primary={`${item.label} - $${item.value.toFixed(2)} (${item.type})`} />
+                <Button variant="outlined" color="secondary" onClick={() => handleRemoveBudget(item.id)}>
+                  Remove
+                </Button>
+              </ListItem>
+            ))}
+          </List>
+        </>
+      ) : null}
     </div>
   );
 };
