@@ -128,6 +128,7 @@ class MonthlyBudget(models.Model):
     CATEGORY_CHOICES = [
         ('income', 'Income'),
         ('expense', 'Expense'),
+        ('debt', 'Debt'),
     ]
     category = models.CharField(max_length=50, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)

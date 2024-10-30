@@ -90,6 +90,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget, month }) => {
                 >
                   <MenuItem value="income">Income</MenuItem>
                   <MenuItem value="expense">Expense</MenuItem>
+                  <MenuItem value="debt">Debt</MenuItem>
                 </Select>
               </FormControl>
             )}
