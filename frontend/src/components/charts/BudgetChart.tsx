@@ -32,7 +32,7 @@ const StyledText = styled('text')(({ theme }) => ({
   fill: theme.palette.text.primary,
   textAnchor: 'middle',
   dominantBaseline: 'central',
-  fontSize: 20,
+  fontSize: 40,
 }));
 
 function PieCenterLabel({ children }: { children: React.ReactNode }) {
@@ -82,21 +82,33 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
   return (
     <Box 
       sx={{
-        margin: 'auto',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
+        position: 'relative', // Positioning for absolute center label
+        width: size.width,
+        height: size.height,
+        margin: 'auto',
       }}
     >
-        <PieChart 
-          series={[{ 
-            data: chartData.map(item => ({ value: item.value, label: item.label, color: item.color })),
-            innerRadius: 140 
-          }]} 
-          {...size}
-        >
-          <PieCenterLabel>€{totalBudget.toFixed(2)}</PieCenterLabel>
-        </PieChart>
+      <PieChart 
+        series={[{ 
+          data: chartData.map(item => ({ value: item.value, label: item.label, color: item.color })),
+          innerRadius: 140 
+        }]} 
+        {...size}
+      />
+      <Box 
+        sx={{
+          position: 'absolute', // Position the label absolutely in the center
+          top: '50%',
+          left: '42.5%',
+          transform: 'translate(-50%, -50%)', // Center the label
+          fontSize: '50px',
+        }}
+      >
+        <PieCenterLabel>€{totalBudget.toFixed(2)}</PieCenterLabel>
+      </Box>
     </Box>
   );
 };

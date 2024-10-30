@@ -88,10 +88,12 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget, month }) => {
           )}
         />
       </div>
-
-      <Button type="submit" variant="contained" color="primary">
-        Add Budget Item
-      </Button>
+      
+      <div className='budget-submit'>
+        <Button type="submit" variant="contained" color="primary">
+          Add Budget Item
+        </Button>
+      </div>
     </form>
     </div>
   );
