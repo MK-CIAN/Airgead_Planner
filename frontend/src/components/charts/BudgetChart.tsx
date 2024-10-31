@@ -58,6 +58,7 @@ const expenseColors = [
   '#9370DB'  // Medium purple
 ];
 
+
 // Function to pick a random color from the predefined options
 const getRandomExpenseColor = () => {
   const randomIndex = Math.floor(Math.random() * expenseColors.length);
@@ -114,29 +115,59 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        position: 'relative', // Positioning for absolute center label
-        width: size.width,
-        height: size.height,
         margin: 'auto',
+        marginLeft: '27.5%',
       }}
     >
+      {/* Container for the Pie Chart and Center Label */}
+      <Box sx={{ position: 'relative', marginRight: '50px' }}>
       <PieChart 
-        series={[{ 
-          data: chartData.map(item => ({ value: item.value, label: item.label, color: item.color })),
-          innerRadius: 140 
-        }]} 
-        {...size}
-      />
+          series={[{ 
+            data: chartData.map(item => ({ value: item.value, label: item.label, color: item.color })),
+            innerRadius: 140,
+          }]} 
+          slotProps={{
+            legend: { hidden: true }  // Hide the built-in legend
+          }}
+          {...size}
+        />
+        <Box 
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '42.5%',
+            transform: 'translate(-50%, -50%)',
+            fontSize: '50px',
+          }}
+        >
+          <PieCenterLabel>€{totalBudget.toFixed(2)}</PieCenterLabel>
+        </Box>
+      </Box>
+
+      {/* Custom Legend Section */}
       <Box 
-        sx={{
-          position: 'absolute', // Position the label absolutely in the center
-          top: '50%',
-          left: '42.5%',
-          transform: 'translate(-50%, -50%)', // Center the label
-          fontSize: '50px',
+        sx={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'flex-start',
+          minWidth: '150px', 
+          
         }}
       >
-        <PieCenterLabel>€{totalBudget.toFixed(2)}</PieCenterLabel>
+        {chartData.map(item => (
+          <Box key={item.id} sx={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+            <Box 
+              sx={{ 
+                width: '16px', 
+                height: '16px', 
+                backgroundColor: item.color, 
+                marginRight: '8px', 
+                borderRadius: '3px'  
+              }} 
+            />
+            <span style={{ fontSize: '16px' }}>{item.label}</span>
+          </Box>
+        ))}
       </Box>
     </Box>
   );
