@@ -44,8 +44,28 @@ function PieCenterLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Predefined color palette for expenses
+const expenseColors = [
+  '#3357FF', // Bright blue
+  '#FF33A8', // Magenta
+  '#8A2BE2', // Blue-violet
+  '#FFD700', // Gold
+  '#FF8F33', // Orange
+  '#DA70D6', // Orchid (purple-pink)
+  '#7D33FF', // Deep purple
+  '#FF1493', // Deep pink
+  '#00CED1', // Dark turquoise
+  '#9370DB'  // Medium purple
+];
+
+// Function to pick a random color from the predefined options
+const getRandomExpenseColor = () => {
+  const randomIndex = Math.floor(Math.random() * expenseColors.length);
+  return expenseColors[randomIndex];
+};
+
 const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
-  // When there's no data, display only the "€0.00" label with an empty pie chart
+  // When there's no data, display an empty pie chart
   if (data.length === 0) {
     return (
       <Box 
@@ -74,6 +94,7 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
   const totalDebt = data
   .filter(item => item.type === 'debt')
   .reduce((total, item) => total + item.value, 0);
+
   // Add color property to each data point based on type
   console.log("Chart Data:", data)
   const chartData = data.map(item => ({
@@ -81,7 +102,7 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
     color: item.type === 'debt'
       ? 'red'
       : item.type === 'expense'
-      ? 'blue'
+      ? getRandomExpenseColor() 
       : 'rgba(6,170,19,0.8477591720281863)', // Green for income or other types
   }));
 
