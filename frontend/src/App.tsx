@@ -12,6 +12,7 @@ import Register from './components/Register'
 import ProtectedRoute from './components/ProtectedRoutes'
 import PasswordResetRequest from './components/PasswordResetRequest'
 import PasswordReset from './components/PasswordReset'
+import Savings from './components/Savings'
 
 function App() {
   const location = useLocation()
@@ -37,6 +38,7 @@ function App() {
               <Route element={<ProtectedRoute/>}>
                 <Route path="/home" element={<Dashboard/>}/>
                 <Route path="/budget" element={<Budget/>}/>
+                <Route path="/savings" element={<Savings/>}/>
                 <Route path="/loans" element={<Loans/>}/>
                 <Route path="/pensions" element={<Pensions/>}/>
                 <Route path="/investments" element={<Investmets/>}/>

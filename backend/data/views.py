@@ -53,3 +53,14 @@ class MonthlyBudgetViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+class SavingsGoalViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = SavingsGoalSerializer
+
+    def get_queryset(self):
+        queryset = SavingsGoal.objects.filter(user=self.request.user)
+        return queryset
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

@@ -14,6 +14,7 @@ import NewspaperIcon from '@mui/icons-material/Newspaper';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import PieChartIcon from '@mui/icons-material/PieChart';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import SavingsIcon from '@mui/icons-material/Savings';
 import HomeIcon from '@mui/icons-material/Home';
 import { Link, useLocation } from 'react-router-dom';
 import '../App.css';
@@ -23,6 +24,8 @@ import { useNavigate } from 'react-router-dom';
 
 
 const drawerWidth = 300;
+const color = 'rgba(6,170,19,0.8477591720281863)';
+const gradient = 'linear-gradient(333deg, rgba(132,250,142,0.71) 0%, rgba(6,170,19,0.85) 50%, rgba(21,94,27,1) 100%)';
 
 interface NavBarProps {
   content: React.ReactNode;
@@ -59,67 +62,110 @@ export default function NavBar({ content }: NavBarProps) {
           width: drawerWidth,
           flexShrink: 0,
           [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
+          selected: { backgroundColor: 'rgba(6,170,19,0.8477591720281863)'}
         }}
       >
         <Toolbar />
         <Box sx={{ overflow: 'auto' }}>
             <ListItem key={1} disablePadding>
-                <ListItemButton component={Link} to={"/home"} selected={"/home" === location.pathname}>
+            <ListItemButton
+                component={Link}
+                to="/home"
+                selected={location.pathname === "/home"}
+                sx={{
+                    backgroundImage: location.pathname === "/home" ? gradient : 'none',
+                    backgroundSize: 'cover'
+                }}
+                >
                     <ListItemIcon>
-                        <HomeIcon />
+                        <HomeIcon sx={{color: color}} />
                     </ListItemIcon>
                     <ListItemText primary="Home" />
                 </ListItemButton>
             </ListItem>
 
             <ListItem key={2} disablePadding>
-                <ListItemButton component={Link} to={"budget"} selected={"/budget" === location.pathname}>
+                <ListItemButton component={Link} to={"budget"} selected={"/budget" === location.pathname}
+                    sx={{
+                        backgroundImage: location.pathname === "/budget" ? gradient : 'none',
+                        backgroundSize: 'cover'
+                      }}>
                     <ListItemIcon>
-                        <PieChartIcon />
+                        <PieChartIcon sx={{color: color}}/>
                     </ListItemIcon>
                     <ListItemText primary="Budget" />
                 </ListItemButton>
             </ListItem>
 
             <ListItem key={3} disablePadding>
-                <ListItemButton component={Link} to={"loans"} selected={"/loans" === location.pathname}>
+                <ListItemButton component={Link} to={"savings"} selected={"/savings" === location.pathname}
+                    sx={{
+                        backgroundImage: location.pathname === "/savings" ? gradient : 'none',
+                        backgroundSize: 'cover'
+                      }}>
                     <ListItemIcon>
-                        <TrendingDownIcon />
+                        <SavingsIcon sx={{color: color}}/>
                     </ListItemIcon>
-                    <ListItemText primary="Loan Repayment Calculator" />
+                    <ListItemText primary="Savings" />
                 </ListItemButton>
             </ListItem>
 
             <ListItem key={4} disablePadding>
-                <ListItemButton component={Link} to={"pensions"} selected={"/pensions" === location.pathname}>
+                <ListItemButton component={Link} to={"pensions"} selected={"/pensions" === location.pathname}
+                    sx={{
+                        backgroundImage: location.pathname === "/pensions" ? gradient : 'none',
+                        backgroundSize: 'cover'
+                    }}>
                     <ListItemIcon>
-                        <TrendingUpIcon />
+                        <TrendingUpIcon sx={{color: color}}/>
                     </ListItemIcon>
                     <ListItemText primary="Pension Strategies" />
                 </ListItemButton>
             </ListItem>
 
             <ListItem key={5} disablePadding>
-                <ListItemButton component={Link} to={"investments"} selected={"/investments" === location.pathname}>
+                <ListItemButton component={Link} to={"investments"} selected={"/investments" === location.pathname}
+                    sx={{
+                        backgroundImage: location.pathname === "/investments" ? gradient : 'none',
+                        backgroundSize: 'cover'
+                    }}>
                     <ListItemIcon>
-                        <SsidChartIcon />
+                        <SsidChartIcon sx={{color: color}}/>
                     </ListItemIcon>
                     <ListItemText primary="Investment Guides"/>
                 </ListItemButton>
             </ListItem>
 
             <ListItem key={6} disablePadding>
-                <ListItemButton component={Link} to={"news"} selected={"/news" === location.pathname}>
+                <ListItemButton component={Link} to={"news"} selected={"/news" === location.pathname}
+                    sx={{
+                        backgroundImage: location.pathname === "/news" ? gradient : 'none',
+                        backgroundSize: 'cover'
+                    }}>
                     <ListItemIcon>
-                        <NewspaperIcon />
+                        <NewspaperIcon sx={{color: color}}/>
                     </ListItemIcon>
                     <ListItemText primary="News For You" />
                 </ListItemButton>
             </ListItem>
+
             <ListItem key={7} disablePadding>
+                <ListItemButton component={Link} to={"loans"} selected={"/loans" === location.pathname}
+                    sx={{
+                        backgroundImage: location.pathname === "/loans" ? gradient : 'none',
+                        backgroundSize: 'cover'
+                    }}>
+                    <ListItemIcon>
+                        <TrendingDownIcon sx={{color: color}}/>
+                    </ListItemIcon>
+                    <ListItemText primary="Loan Repayment Calculator" />
+                </ListItemButton>
+            </ListItem>
+
+            <ListItem key={8} disablePadding>
                 <ListItemButton onClick={logoutUser}>
                     <ListItemIcon>
-                        <LogoutIcon/>
+                        <LogoutIcon sx={{color: color}}/>
                     </ListItemIcon>
                     <ListItemText primary="Logout" />
                 </ListItemButton>
