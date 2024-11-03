@@ -89,6 +89,12 @@ const Savings: React.FC = () => {
     setSavingsData(prevData =>
       prevData.map(goal => {
         if (goal.id === id) {
+
+          if (goal.displayed_amount >= goal.target_amount) {
+            console.log("Target amount reached; cannot go forward further.");
+            return goal;
+          }
+          
           const newMonth = goal.currentMonth.add(1, 'month');
           const incrementedAmount = goal.displayed_amount + goal.monthly_contribution;
 
@@ -179,14 +185,16 @@ const Savings: React.FC = () => {
             {/* Savings Chart */}
             <SavingsChart progress={(goal.displayed_amount / goal.target_amount) * 100} />
 
-            <Button
-              onClick={() => handleRemoveSavingsGoal(goal.id)}
-              variant="outlined"
-              color="secondary"
-              style={{ marginTop: 8 }}
-            >
-              Remove
-            </Button>
+            <div className='savings_goals_button'>
+              <Button
+                onClick={() => handleRemoveSavingsGoal(goal.id)}
+                variant="outlined"
+                color="secondary"
+                style={{ marginTop: 8 }}
+              >
+                Remove
+              </Button>
+            </div>
           </div>
         ))}
       </div>
