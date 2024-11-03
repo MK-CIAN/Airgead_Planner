@@ -160,6 +160,7 @@ class SavingsGoal(models.Model):
     name = models.CharField(max_length=100)
     target_amount = models.DecimalField(max_digits=12, decimal_places=2)
     current_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    start_date = models.DateField(null=True, blank=True)
     target_date = models.DateField(null=True, blank=True)
     monthly_contribution = models.DecimalField(max_digits=10, decimal_places=2)
 

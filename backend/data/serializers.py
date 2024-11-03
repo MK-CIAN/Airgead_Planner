@@ -20,5 +20,5 @@ class MonthlyBudgetSerializer(serializers.ModelSerializer):
 class SavingsGoalSerializer(serializers.ModelSerializer):
     class Meta:
         model = SavingsGoal
-        fields = ['id', 'user', 'name', 'target_amount', 'current_amount', 'target_date', 'monthly_contribution']
+        fields = ['id', 'user', 'name', 'target_amount', 'current_amount', 'start_date', 'target_date', 'monthly_contribution']
         read_only_fields = ['user']

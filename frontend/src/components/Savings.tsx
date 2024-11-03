@@ -19,6 +19,7 @@ interface SavingsGoalData {
   projected_progress: number;
   displayed_amount: number;
   currentMonth: Dayjs;
+  start_date: Dayjs | null;
 }
 
 const Savings: React.FC = () => {
@@ -34,8 +35,10 @@ const Savings: React.FC = () => {
           current_amount: Number(goal.current_amount),
           monthly_contribution: Number(goal.monthly_contribution),
           progress: (goal.current_amount / goal.target_amount) * 100,
-          displayed_amount: Number(goal.current_amount), // Initialize as the current amount
+          displayed_amount: Number(goal.current_amount),
           currentMonth: dayjs().startOf('month'),
+          start_date: goal.start_date ? dayjs(goal.start_date) : null, // Convert start_date to Dayjs
+          target_date: goal.target_date ? dayjs(goal.target_date) : null, // Convert target_date to Dayjs if applicable
         }));
         setSavingsData(formattedData);
       })
@@ -48,14 +51,16 @@ const Savings: React.FC = () => {
     getSavingsData();
   }, []);
 
-  const handleAddSavingsGoal = (newGoal: Omit<SavingsGoalData, 'id' | 'progress' | 'projected_progress' | 'displayed_amount' | 'currentMonth'>) => {
+  const handleAddSavingsGoal = (newGoal: { name: string; target_amount: number; current_amount: number; monthly_contribution: number; target_date?: string | null; start_date?: string | null }) => {
     Axios.post(`data/savings/`, newGoal)
       .then((response) => {
-        const savedGoal = {
+        const savedGoal: SavingsGoalData = {
           ...response.data,
           progress: (response.data.current_amount / response.data.target_amount) * 100,
           displayed_amount: response.data.current_amount,
           currentMonth: dayjs().startOf('month'),
+          start_date: response.data.start_date ? dayjs(response.data.start_date) : null,  // Convert to Dayjs
+          target_date: response.data.target_date ? dayjs(response.data.target_date) : null,  // Convert to Dayjs if applicable
         };
         setSavingsData((prevData) => [...prevData, savedGoal]);
         setIsFormVisible(false);
@@ -85,10 +90,9 @@ const Savings: React.FC = () => {
       prevData.map(goal => {
         if (goal.id === id) {
           const newMonth = goal.currentMonth.add(1, 'month');
-          // Increment by monthly contribution up to target amount
           const incrementedAmount = goal.displayed_amount + goal.monthly_contribution;
 
-          // Cap displayed_amount at target_amount to prevent overflows
+          // Ensure incrementedAmount does not exceed target_amount
           const newDisplayedAmount = Math.min(incrementedAmount, goal.target_amount);
 
           console.log(`Next Month for Goal ${id}: Incremented Amount = ${incrementedAmount}, New Displayed Amount = ${newDisplayedAmount}`);
@@ -109,6 +113,12 @@ const Savings: React.FC = () => {
     setSavingsData(prevData =>
       prevData.map(goal => {
         if (goal.id === id) {
+          // Check if start_date exists and prevent going back before it
+          if (goal.start_date && goal.currentMonth.isSame(goal.start_date, 'month')) {
+            console.log("Reached the start date; cannot go back further.");
+            return goal;
+          }
+
           const newMonth = goal.currentMonth.subtract(1, 'month');
           const decrementedAmount = goal.displayed_amount - goal.monthly_contribution;
           const newDisplayedAmount = Math.max(decrementedAmount, goal.current_amount);
