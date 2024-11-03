@@ -1,52 +1,50 @@
 // SavingsChart.tsx
 import React from 'react';
-import {
-  GaugeContainer,
-  GaugeValueArc,
-  GaugeReferenceArc,
-  useGaugeState,
-} from '@mui/x-charts/Gauge';
+import { Gauge, gaugeClasses } from '@mui/x-charts/Gauge';
+import { Box, Typography } from '@mui/material';
 
 interface SavingsChartProps {
   progress: number;
 }
 
-function GaugePointer() {
-  const { valueAngle, outerRadius, cx, cy } = useGaugeState();
-
-  if (valueAngle === null) {
-    return null;
-  }
-
-  const target = {
-    x: cx + outerRadius * Math.sin(valueAngle),
-    y: cy - outerRadius * Math.cos(valueAngle),
-  };
-  return (
-    <g>
-      <circle cx={cx} cy={cy} r={5} fill="red" />
-      <path
-        d={`M ${cx} ${cy} L ${target.x} ${target.y}`}
-        stroke="red"
-        strokeWidth={3}
-      />
-    </g>
-  );
-}
-
 const SavingsChart: React.FC<SavingsChartProps> = ({ progress }) => {
   return (
-    <GaugeContainer
-      width={200}
-      height={200}
-      startAngle={-110}
-      endAngle={110}
-      value={progress}
-    >
-      <GaugeReferenceArc />
-      <GaugeValueArc />
-      <GaugePointer />
-    </GaugeContainer>
+    <Box position="relative" display="inline-flex">
+      <Gauge
+        width={200}
+        height={200}
+        value={progress}  // Set the gauge's value to the progress percentage
+        cornerRadius="50%"
+        sx={{
+          [`& .${gaugeClasses.valueText}`]: {
+            display: 'none',  // Hide the default value text
+          },
+          [`& .${gaugeClasses.valueArc}`]: {
+            fill: 'rgba(6,170,19,0.8477591720281863)',  // Color for the progress arc
+          },
+          [`& .${gaugeClasses.referenceArc}`]: {
+            fill: '#cccccc',  // Color for the background arc (reference arc)
+          },
+        }}
+      />
+      {/* Overlay Text for Percentage */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+        component="div"  // Explicitly specify component to satisfy TypeScript
+      >
+        <Typography variant="h5" component="span" fontSize={40} fontWeight="bold">
+          {progress}%
+        </Typography>
+      </Box>
+    </Box>
   );
 };
 

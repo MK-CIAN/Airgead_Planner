@@ -2,6 +2,7 @@
 import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { TextField, Button } from '@mui/material';
+import '../../App.css';
 
 interface SavingsFormProps {
   onAddSavingsGoal: (newGoal: { name: string; target_amount: number; current_amount: number; monthly_contribution: number; target_date?: string }) => void;
@@ -65,9 +66,12 @@ const SavingsForm: React.FC<SavingsFormProps> = ({ onAddSavingsGoal }) => {
           <TextField {...field} type="date" label="Target Date" fullWidth margin="normal" InputLabelProps={{ shrink: true }} />
         )}
       />
-      <Button type="submit" variant="contained" color="primary" fullWidth>
-        Add Savings Goal
-      </Button>
+
+      <div className='savings-submit'>
+        <Button type="submit" variant="contained" color="primary" fullWidth>
+          Add Savings Goal
+        </Button>
+      </div>
     </form>
   );
 };

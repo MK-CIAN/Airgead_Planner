@@ -111,4 +111,46 @@
     background-color: #22ff00;
 }
 
+
+.savings-submit button {
+    background: rgb(132,250,142);
+    background: linear-gradient(333deg, rgba(132,250,142,0.710504270067402) 0%, rgba(6,170,19,0.8477591720281863) 50%, rgba(21,94,27,1) 100%);
+    color: white;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.savings-submit button:hover {
+    background-color: #22ff00;
+}
+
+/* Container for the savings grid */
+.savings-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 20px;
+}
   
+  /* Each individual savings goal item */
+.savings-item {
+    flex: 1 1 250px; /* Minimum width of 250px, flex-grow as space allows */
+    max-width: 300px; /* Set a maximum width */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+}
+
+.savings-title {
+    text-align: center;
+    font-weight: 400;
+    font-size: 1rem;
+}

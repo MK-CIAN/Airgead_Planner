@@ -4,6 +4,7 @@ import Axios from './Axios';
 import SavingsChart from './charts/SavingsChart';
 import SavingsForm from './forms/SavingsForms';
 import { Button, List, ListItem, ListItemText, Typography } from '@mui/material';
+import '../App.css';
 
 interface SavingsGoalData {
   id: string;
@@ -16,6 +17,7 @@ interface SavingsGoalData {
 
 const Savings: React.FC = () => {
   const [savingsData, setSavingsData] = useState<SavingsGoalData[]>([]);
+  const [isFormVisible, setIsFormVisible] = useState(false);  // Track form visibility
 
   const getSavingsData = () => {
     Axios.get(`data/savings`)
@@ -45,6 +47,7 @@ const Savings: React.FC = () => {
           progress: (response.data.current_amount / response.data.target_amount) * 100,
         };
         setSavingsData((prevData) => [...prevData, savedGoal]);
+        setIsFormVisible(false); 
       })
       .catch((error) => {
         console.error("Error adding savings goal:", error);
@@ -61,26 +64,49 @@ const Savings: React.FC = () => {
       });
   };
 
+  const toggleFormVisibility = () => {
+    setIsFormVisible(!isFormVisible);
+  };
+
   return (
     <div>
-      <h1>Savings Goals</h1>
-      {/* Savings Form */}
-      <SavingsForm onAddSavingsGoal={handleAddSavingsGoal} />
+      {/* Toggle Button for Savings Form */}
+      <div className='savings-submit'>
+        <Button variant="contained" color="primary" onClick={toggleFormVisibility}>
+          {isFormVisible ? "Hide Form" : "Add Savings Goal"}
+        </Button>
+      </div>
+
+      {/* Conditionally Render Savings Form */}
+      {isFormVisible && (
+        <div style={{ marginTop: '16px' }}>
+          <SavingsForm onAddSavingsGoal={handleAddSavingsGoal} />
+        </div>
+      )}
+
+      {/* Title for Savings Goals */}
+      <Typography variant="h6" className="savings-title">
+        Your Savings Goals
+      </Typography>
 
       {/* List of Savings Goals with Gauge Charts */}
-      <div>
-        <Typography variant="h6" style={{ marginTop: '20px' }}>Your Savings Goals</Typography>
-        <List>
-          {savingsData.map((goal) => (
-            <ListItem key={goal.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <ListItemText primary={`${goal.name} - $${goal.current_amount} / $${goal.target_amount}`} />
-              <SavingsChart progress={goal.progress} />
-              <Button onClick={() => handleRemoveSavingsGoal(goal.id)} variant="outlined" color="secondary" style={{ marginTop: 8 }}>
-                Remove
-              </Button>
-            </ListItem>
-          ))}
-        </List>
+      <div className="savings-grid">
+        {savingsData.map((goal) => (
+          <div key={goal.id} className="savings-item">
+            <Typography variant="subtitle1" align="center">
+              {goal.name} - €{goal.current_amount} / €{goal.target_amount}
+            </Typography>
+            <SavingsChart progress={goal.progress} />
+            <Button
+              onClick={() => handleRemoveSavingsGoal(goal.id)}
+              variant="outlined"
+              color="secondary"
+              style={{ marginTop: 8 }}
+            >
+              Remove
+            </Button>
+          </div>
+        ))}
       </div>
     </div>
   );
