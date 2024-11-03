@@ -41,7 +41,7 @@ const SavingsChart: React.FC<SavingsChartProps> = ({ progress }) => {
         component="div"  // Explicitly specify component to satisfy TypeScript
       >
         <Typography variant="h5" component="span" fontSize={40} fontWeight="bold">
-          {progress}%
+          {Math.round(progress)}%
         </Typography>
       </Box>
     </Box>
