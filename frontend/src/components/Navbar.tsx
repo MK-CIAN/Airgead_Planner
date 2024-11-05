@@ -51,6 +51,7 @@ export default function NavBar({ content }: NavBarProps) {
       background: 'linear-gradient(333deg, rgba(132,250,142,0.710504270067402) 0%, rgba(6,170,19,0.8477591720281863) 50%, rgba(21,94,27,1) 100%)',
       }}>
         <Toolbar>
+            <img src="/src/assets/harpIcon.png" alt="Harp Icon" style={{ width: 40, height: 40, marginRight: 16 }} />
           <Typography variant="h5" noWrap component="div">
             Airgead Planner
           </Typography>
