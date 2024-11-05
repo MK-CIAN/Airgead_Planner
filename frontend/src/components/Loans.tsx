@@ -3,30 +3,45 @@ import React, { useState } from 'react';
 import LoanForm from './forms/LoanForm';
 import LoanChart from './charts/LoanChart';
 import { Button, Typography } from '@mui/material';
-import dayjs from 'dayjs';
 
 interface LoanData {
   balance: number;
   interestRate: number;
-  monthlyContribution: number;
   termLength: number;
+  monthlyContribution?: number;
 }
 
 const LoanCalculator: React.FC = () => {
   const [loanData, setLoanData] = useState<LoanData>({
     balance: 0,
     interestRate: 0,
-    monthlyContribution: 0,
     termLength: 0,
   });
 
+  const [monthlyContribution, setMonthlyContribution] = useState<number | null>(null);
   const [repaymentSchedule, setRepaymentSchedule] = useState<number[]>([]);
   const [totalInterest, setTotalInterest] = useState(0);
 
-  const handleCalculateRepayment = (data: LoanData) => {
-    setLoanData(data);
+  const calculateMonthlyPayment = (balance: number, interestRate: number, termLength: number) => {
+    const montlyRate = interestRate / 100 / 12;
+    const n = termLength;
 
-    const { balance, interestRate, monthlyContribution, termLength } = data;
+    //Checking if the interest rate is 0
+    if (montlyRate === 0) {
+      return balance / n;
+    }
+
+    return (balance * montlyRate * Math.pow(1 + montlyRate, n)) / (Math.pow(1 + montlyRate, n) - 1);
+    };
+
+  const handleCalculateRepayment = (data: LoanData) => {
+
+    const { balance, interestRate, termLength } = data;
+    const monthlyContribution = calculateMonthlyPayment(balance, interestRate, termLength);
+
+    setLoanData({ ...data, monthlyContribution });
+    setMonthlyContribution(monthlyContribution);
+
     const monthlyRate = interestRate / 100 / 12;
     const schedule = [];
     let currentBalance = balance;
@@ -57,6 +72,13 @@ const LoanCalculator: React.FC = () => {
       
       {/* Loan Form for inputs */}
       <LoanForm onCalculateRepayment={handleCalculateRepayment} />
+
+      {/* Display calculated Repayments */}
+      {monthlyContribution !== null && (
+        <Typography variant="h6" gutterBottom>
+            Calculated Monthly Repayments: €{monthlyContribution.toFixed(2)}
+        </Typography>
+    )}
 
       {/* Render charts with calculated data */}
       <LoanChart repaymentSchedule={repaymentSchedule} totalInterest={totalInterest} loanBalance={loanData.balance} />

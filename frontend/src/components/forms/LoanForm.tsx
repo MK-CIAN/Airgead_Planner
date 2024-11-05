@@ -4,17 +4,17 @@ import { useForm, Controller } from 'react-hook-form';
 import { TextField, Button } from '@mui/material';
 
 interface LoanFormProps {
-  onCalculateRepayment: (data: { balance: number; interestRate: number; monthlyContribution: number; termLength: number }) => void;
+  onCalculateRepayment: (data: { balance: number; interestRate: number; termLength: number }) => void;
+  monthlyContribution?: number;
 }
 
-const LoanForm: React.FC<LoanFormProps> = ({ onCalculateRepayment }) => {
+const LoanForm: React.FC<LoanFormProps> = ({ onCalculateRepayment}) => {
   const { control, handleSubmit, reset } = useForm();
 
   const onSubmit = (data: any) => {
     onCalculateRepayment({
       balance: parseFloat(data.balance),
       interestRate: parseFloat(data.interestRate),
-      monthlyContribution: parseFloat(data.monthlyContribution),
       termLength: parseInt(data.termLength, 10),
     });
   };
@@ -35,14 +35,6 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculateRepayment }) => {
         defaultValue=""
         render={({ field }) => (
           <TextField {...field} label="Interest Rate (APY)" type="number" required fullWidth margin="normal" />
-        )}
-      />
-      <Controller
-        name="monthlyContribution"
-        control={control}
-        defaultValue=""
-        render={({ field }) => (
-          <TextField {...field} label="Monthly Contribution" type="number" required fullWidth margin="normal" />
         )}
       />
       <Controller
