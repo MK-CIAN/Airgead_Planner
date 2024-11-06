@@ -22,3 +22,9 @@ class SavingsGoalSerializer(serializers.ModelSerializer):
         model = SavingsGoal
         fields = ['id', 'user', 'name', 'target_amount', 'current_amount', 'start_date', 'target_date', 'monthly_contribution']
         read_only_fields = ['user']
+
+class LoanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Loan
+        fields = ['id', 'user', 'name', 'balance', 'interest_rate', 'term_length', 'monthly_payment', 'total_interest', 'created_at']
+        read_only_fields = ['id', 'created_at', 'user']

@@ -64,3 +64,15 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+class LoanViewSet(viewsets.ModelViewSet):
+    serializer_class = LoanSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # Return only loans for the authenticated user
+        return Loan.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        # Automatically associate the loan with the authenticated user
+        serializer.save(user=self.request.user)

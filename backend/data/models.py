@@ -166,3 +166,19 @@ class SavingsGoal(models.Model):
 
     class Meta:
         db_table = 'savings_goal'
+
+class Loan(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    balance = models.DecimalField(max_digits=12, decimal_places=2)
+    interest_rate = models.DecimalField(max_digits=5, decimal_places=2)
+    term_length = models.IntegerField()
+    monthly_payment = models.DecimalField(max_digits=24, decimal_places=2)
+    total_interest = models.DecimalField(max_digits=24, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'loan'
+
+    def __str__(self):
+        return self.name
