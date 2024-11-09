@@ -5,6 +5,7 @@ import LoanForm from './forms/LoanForm';
 import LoanChart from './charts/LoanChart';
 import { Button, Typography, Box, Card, CardContent, TextField } from '@mui/material';
 import dayjs from 'dayjs';
+import '../App.css';
 
 interface LoanData {
   id: string;
@@ -147,10 +148,14 @@ const LoanCalculator: React.FC = () => {
       </Button>
 
       {isFormVisible && <LoanForm onCalculateRepayment={handleCalculateRepayment} />}
-
-      <Box display="grid" gridTemplateColumns="repeat(auto-fill, minmax(300px, 1fr))" gap={3}>
+      <Box className={editingLoan ? 'loan-grid editing' : 'loan-grid'}
+      style={{ position: 'relative'}}>
         {loans.map((loan) => (
-          <Card key={loan.id} style={{ position: 'relative' }}>
+          <Card
+            key={loan.id}
+            className={editingLoan === loan.id ? 'loan-card expanded' : 'loan-card'}
+            style={{ position: 'relative' }}
+          >
             <CardContent>
               <Typography variant="subtitle1" align="center">{loan.name}</Typography>
               <Typography>Initial Balance: €{loan.balance.toFixed(2)}</Typography>
@@ -170,7 +175,7 @@ const LoanCalculator: React.FC = () => {
                 />
               )}
 
-              <LoanChart
+                <LoanChart
                 repaymentSchedule={loan.repaymentSchedule}
                 customRepaymentSchedule={editingLoan === loan.id ? customRepaymentSchedule : []}
                 totalInterest={loan.totalInterest}

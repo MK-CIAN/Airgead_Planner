@@ -58,9 +58,10 @@ const LoanChart: React.FC<LoanChartProps> = ({ repaymentSchedule, customRepaymen
 
   const lineChartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: customRepaymentSchedule ? true : false, // Show legend only if custom schedule exists
+        display: isEditing && customRepaymentSchedule ? true : false, // Show legend only if custom schedule exists
       },
     },
     scales: {
@@ -83,8 +84,8 @@ const LoanChart: React.FC<LoanChartProps> = ({ repaymentSchedule, customRepaymen
   return (
     <div>
       {/* Line Chart for Repayment Schedule */}
-      <div style={{ marginBottom: '20px' }}>
-        <Line data={lineChartData} options={lineChartOptions} />
+      <div style={{ marginBottom: '20px',}}>
+        <Line data={lineChartData} options={lineChartOptions} width={isEditing ? 800 : 400} height={isEditing ? 400 : 200} />
       </div>
 
       {/* Donut Chart for Principal vs. Interest */}

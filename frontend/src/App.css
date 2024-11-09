@@ -1,161 +1,213 @@
 .myBackground {
-    width:100vw;
-    height:100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgb(132,250,142);
-    background: linear-gradient(333deg, rgba(132,250,142,0.710504270067402) 20%, rgba(6,170,19,0.8477591720281863) 50%, rgba(21,94,27,1) 75%); 
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(132, 250, 142);
+  background: linear-gradient(
+    333deg,
+    rgba(132, 250, 142, 0.710504270067402) 20%,
+    rgba(6, 170, 19, 0.8477591720281863) 50%,
+    rgba(21, 94, 27, 1) 75%
+  );
 }
-.whiteBox{
-    background-color: white;
-    padding: 20px;
-    min-width: 300px;
-    height: 50%;
-    width: 30%;
-    border: 5px solid rgba(0, 0, 0, 0.654);
-    justify-content: center;
-    margin-left: 5%;
+.whiteBox {
+  background-color: white;
+  padding: 20px;
+  min-width: 300px;
+  height: 50%;
+  width: 30%;
+  border: 5px solid rgba(0, 0, 0, 0.654);
+  justify-content: center;
+  margin-left: 5%;
 }
 .itemBox {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 80px;
 }
 .title {
-    font-size: 30px;
-    font-weight: bold;
-    color: black;
-    text-align: center;
+  font-size: 30px;
+  font-weight: bold;
+  color: black;
+  text-align: center;
 }
 .myForm {
-    width: 100%;
+  width: 100%;
 }
 
 .myButton {
-    width: 100%;
-    background: rgb(132,250,142);
-    background: linear-gradient(333deg, rgba(132,250,142,0.710504270067402) 0%, rgba(6,170,19,0.8477591720281863) 50%, rgba(21,94,27,1) 100%); 
+  width: 100%;
+  background: rgb(132, 250, 142);
+  background: linear-gradient(
+    333deg,
+    rgba(132, 250, 142, 0.710504270067402) 0%,
+    rgba(6, 170, 19, 0.8477591720281863) 50%,
+    rgba(21, 94, 27, 1) 100%
+  );
 }
-
 
 .container {
-    display: 'flex';
-    justify-content: 'center';
-    margin-top: 20px;
-    text-align: center;
+  display: "flex";
+  justify-content: "center";
+  margin-top: 20px;
+  text-align: center;
 }
 .container h1 {
-    margin-right: 5%;
+  margin-right: 5%;
 }
 
 .budget-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px; /* Adds more space between the form and list */
-    margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px; /* Adds more space between the form and list */
+  margin-top: 20px;
 }
 
 .budget-form {
-    flex: 1;
-    max-width: 100%; /* Increased to allow more space for the form */
+  flex: 1;
+  max-width: 100%; /* Increased to allow more space for the form */
 }
 
 .budget-list {
-    flex: 1;
-    max-width: 100%; /* Increased to allow more space for the list */
-    max-height: 250px; /* Sets a maximum height for the budget list */
-    overflow-y: auto; /* Enables vertical scrolling when items exceed max-height */
-    /*border: 1px solid #ddd; /* Optional: add a border for a cleaner look */
-    padding: 10px; /* Adds some padding inside the list */
+  flex: 1;
+  max-width: 100%; /* Increased to allow more space for the list */
+  max-height: 250px; /* Sets a maximum height for the budget list */
+  overflow-y: auto; /* Enables vertical scrolling when items exceed max-height */
+  /*border: 1px solid #ddd; /* Optional: add a border for a cleaner look */
+  padding: 10px; /* Adds some padding inside the list */
 }
 .budget-list::-webkit-scrollbar {
-    width: 8px; /* Adjust scrollbar width if desired */
+  width: 8px; /* Adjust scrollbar width if desired */
 }
 
 .budget-list::-webkit-scrollbar-thumb {
-    background-color: #bdbdbd; /* Customize scrollbar color */
-    border-radius: 4px;
+  background-color: #bdbdbd; /* Customize scrollbar color */
+  border-radius: 4px;
 }
 .budget-list button {
-    color: red;
-    outline-color: red;
+  color: red;
+  outline-color: red;
 }
 .budget-form,
 .budget-input,
 .budget-submit {
-    width: 100%;
-    padding: 1%;
+  width: 100%;
+  padding: 1%;
 }
 
 .budget-input input,
 .budget-submit button {
-    width: 100%; /* Make inputs and buttons fill the container width */
-    box-sizing: border-box; /* Ensure padding does not affect width */
-    margin-bottom: 10px; /* Add spacing between inputs */
+  width: 100%; /* Make inputs and buttons fill the container width */
+  box-sizing: border-box; /* Ensure padding does not affect width */
+  margin-bottom: 10px; /* Add spacing between inputs */
 }
 
 .budget-submit button {
-    background: rgb(132,250,142);
-    background: linear-gradient(333deg, rgba(132,250,142,0.710504270067402) 0%, rgba(6,170,19,0.8477591720281863) 50%, rgba(21,94,27,1) 100%);
-    color: white;
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 5px;
+  background: rgb(132, 250, 142);
+  background: linear-gradient(
+    333deg,
+    rgba(132, 250, 142, 0.710504270067402) 0%,
+    rgba(6, 170, 19, 0.8477591720281863) 50%,
+    rgba(21, 94, 27, 1) 100%
+  );
+  color: white;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
 }
 
 .budget-submit button:hover {
-    background-color: #22ff00;
+  background-color: #22ff00;
 }
 
-
 .savings-submit button {
-    background: rgb(132,250,142);
-    background: linear-gradient(333deg, rgba(132,250,142,0.710504270067402) 0%, rgba(6,170,19,0.8477591720281863) 50%, rgba(21,94,27,1) 100%);
-    color: white;
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 5px;
+  background: rgb(132, 250, 142);
+  background: linear-gradient(
+    333deg,
+    rgba(132, 250, 142, 0.710504270067402) 0%,
+    rgba(6, 170, 19, 0.8477591720281863) 50%,
+    rgba(21, 94, 27, 1) 100%
+  );
+  color: white;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
 }
 
 .savings-submit button:hover {
-    background-color: #22ff00;
+  background-color: #22ff00;
 }
 
 /* Container for the savings grid */
 .savings-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    justify-content: center;
-    margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 20px;
 }
-  
-  /* Each individual savings goal item */
+
+/* Each individual savings goal item */
 .savings-item {
-    flex: 1 1 250px; /* Minimum width of 250px, flex-grow as space allows */
-    max-width: 300px; /* Set a maximum width */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 16px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-    background-color: #ffffff;
+  flex: 1 1 250px; /* Minimum width of 250px, flex-grow as space allows */
+  max-width: 300px; /* Set a maximum width */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
 }
 
 .savings-title {
-    text-align: center;
-    font-weight: 400;
-    font-size: 1rem;
+  text-align: center;
+  font-weight: 400;
+  font-size: 1rem;
 }
 
 .savings_goals_button button {
-    border: none;
-    color: red;
+  border: none;
+  color: red;
+}
+
+.loan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.loan-grid.editing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.loan-card {
+  transition: all 0.3s ease;
+}
+
+.loan-card.expanded {
+  width: 80%; /* Adjust width to take up most of the screen */
+  max-width: 1000px; /* Cap the width to prevent it from becoming too large on wide screens */
+  margin: 20px auto;
+  padding: 20px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.loan-card.expanded .loan-chart {
+  width: 100%;
+  height: 500px; /* Increase height for a larger chart display */
+}
+
+.loan-card.expanded canvas {
+  width: 100%;
+  height: 100%;
 }
