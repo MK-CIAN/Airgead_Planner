@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Axios from './Axios';
 import LoanForm from './forms/LoanForm';
 import LoanChart from './charts/LoanChart';
-import { Button, Typography, Box, Card, CardContent } from '@mui/material';
+import { Button, Typography, Box, Card, CardContent, TextField } from '@mui/material';
 import dayjs from 'dayjs';
 
 interface LoanData {
@@ -21,38 +21,12 @@ interface LoanData {
 const LoanCalculator: React.FC = () => {
   const [loans, setLoans] = useState<LoanData[]>([]);
   const [isFormVisible, setIsFormVisible] = useState(false);
+  const [editingLoan, setEditingLoan] = useState<string | null>(null); // ID of the loan being edited
+  const [customMonthlyPayment, setCustomMonthlyPayment] = useState<number | null>(null);
+  const [customRepaymentSchedule, setCustomRepaymentSchedule] = useState<number[]>([]);
 
-  // Fetch saved loans from the backend when the component mounts
-  useEffect(() => {
-    Axios.get(`data/loans/`)
-      .then((response) => {
-        const fetchedLoans = response.data.map((loan: any) => ({
-          id: loan.id,
-          name: loan.name,
-          balance: parseFloat(loan.balance),
-          interestRate: parseFloat(loan.interest_rate),
-          termLength: loan.term_length,
-          monthlyPayment: parseFloat(loan.monthly_payment),
-          totalInterest: parseFloat(loan.total_interest),
-          repaymentSchedule: [], // Add repayment calculation here if needed
-          currentMonth: dayjs().startOf('month'),
-        }));
-        setLoans(fetchedLoans);
-      })
-      .catch((error) => {
-        console.error("Error fetching loans:", error);
-      });
-  }, []);
-
-  const handleCalculateRepayment = (data: { name: string; balance: number; interestRate: number; termLength: number }) => {
-    const { name, balance, interestRate, termLength } = data;
+  const calculateRepaymentSchedule = (balance: number, monthlyPayment: number, interestRate: number, termLength: number) => {
     const monthlyRate = interestRate / 100 / 12;
-    const n = termLength;
-
-    const monthlyPayment = monthlyRate === 0
-      ? balance / n
-      : (balance * monthlyRate * Math.pow(1 + monthlyRate, n)) / (Math.pow(1 + monthlyRate, n) - 1);
-
     const schedule = [];
     let currentBalance = balance;
     let totalInterestPaid = 0;
@@ -66,6 +40,44 @@ const LoanCalculator: React.FC = () => {
       schedule.push(currentBalance > 0 ? currentBalance : 0);
       if (currentBalance <= 0) break;
     }
+
+    return { schedule, totalInterestPaid };
+  };
+
+  useEffect(() => {
+    Axios.get(`data/loans/`)
+      .then((response) => {
+        const fetchedLoans = response.data.map((loan: any) => {
+          const { schedule, totalInterestPaid } = calculateRepaymentSchedule(
+            parseFloat(loan.balance),
+            parseFloat(loan.monthly_payment),
+            parseFloat(loan.interest_rate),
+            loan.term_length
+          );
+
+          return {
+            id: loan.id,
+            name: loan.name,
+            balance: parseFloat(loan.balance),
+            interestRate: parseFloat(loan.interest_rate),
+            termLength: loan.term_length,
+            monthlyPayment: parseFloat(loan.monthly_payment),
+            totalInterest: parseFloat(totalInterestPaid.toFixed(2)),
+            repaymentSchedule: schedule,
+            currentMonth: dayjs().startOf('month'),
+          };
+        });
+        setLoans(fetchedLoans);
+      })
+      .catch((error) => {
+        console.error("Error fetching loans:", error);
+      });
+  }, []);
+
+  const handleCalculateRepayment = (data: { name: string; balance: number; interestRate: number; termLength: number }) => {
+    const { name, balance, interestRate, termLength } = data;
+    const monthlyPayment = (balance * (interestRate / 100 / 12) * Math.pow(1 + interestRate / 100 / 12, termLength)) / (Math.pow(1 + interestRate / 100 / 12, termLength) - 1);
+    const { schedule, totalInterestPaid } = calculateRepaymentSchedule(balance, monthlyPayment, interestRate, termLength);
 
     const newLoan: LoanData = {
       id: `${loans.length + 1}`,
@@ -83,7 +95,7 @@ const LoanCalculator: React.FC = () => {
   };
 
   const handleSaveLoan = (loan: LoanData) => {
-    Axios.post('/loans/', {
+    Axios.post('data/loans/', {
       name: loan.name,
       balance: loan.balance,
       interest_rate: loan.interestRate,
@@ -99,6 +111,29 @@ const LoanCalculator: React.FC = () => {
       });
   };
 
+  const handleRemoveLoan = (id: string) => {
+    Axios.delete(`data/loans/${id}/`)
+      .then(() => {
+        setLoans((prevLoans) => prevLoans.filter((loan) => loan.id !== id));
+      })
+      .catch((error) => {
+        console.error("Error removing loan:", error);
+      });
+  };
+
+  const handleEditLoan = (loan: LoanData) => {
+    setEditingLoan(loan.id);
+    setCustomMonthlyPayment(loan.monthlyPayment);
+  }
+
+  const handleCustomMontlyPaymentChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, loan: LoanData) => {
+    const newMonthlyPayment = parseFloat(event.target.value);
+    setCustomMonthlyPayment(newMonthlyPayment);
+
+    const { schedule } = calculateRepaymentSchedule(loan.balance, newMonthlyPayment, loan.interestRate, loan.termLength);
+    setCustomRepaymentSchedule(schedule);
+  }
+
   const toggleFormVisibility = () => {
     setIsFormVisible(!isFormVisible);
   };
@@ -107,15 +142,12 @@ const LoanCalculator: React.FC = () => {
     <div>
       <Typography variant="h5" gutterBottom>Loan Repayment Calculator</Typography>
 
-      {/* Toggle Form Button */}
       <Button variant="contained" color="primary" onClick={toggleFormVisibility} style={{ marginBottom: '20px' }}>
         {isFormVisible ? "Hide Form" : "Add New Loan"}
       </Button>
 
-      {/* Loan Form */}
       {isFormVisible && <LoanForm onCalculateRepayment={handleCalculateRepayment} />}
 
-      {/* Loan Grid */}
       <Box display="grid" gridTemplateColumns="repeat(auto-fill, minmax(300px, 1fr))" gap={3}>
         {loans.map((loan) => (
           <Card key={loan.id} style={{ position: 'relative' }}>
@@ -127,11 +159,23 @@ const LoanCalculator: React.FC = () => {
               <Typography>Total Interest: €{loan.totalInterest.toFixed(2)}</Typography>
               <Typography>Term Length: {loan.termLength} months</Typography>
 
-              {/* Loan Repayment Chart */}
+              {editingLoan === loan.id && (
+                <TextField
+                  label="Custom Monthly Payment"
+                  type="number"
+                  value={customMonthlyPayment || ''}
+                  onChange={(e) => handleCustomMontlyPaymentChange(e, loan)}
+                  fullWidth
+                  style={{ marginBottom: '10px' }}
+                />
+              )}
+
               <LoanChart
                 repaymentSchedule={loan.repaymentSchedule}
+                customRepaymentSchedule={editingLoan === loan.id ? customRepaymentSchedule : []}
                 totalInterest={loan.totalInterest}
                 loanBalance={loan.balance}
+                isEditing={editingLoan === loan.id}
               />
 
               <Button
@@ -140,7 +184,23 @@ const LoanCalculator: React.FC = () => {
                 onClick={() => handleSaveLoan(loan)}
                 style={{ marginTop: '10px' }}
               >
-                Save Loan
+                Save
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => handleRemoveLoan(loan.id)}
+                style={{ marginTop: '10px' }}
+              >
+                Remove
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => handleEditLoan(loan)}
+                style={{ marginTop: '10px' }}
+              >
+                Edit
               </Button>
             </CardContent>
           </Card>

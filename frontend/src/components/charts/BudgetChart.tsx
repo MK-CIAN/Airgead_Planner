@@ -116,11 +116,11 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
         justifyContent: 'center',
         alignItems: 'center',
         margin: 'auto',
-        marginLeft: '27.5%',
+        //marginLeft: '27.5%',
       }}
     >
       {/* Container for the Pie Chart and Center Label */}
-      <Box sx={{ position: 'relative', marginRight: '50px' }}>
+      <Box sx={{ position: 'relative', marginLeft: '15%' }}>
       <PieChart 
           series={[{ 
             data: chartData.map(item => ({ value: item.value, label: item.label, color: item.color })),
