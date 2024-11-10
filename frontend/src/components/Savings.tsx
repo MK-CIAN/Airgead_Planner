@@ -184,6 +184,7 @@ const Savings: React.FC = () => {
 
   return (
     <div>
+      <h1>Savings</h1>
       {/* Toggle Button for Savings Form */}
       <div className="savings-submit">
         <Button

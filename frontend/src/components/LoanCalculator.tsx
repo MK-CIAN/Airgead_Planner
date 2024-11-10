@@ -214,9 +214,7 @@ const LoanCalculator: React.FC = () => {
 
   return (
     <div>
-      <Typography variant="h5" gutterBottom>
-        Loan Repayment Calculator
-      </Typography>
+      <h1>Loan Repayment Calculator</h1>
       <Button
         className="loan-button"
         variant="contained"
@@ -235,17 +233,18 @@ const LoanCalculator: React.FC = () => {
       {editingLoan && (
         <Box
           className="expanded-loan-container"
-          style={{ width: "80%", marginBottom: "20px" }}
+          style={{ width: "80%", marginBottom: "20px"}}
         >
           {loans
             .filter((loan) => loan.id === editingLoan)
             .map((loan) => (
               <Card key={loan.id} style={{ width: "100%" }}>
                 <CardContent>
+                  
                   <Typography variant="subtitle1" align="center">
                     {loan.name}
                   </Typography>
-                  <Typography>
+                  <Typography className="loan-detail">
                     Initial Balance: €{loan.balance.toFixed(2)}
                   </Typography>
                   <Typography>Interest Rate: {loan.interestRate}%</Typography>
@@ -258,6 +257,7 @@ const LoanCalculator: React.FC = () => {
                   <Typography>Term Length: {loan.termLength} months</Typography>
 
                   <TextField
+                    className="custom-payment-input"
                     label="Custom Monthly Payment"
                     type="number"
                     value={customMonthlyPayment || ""}

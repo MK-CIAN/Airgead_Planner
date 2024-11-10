@@ -189,7 +189,7 @@
   max-height: 80vh;
   overflow-y: auto;
   padding: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: none;
   border-radius: 8px;
   background-color: white;
 }
@@ -200,6 +200,12 @@
   align-items: center;
 }
 
+.expanded-loan-container p {
+  padding: 0.5%;
+}
+.custom-payment-input {
+  padding: 0.5%;
+}
 .loan-chart-container {
   width: 100%;
   margin-bottom: 20px;

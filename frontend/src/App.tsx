@@ -4,7 +4,7 @@ import Dashboard from './components/Dashboard'
 import Budget from './components/Budget'
 import Loans from './components/LoanCalculator'
 import Pensions from './components/Pensions'
-import Investmets from './components/Investments'
+import StockSim from './components/StockSim'
 import News from './components/News'
 import Navbar from './components/Navbar'
 import Login from './components/Login'
@@ -41,7 +41,7 @@ function App() {
                 <Route path="/savings" element={<Savings/>}/>
                 <Route path="/loans" element={<Loans/>}/>
                 <Route path="/pensions" element={<Pensions/>}/>
-                <Route path="/investments" element={<Investmets/>}/>
+                <Route path="/stocksim" element={<StockSim/>}/>
                 <Route path="/news" element={<News/>}/>
               </Route>
             </Routes>

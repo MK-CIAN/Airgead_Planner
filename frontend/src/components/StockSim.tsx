@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Loans: React.FC = () => {
+const StockSim: React.FC = () => {
     return (
         <div>
             <h1>Invesments Page</h1>
@@ -9,4 +9,4 @@ const Loans: React.FC = () => {
     );
 };
 
-export default Loans;
+export default StockSim;

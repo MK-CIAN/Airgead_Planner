@@ -125,15 +125,15 @@ export default function NavBar({ content }: NavBarProps) {
             </ListItem>
 
             <ListItem key={5} disablePadding>
-                <ListItemButton component={Link} to={"investments"} selected={"/investments" === location.pathname}
+                <ListItemButton component={Link} to={"stocksim"} selected={"/stocksim" === location.pathname}
                     sx={{
-                        backgroundImage: location.pathname === "/investments" ? gradient : 'none',
+                        backgroundImage: location.pathname === "/stocksim" ? gradient : 'none',
                         backgroundSize: 'cover'
                     }}>
                     <ListItemIcon>
                         <SsidChartIcon sx={{color: color}}/>
                     </ListItemIcon>
-                    <ListItemText primary="Investment Guides"/>
+                    <ListItemText primary="Stock Market Simulator"/>
                 </ListItemButton>
             </ListItem>
 
