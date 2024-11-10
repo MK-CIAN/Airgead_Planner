@@ -4,6 +4,7 @@ from .serializers import *
 from .models import *
 from rest_framework.response import Response
 from django.db.models import F, Sum
+from datetime import datetime, timedelta
 
 # Create your views here.
 class SuperMarketSalesViewset(viewsets.ViewSet):
@@ -76,3 +77,25 @@ class LoanViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Automatically associate the loan with the authenticated user
         serializer.save(user=self.request.user)
+
+class StockDataViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def list(self, request):
+        # Fetch the latest stock data for each FAANG stock
+        ticker = request.query_params.get('ticker')
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date', datetime.now().date())
+
+        if not ticker:
+            return Response({'error': 'Please provide a ticker'}, status=400)
+
+        start_date = start_date or (datetime.now() - timedelta(days=365)).date()  # Default to 1 year ago
+
+        stock_data = StockData.objects.filter(
+            ticker=ticker,
+            date__range=[start_date, end_date]
+        ).order_by('date')
+
+        serializer = StockDataSerializer(stock_data, many=True)
+        return Response(serializer.data)

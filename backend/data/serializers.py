@@ -28,3 +28,8 @@ class LoanSerializer(serializers.ModelSerializer):
         model = Loan
         fields = ['id', 'user', 'name', 'balance', 'interest_rate', 'term_length', 'monthly_payment', 'total_interest', 'created_at']
         read_only_fields = ['id', 'created_at', 'user']
+
+class StockDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StockData
+        fields = ['ticker', 'date', 'open_price', 'high_price', 'low_price', 'close_price', 'adj_close_price', 'volume']
