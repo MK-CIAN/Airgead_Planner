@@ -32,7 +32,7 @@ const DonutChart: React.FC<DonutChartProps> = ({ principal, interest }) => {
           cy="18"
           r="15.915"
           fill="none"
-          stroke={theme.palette.grey[300]}
+          stroke={theme.palette.success.main}
           strokeWidth="3.8"
         />
         <circle

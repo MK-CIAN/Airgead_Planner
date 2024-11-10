@@ -1,11 +1,18 @@
 // LoanCalculator.tsx
-import React, { useState, useEffect } from 'react';
-import Axios from './Axios';
-import LoanForm from './forms/LoanForm';
-import LoanChart from './charts/LoanChart';
-import { Button, Typography, Box, Card, CardContent, TextField } from '@mui/material';
-import dayjs from 'dayjs';
-import '../App.css';
+import React, { useState, useEffect } from "react";
+import Axios from "./Axios";
+import LoanForm from "./forms/LoanForm";
+import LoanChart from "./charts/LoanChart";
+import {
+  Button,
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  TextField,
+} from "@mui/material";
+import dayjs from "dayjs";
+import "../App.css";
 
 interface LoanData {
   id: string;
@@ -17,16 +24,26 @@ interface LoanData {
   totalInterest: number;
   repaymentSchedule: number[];
   currentMonth: dayjs.Dayjs;
+  saved: boolean;
 }
 
 const LoanCalculator: React.FC = () => {
   const [loans, setLoans] = useState<LoanData[]>([]);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [editingLoan, setEditingLoan] = useState<string | null>(null); // ID of the loan being edited
-  const [customMonthlyPayment, setCustomMonthlyPayment] = useState<number | null>(null);
-  const [customRepaymentSchedule, setCustomRepaymentSchedule] = useState<number[]>([]);
+  const [customMonthlyPayment, setCustomMonthlyPayment] = useState<
+    number | null
+  >(null);
+  const [customRepaymentSchedule, setCustomRepaymentSchedule] = useState<
+    number[]
+  >([]);
 
-  const calculateRepaymentSchedule = (balance: number, monthlyPayment: number, interestRate: number, termLength: number) => {
+  const calculateRepaymentSchedule = (
+    balance: number,
+    monthlyPayment: number,
+    interestRate: number,
+    termLength: number
+  ) => {
     const monthlyRate = interestRate / 100 / 12;
     const schedule = [];
     let currentBalance = balance;
@@ -65,7 +82,8 @@ const LoanCalculator: React.FC = () => {
             monthlyPayment: parseFloat(loan.monthly_payment),
             totalInterest: parseFloat(totalInterestPaid.toFixed(2)),
             repaymentSchedule: schedule,
-            currentMonth: dayjs().startOf('month'),
+            currentMonth: dayjs().startOf("month"),
+            saved: true,
           };
         });
         setLoans(fetchedLoans);
@@ -75,10 +93,24 @@ const LoanCalculator: React.FC = () => {
       });
   }, []);
 
-  const handleCalculateRepayment = (data: { name: string; balance: number; interestRate: number; termLength: number }) => {
+  const handleCalculateRepayment = (data: {
+    name: string;
+    balance: number;
+    interestRate: number;
+    termLength: number;
+  }) => {
     const { name, balance, interestRate, termLength } = data;
-    const monthlyPayment = (balance * (interestRate / 100 / 12) * Math.pow(1 + interestRate / 100 / 12, termLength)) / (Math.pow(1 + interestRate / 100 / 12, termLength) - 1);
-    const { schedule, totalInterestPaid } = calculateRepaymentSchedule(balance, monthlyPayment, interestRate, termLength);
+    const monthlyPayment =
+      (balance *
+        (interestRate / 100 / 12) *
+        Math.pow(1 + interestRate / 100 / 12, termLength)) /
+      (Math.pow(1 + interestRate / 100 / 12, termLength) - 1);
+    const { schedule, totalInterestPaid } = calculateRepaymentSchedule(
+      balance,
+      monthlyPayment,
+      interestRate,
+      termLength
+    );
 
     const newLoan: LoanData = {
       id: `${loans.length + 1}`,
@@ -89,14 +121,15 @@ const LoanCalculator: React.FC = () => {
       monthlyPayment: parseFloat(monthlyPayment.toFixed(2)),
       totalInterest: parseFloat(totalInterestPaid.toFixed(2)),
       repaymentSchedule: schedule,
-      currentMonth: dayjs().startOf('month'),
+      currentMonth: dayjs().startOf("month"),
+      saved: false,
     };
 
     setLoans([...loans, newLoan]);
   };
 
   const handleSaveLoan = (loan: LoanData) => {
-    Axios.post('data/loans/', {
+    Axios.post("data/loans/", {
       name: loan.name,
       balance: loan.balance,
       interest_rate: loan.interestRate,
@@ -106,6 +139,9 @@ const LoanCalculator: React.FC = () => {
     })
       .then((response) => {
         console.log("Loan saved:", response.data);
+        setLoans((prevLoans) =>
+          prevLoans.map((l) => (l.id === loan.id ? { ...l, saved: true } : l))
+        );
       })
       .catch((error) => {
         console.error("Error saving loan:", error);
@@ -125,15 +161,52 @@ const LoanCalculator: React.FC = () => {
   const handleEditLoan = (loan: LoanData) => {
     setEditingLoan(loan.id);
     setCustomMonthlyPayment(loan.monthlyPayment);
-  }
+  };
 
-  const handleCustomMontlyPaymentChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, loan: LoanData) => {
+  const handleCustomMontlyPaymentChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    loan: LoanData
+  ) => {
     const newMonthlyPayment = parseFloat(event.target.value);
     setCustomMonthlyPayment(newMonthlyPayment);
 
-    const { schedule } = calculateRepaymentSchedule(loan.balance, newMonthlyPayment, loan.interestRate, loan.termLength);
+    const { schedule } = calculateRepaymentSchedule(
+      loan.balance,
+      newMonthlyPayment,
+      loan.interestRate,
+      loan.termLength
+    );
     setCustomRepaymentSchedule(schedule);
-  }
+  };
+
+  const handleSaveCustomMonthlyPayment = (loan: LoanData) => {
+    // Update the loan with new custom monthly payment
+    if (customMonthlyPayment != null) {
+      Axios.patch(`data/loans/${loan.id}/`, {
+        monthly_payment: customMonthlyPayment,
+      })
+        .then(() => {
+          // Update state to reflect new monthly payment
+          setLoans((prevLoans) =>
+            prevLoans.map((l) =>
+              l.id === loan.id
+                ? {
+                    ...l,
+                    monthlyPayment: customMonthlyPayment,
+                    repaymentSchedule: customRepaymentSchedule,
+                  }
+                : l
+            )
+          );
+          setEditingLoan(null); // Close the edit mode
+          setCustomMonthlyPayment(null); // Reset custom monthly payment
+          console.log("Loan updated with custom monthly payment.");
+        })
+        .catch((error) => {
+          console.error("Error updating loan:", error);
+        });
+    }
+  };
 
   const toggleFormVisibility = () => {
     setIsFormVisible(!isFormVisible);
@@ -141,75 +214,160 @@ const LoanCalculator: React.FC = () => {
 
   return (
     <div>
-      <Typography variant="h5" gutterBottom>Loan Repayment Calculator</Typography>
-
-      <Button variant="contained" color="primary" onClick={toggleFormVisibility} style={{ marginBottom: '20px' }}>
+      <Typography variant="h5" gutterBottom>
+        Loan Repayment Calculator
+      </Typography>
+      <Button
+        className="loan-button"
+        variant="contained"
+        color="primary"
+        onClick={toggleFormVisibility}
+        style={{ marginBottom: "20px" }}
+      >
         {isFormVisible ? "Hide Form" : "Add New Loan"}
       </Button>
+    
+      {isFormVisible && (
+        <LoanForm onCalculateRepayment={handleCalculateRepayment} />
+      )}
 
-      {isFormVisible && <LoanForm onCalculateRepayment={handleCalculateRepayment} />}
-      <Box className={editingLoan ? 'loan-grid editing' : 'loan-grid'}
-      style={{ position: 'relative'}}>
-        {loans.map((loan) => (
-          <Card
-            key={loan.id}
-            className={editingLoan === loan.id ? 'loan-card expanded' : 'loan-card'}
-            style={{ position: 'relative' }}
-          >
-            <CardContent>
-              <Typography variant="subtitle1" align="center">{loan.name}</Typography>
-              <Typography>Initial Balance: €{loan.balance.toFixed(2)}</Typography>
-              <Typography>Interest Rate: {loan.interestRate}%</Typography>
-              <Typography>Monthly Payment: €{loan.monthlyPayment.toFixed(2)}</Typography>
-              <Typography>Total Interest: €{loan.totalInterest.toFixed(2)}</Typography>
-              <Typography>Term Length: {loan.termLength} months</Typography>
+      {/* Expanded Loan View */}
+      {editingLoan && (
+        <Box
+          className="expanded-loan-container"
+          style={{ width: "80%", marginBottom: "20px" }}
+        >
+          {loans
+            .filter((loan) => loan.id === editingLoan)
+            .map((loan) => (
+              <Card key={loan.id} style={{ width: "100%" }}>
+                <CardContent>
+                  <Typography variant="subtitle1" align="center">
+                    {loan.name}
+                  </Typography>
+                  <Typography>
+                    Initial Balance: €{loan.balance.toFixed(2)}
+                  </Typography>
+                  <Typography>Interest Rate: {loan.interestRate}%</Typography>
+                  <Typography>
+                    Monthly Payment: €{loan.monthlyPayment.toFixed(2)}
+                  </Typography>
+                  <Typography>
+                    Total Interest: €{loan.totalInterest.toFixed(2)}
+                  </Typography>
+                  <Typography>Term Length: {loan.termLength} months</Typography>
 
-              {editingLoan === loan.id && (
-                <TextField
-                  label="Custom Monthly Payment"
-                  type="number"
-                  value={customMonthlyPayment || ''}
-                  onChange={(e) => handleCustomMontlyPaymentChange(e, loan)}
-                  fullWidth
-                  style={{ marginBottom: '10px' }}
-                />
-              )}
+                  <TextField
+                    label="Custom Monthly Payment"
+                    type="number"
+                    value={customMonthlyPayment || ""}
+                    onChange={(e) => handleCustomMontlyPaymentChange(e, loan)}
+                    fullWidth
+                    style={{ marginBottom: "10px" }}
+                  />
+
+                  <LoanChart
+                    repaymentSchedule={loan.repaymentSchedule}
+                    customRepaymentSchedule={
+                      editingLoan === loan.id ? customRepaymentSchedule : []
+                    }
+                    totalInterest={loan.totalInterest}
+                    loanBalance={loan.balance}
+                    isEditing={editingLoan === loan.id}
+                  />
+
+                  <div className="loan-buttons">
+                    <Button
+                      className="loan-button"
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleSaveCustomMonthlyPayment(loan)}
+                      style={{ marginTop: "10px" }}
+                    >
+                      Save Custom Payment
+                    </Button>
+                    <Button
+                      className="remove-loan-button"
+                      variant="contained"
+                      color="primary"
+                      onClick={() => setEditingLoan(null)}
+                      style={{ marginTop: "10px" }}
+                    >
+                      Close
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+        </Box>
+      )}
+
+      {/* Remaining Loans in a Row */}
+      <Box
+        display="grid"
+        gridTemplateColumns="repeat(auto-fill, minmax(300px, 1fr))"
+        gap={3}
+      >
+        {!editingLoan &&
+          loans.map((loan) => (
+            <Card key={loan.id} style={{ position: "relative" }}>
+              <CardContent>
+                <Typography variant="subtitle1" align="center">
+                  {loan.name}
+                </Typography>
+                <Typography>
+                  Initial Balance: €{loan.balance.toFixed(2)}
+                </Typography>
+                <Typography>Interest Rate: {loan.interestRate}%</Typography>
+                <Typography>
+                  Monthly Payment: €{loan.monthlyPayment.toFixed(2)}
+                </Typography>
+                <Typography>
+                  Total Interest: €{loan.totalInterest.toFixed(2)}
+                </Typography>
+                <Typography>Term Length: {loan.termLength} months</Typography>
 
                 <LoanChart
-                repaymentSchedule={loan.repaymentSchedule}
-                customRepaymentSchedule={editingLoan === loan.id ? customRepaymentSchedule : []}
-                totalInterest={loan.totalInterest}
-                loanBalance={loan.balance}
-                isEditing={editingLoan === loan.id}
-              />
+                  repaymentSchedule={loan.repaymentSchedule}
+                  totalInterest={loan.totalInterest}
+                  loanBalance={loan.balance}
+                  isEditing={false}
+                />
 
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => handleSaveLoan(loan)}
-                style={{ marginTop: '10px' }}
-              >
-                Save
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => handleRemoveLoan(loan.id)}
-                style={{ marginTop: '10px' }}
-              >
-                Remove
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => handleEditLoan(loan)}
-                style={{ marginTop: '10px' }}
-              >
-                Edit
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
+                <div className="loan-buttons">
+                  <Button
+                    className="loan-button"
+                    variant="contained"
+                    color="primary"
+                    onClick={() => { handleEditLoan(loan); setIsFormVisible(false); }}
+                    style={{ marginTop: "10px" }}
+                  >
+                    Edit
+                  </Button>
+                  {!loan.saved && (
+                    <Button
+                      className="loan-button"
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleSaveLoan(loan)}
+                      style={{ marginTop: "10px" }}
+                    >
+                      Save
+                    </Button>
+                  )}
+                  <Button
+                    className="remove-loan-button"
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleRemoveLoan(loan.id)}
+                    style={{ marginTop: "10px" }}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
       </Box>
     </div>
   );

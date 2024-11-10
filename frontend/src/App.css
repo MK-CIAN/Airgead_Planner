@@ -178,36 +178,69 @@
   color: red;
 }
 
-.loan-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
+.expanded-loan-container {
+  justify-content: center;
+  margin: auto;
+  align-items: flex-start;
+  padding: 20px;
+  width: 80%;
+  height: 30%;
+  max-width: 800px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  background-color: white;
 }
 
-.loan-grid.editing {
+.expanded-loan-content {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.loan-card {
-  transition: all 0.3s ease;
-}
-
-.loan-card.expanded {
-  width: 80%; /* Adjust width to take up most of the screen */
-  max-width: 1000px; /* Cap the width to prevent it from becoming too large on wide screens */
-  margin: 20px auto;
-  padding: 20px;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.loan-card.expanded .loan-chart {
+.loan-chart-container {
   width: 100%;
-  height: 500px; /* Increase height for a larger chart display */
+  margin-bottom: 20px;
 }
 
-.loan-card.expanded canvas {
-  width: 100%;
-  height: 100%;
+.centered-button-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.loan-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+
+.loan-button {
+  background: rgb(132, 250, 142);
+  background: linear-gradient(
+    333deg,
+    rgba(132, 250, 142, 0.710504270067402) 0%,
+    rgba(6, 170, 19, 0.8477591720281863) 50%,
+    rgba(21, 94, 27, 1) 100%
+  );
+  color: white;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.remove-loan-button {
+    background: red;
+    background-color: red !important;
+    color: white !important;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
 }

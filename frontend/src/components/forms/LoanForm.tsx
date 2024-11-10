@@ -54,9 +54,8 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculateRepayment }) => {
           <TextField {...field} label="Term Length (months)" type="number" required fullWidth margin="normal" />
         )}
       />
-
-      <Button type="submit" variant="contained" color="primary" fullWidth style={{ marginTop: '20px' }}>
-        Calculate Repayment
+      <Button type="submit" className="loan-button" variant="contained" color="primary" fullWidth style={{ marginTop: '20px' }}>
+        Calculate Loan
       </Button>
     </form>
   );
