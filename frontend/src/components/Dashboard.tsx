@@ -72,12 +72,12 @@ const Dashboard = () => {
   return (
     <div className="container">
       <Typography variant="h4" gutterBottom>
-        Dashboard
+        Your Financial Dashboard
       </Typography>
       
       <Grid container spacing={3}>
         {/* Budget Chart Widget */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={6} onClick={() => window.location.href = '/budget'}>
           <Paper elevation={3} style={{ padding: '16px', height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Monthly Budget
@@ -87,7 +87,7 @@ const Dashboard = () => {
         </Grid>
 
         {/* Savings Goal Widget */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={6} onClick={() => window.location.href = '/savings'}>
           <Paper elevation={3} style={{ padding: '16px', height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Savings Goal

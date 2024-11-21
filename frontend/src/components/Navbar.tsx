@@ -164,6 +164,19 @@ export default function NavBar({ content }: NavBarProps) {
             </ListItem>
 
             <ListItem key={8} disablePadding>
+                <ListItemButton component={Link} to={"income"} selected={"/income" === location.pathname}
+                    sx={{
+                        backgroundImage: location.pathname === "/income" ? gradient : 'none',
+                        backgroundSize: 'cover'
+                    }}>
+                    <ListItemIcon>
+                        <TrendingDownIcon sx={{color: color}}/>
+                    </ListItemIcon>
+                    <ListItemText primary="Income Tax Calculator" />
+                </ListItemButton>
+            </ListItem>
+
+            <ListItem key={9} disablePadding>
                 <ListItemButton onClick={logoutUser}>
                     <ListItemIcon>
                         <LogoutIcon sx={{color: color}}/>

@@ -13,6 +13,7 @@ import ProtectedRoute from './components/ProtectedRoutes'
 import PasswordResetRequest from './components/PasswordResetRequest'
 import PasswordReset from './components/PasswordReset'
 import Savings from './components/Savings'
+import Income from './components/Income'
 
 function App() {
   const location = useLocation()
@@ -43,6 +44,7 @@ function App() {
                 <Route path="/pensions" element={<Pensions/>}/>
                 <Route path="/stocksim" element={<StockSim/>}/>
                 <Route path="/news" element={<News/>}/>
+                <Route path="/income" element={<Income/>}/>
               </Route>
             </Routes>
           }
