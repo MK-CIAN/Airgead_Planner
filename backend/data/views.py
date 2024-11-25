@@ -73,10 +73,16 @@ class PortfolioViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def list(self, request):
-        """Retrieve the portfolio details."""
-        portfolio, _ = Portfolio.objects.get_or_create(user=request.user)
-        serializer = PortfolioSerializer(portfolio)
-        return Response(serializer.data)
+        """Fetch the user's portfolio and its holdings."""
+        portfolio, created = Portfolio.objects.get_or_create(user=request.user)
+        holdings = StockHolding.objects.filter(portfolio=portfolio)
+
+        # Prepare the response data
+        response_data = {
+            "balance": str(portfolio.balance),  # Convert Decimal to string
+            "holdings": [{"ticker": h.ticker, "quantity": h.quantity} for h in holdings],
+        }
+        return Response(response_data)
 
     def create(self, request):
         """Handle buy/sell transactions."""

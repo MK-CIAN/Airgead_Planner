@@ -3,14 +3,7 @@ import React, { useState, useEffect } from "react";
 import Axios from "./Axios";
 import LoanForm from "./forms/LoanForm";
 import LoanChart from "./charts/LoanChart";
-import {
-  Button,
-  Typography,
-  Box,
-  Card,
-  CardContent,
-  TextField,
-} from "@mui/material";
+import {Button, Typography, Box, Card, CardContent, TextField} from "@mui/material";
 import dayjs from "dayjs";
 import "../App.css";
 

@@ -267,5 +267,36 @@
   margin-bottom: 16px;
 }
 
+.portfolio-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
 
+.portfolio-button {
+  background: #f5f5f5; /* Pale white background for unselected */
+  color: #999; /* Light gray text color for unselected */
+  border: 1px solid #ddd; /* Light gray border for unselected */
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: transform 0.2s ease-in-out, background 0.3s ease, color 0.3s ease;
+}
+
+.portfolio-button:hover {
+  background: #e0e0e0; /* Slightly darker gray on hover for unselected buttons */
+}
+
+.portfolio-button.selected {
+  background: linear-gradient(
+    333deg,
+    rgba(132, 250, 142, 0.710504270067402) 0%,
+    rgba(6, 170, 19, 0.8477591720281863) 50%,
+    rgba(21, 94, 27, 1) 100%
+  ); /* Green gradient for selected button */
+  color: white; /* White text for selected button */
+  border: none; /* Remove border for selected button */
+  transform: scale(1.05); /* Slight enlargement for the selected button */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); /* Add shadow to selected button */
+}
 

@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from "react";
 import Axios from "./Axios";
-import { Box, Typography, Button, TextField, Card, CardContent } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  TextField,
+  Card,
+  CardContent,
+} from "@mui/material";
+import "../App.css";
 
 interface Portfolio {
   balance: number;
@@ -21,6 +29,7 @@ const Portfolio: React.FC<PortfolioProps> = ({ stocks }) => {
   const fetchPortfolio = async () => {
     try {
       const response = await Axios.get(`data/portfolio/`);
+      console.log("Portfolio API response:", response.data);
       setPortfolio(response.data);
     } catch (error) {
       console.error("Error fetching portfolio data:", error);
@@ -96,25 +105,36 @@ const Portfolio: React.FC<PortfolioProps> = ({ stocks }) => {
           value={quantity}
           onChange={(e) => setQuantity(Number(e.target.value))}
         />
-        <Button
-          onClick={() => setTransactionType("BUY")}
-          variant={transactionType === "BUY" ? "contained" : "outlined"}
-        >
-          Buy
-        </Button>
-        <Button
-          onClick={() => setTransactionType("SELL")}
-          variant={transactionType === "SELL" ? "contained" : "outlined"}
-        >
-          Sell
-        </Button>
-        <Button onClick={handleTransaction} variant="contained" color="primary">
-          Submit
-        </Button>
+        <div className="portfolio-buttons">
+          <Button
+            onClick={() => setTransactionType("BUY")}
+            variant="contained"
+            className={`portfolio-button ${
+              transactionType === "BUY" ? "selected" : ""
+            }`}
+          >
+            Buy
+          </Button>
+          <Button
+            onClick={() => setTransactionType("SELL")}
+            variant="contained"
+            className={`portfolio-button ${
+              transactionType === "SELL" ? "selected" : ""
+            }`}
+          >
+            Sell
+          </Button>
+          <Button
+            onClick={handleTransaction}
+            variant="contained"
+            color="primary"
+          >
+            Submit
+          </Button>
+        </div>
       </Box>
     </Box>
   );
-  
 };
 
 export default Portfolio;
