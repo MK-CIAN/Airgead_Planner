@@ -49,6 +49,7 @@ class LoanViewSet(viewsets.ModelViewSet):
         # Automatically associate the loan with the authenticated user
         serializer.save(user=self.request.user)
 
+# Stock Data Viewset
 class StockDataViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
     
@@ -70,12 +71,13 @@ class StockDataViewSet(viewsets.ViewSet):
 
         serializer = StockDataSerializer(stock_data, many=True)
         return Response(serializer.data)
-    
+
+# Portfolio Viewset
 class PortfolioViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def list(self, request):
-        """Fetch the user's portfolio and its holdings."""
+        # Fetch the user's portfolio and holdings
         portfolio, created = Portfolio.objects.get_or_create(user=request.user)
         holdings = StockHolding.objects.filter(portfolio=portfolio)
 
@@ -87,16 +89,18 @@ class PortfolioViewSet(viewsets.ViewSet):
         return Response(response_data)
 
     def create(self, request):
-        """Handle buy/sell transactions."""
+        # Making sure the user has a portfolio before making transactions
         portfolio = Portfolio.objects.get(user=request.user)
         ticker = request.data.get("ticker")
         transaction_type = request.data.get("transaction_type")
         quantity = int(request.data.get("quantity", 0))
         price_per_share = float(request.data.get("price_per_share", 0))
 
+        # Validate the transaction data
         if not ticker or quantity <= 0 or price_per_share <= 0:
             return Response({"error": "Invalid transaction data"}, status=400)
-
+        
+        # Pass the transaction handling based on the transaction type to helper functions
         if transaction_type == "BUY":
             return self._buy_stock(portfolio, ticker, quantity, price_per_share)
         elif transaction_type == "SELL":
@@ -104,6 +108,7 @@ class PortfolioViewSet(viewsets.ViewSet):
         else:
             return Response({"error": "Invalid transaction type"}, status=400)
 
+    # Helper methods for buying stocks
     def _buy_stock(self, portfolio, ticker, quantity, price_per_share):
         total_cost = Decimal(quantity) * Decimal(price_per_share)  # Ensure total_cost is a Decimal
 
@@ -113,11 +118,11 @@ class PortfolioViewSet(viewsets.ViewSet):
         portfolio.balance -= total_cost
         portfolio.save()
 
-        # Ensure that the `quantity` field is initialized during creation
+        # Update or create the stock holding
         holding, created = StockHolding.objects.get_or_create(
             portfolio=portfolio,
             ticker=ticker,
-            defaults={"quantity": 0}  # Default to 0 if creating a new holding
+            defaults={"quantity": 0}
         )
 
         holding.quantity += quantity
@@ -132,10 +137,11 @@ class PortfolioViewSet(viewsets.ViewSet):
         )
         return Response(TransactionSerializer(transaction).data)
 
+    # Helper method for selling stocks
     def _sell_stock(self, portfolio, ticker, quantity, price_per_share):
         # Ensure proper decimal handling
-        quantity = int(quantity)  # Cast quantity to integer
-        price_per_share = Decimal(price_per_share)  # Ensure price_per_share is Decimal
+        quantity = int(quantity)
+        price_per_share = Decimal(price_per_share)
         total_earnings = Decimal(quantity) * price_per_share
 
         # Retrieve the holding and validate availability
@@ -147,10 +153,10 @@ class PortfolioViewSet(viewsets.ViewSet):
         portfolio.balance += total_earnings
         holding.quantity -= quantity
         if holding.quantity == 0:
-            holding.delete()  # Delete holding if quantity reaches 0
+            holding.delete()
         else:
-            holding.save()  # Save updated holding if quantity > 0
-        portfolio.save()  # Save the updated portfolio balance
+            holding.save()
+        portfolio.save()
 
         # Record the transaction
         transaction = Transaction.objects.create(
@@ -163,19 +169,15 @@ class PortfolioViewSet(viewsets.ViewSet):
 
         return Response(TransactionSerializer(transaction).data)
     
-
+# Financial Articles View
 class RecommendedArticlesView(APIView):
     permission_classes = [permissions.IsAuthenticated]  # Ensure only authenticated users can access this view
 
     def get(self, request):
-        # For now, hardcoding user interests
+        # Hardcoding user interests needs to be dynamic later
         recommended_article_ids = recommend_articles()
-        
+
         # Fetch articles matching the recommended IDs
         articles = FinancialArticle.objects.filter(id__in=recommended_article_ids)
-        
-        # Serialize the data
         serializer = FinancialArticleSerializer(articles, many=True)
-        
-        # Return the serialized data
         return Response(serializer.data)

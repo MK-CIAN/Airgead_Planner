@@ -5,7 +5,7 @@ from ..models import StockData
 FAANG_TICKERS = ['META', 'AMZN', 'AAPL', 'NFLX', 'GOOGL']
 
 def fetch_initial_stock_data():
-    """Fetch 5 years of data for each FAANG stock and store it."""
+    # Fetching historical stock data for the FAANG stocks
     end_date = datetime.now()
     start_date = end_date - timedelta(days=5 * 365)  # 5 years
 

@@ -14,9 +14,6 @@ KEYWORD_QUERY = config("KEYWORD_QUERY")
 MAIN_KEYWORDS = {"stock", "market", "investment", "finance", "economy", "health", "money", "insurance", "taxes", "credit"}
 
 def fetch_and_store_financial_news():
-    """
-    Fetch financial news articles from the API and store them in the database.
-    """
     # Parameters for the API request
     params = {
         "apikey": API_KEY,
@@ -72,16 +69,13 @@ def fetch_and_store_financial_news():
 
 # Helper function to extract and prioritize keywords from the article title and description
 def extract_keywords(title, description):
-    """
-    Extract and prioritize keywords from the article title and description using regex.
-    """
     if not title and not description:
         return []
 
     # Combine title and description for keyword extraction
     combined_text = f"{title} {description}"
 
-    # Tokenize and clean the combined text
+    # Convert text to lowercase and extract words using regex, filtering out useless words and then adding useful words to array
     words = re.findall(r"\b\w+\b", combined_text.lower())
     stopwords = {"the", "is", "was", "for", "and", "to", "a", "of", "in", "on", "at", "with", "by", "as"}
     keywords = [word for word in words if word not in stopwords and len(word) > 3]
@@ -90,15 +84,12 @@ def extract_keywords(title, description):
     main_keywords = [word for word in keywords if word in MAIN_KEYWORDS]
     other_keywords = [word for word in keywords if word not in MAIN_KEYWORDS]
 
-    # Prioritize main keywords and add up to 5 other keywords
+    # Prioritizing the main keywords and combining with other keywords
     prioritized_keywords = main_keywords + other_keywords
     # Limit to top 5 keywords
     return prioritized_keywords[:5]  
 
 def recommend_articles():
-    """
-    Recommend articles based on hardcoded user-selected interests.
-    """
     # Hardcoded user interests
     user_interests = ["finance", "investment", "taxes", "economy", "health"]
     
@@ -114,11 +105,8 @@ def recommend_articles():
     recommendations.sort(key=lambda x: x["similarity"], reverse=True)
     return [rec["article_id"] for rec in recommendations[:5]]
 
-
+# Jaccard similarity function, comparing two sets of keywords for similarity
 def jaccard_similarity(set1, set2):
-    """
-    Calculate Jaccard similarity between two sets.
-    """
     intersection = len(set1 & set2)
     union = len(set1 | set2)
     return intersection / union if union != 0 else 0
