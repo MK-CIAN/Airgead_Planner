@@ -26,12 +26,13 @@ const Dashboard = () => {
   const [budgetData, setBudgetData] = useState<BudgetData[]>([]);
   const [savingsData, setSavingsData] = useState<SavingsGoalData[]>([]);
 
+  //Getting budget data from user to display on the dashboard
   const getBudgetData = (month: Dayjs) => {
     Axios.get(`data/budget/`, { params: { month: month.format('YYYY-MM') } })
       .then((response) => {
-        console.log("Fetched budget data:", response.data); // Log the fetched data
+        console.log("Fetched budget data:", response.data); // Logging fetched data
         const formattedData: BudgetData[] = response.data.map((item: { id: number; amount: string; category: string; transaction_type: string }) => ({
-          id: item.id,  // Ensure you extract the ID from the response
+          id: item.id, 
           value: parseFloat(item.amount),
           label: item.category,
           type: item.transaction_type,

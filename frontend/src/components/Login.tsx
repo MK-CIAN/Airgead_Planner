@@ -15,11 +15,13 @@ interface IFormInput {
     password: string;
 }
 
+// Login component
 const Login = () => {
     const { handleSubmit, control } = useForm<IFormInput>();
     const navigate = useNavigate();
     const [ShowMessage, setShowMessage] = useState(false);
-
+    
+    // Function to submit login form
     const submission: SubmitHandler<IFormInput> = (data) => {
         Axios.post(`login/`, {
             email: data.email,

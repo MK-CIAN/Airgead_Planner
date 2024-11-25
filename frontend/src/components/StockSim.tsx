@@ -3,6 +3,7 @@ import Axios from "./Axios";
 import StockChart from "./charts/StockChart";
 import { Button, Typography, Box, Card, CardContent } from "@mui/material";
 import dayjs from "dayjs";
+import Portfolio from "./Portfolio";
 
 interface StockData {
   ticker: string;
@@ -130,6 +131,7 @@ const StockSim: React.FC = () => {
   return (
     <div>
       <h1>FAANG Stocks Overview</h1>
+      <Portfolio stocks={stocks} />
       {expandedStock ? (
         // Full-screen expanded view for selected stock
         <Box display="flex" flexDirection="column" alignItems="center" p={4}>

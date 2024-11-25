@@ -20,12 +20,13 @@ const Budget: React.FC = () => {
   const [currentMonth, setCurrentMonth] = useState<Dayjs>(dayjs().startOf('month'));
   const [budgetData, setBudgetData] = useState<BudgetData[]>([]);
 
+  // Function to get budget data
   const getBudgetData = (month: Dayjs) => {
     Axios.get(`data/budget/`, { params: { month: month.format('YYYY-MM') } })
       .then((response) => {
         console.log("Fetched budget data:", response.data); // Log the fetched data
         const formattedData: BudgetData[] = response.data.map((item: { id: number; amount: string; category: string; transaction_type: string }) => ({
-          id: item.id,  // Ensure you extract the ID from the response
+          id: item.id, 
           value: parseFloat(item.amount),
           label: item.category,
           type: item.transaction_type,
@@ -37,11 +38,12 @@ const Budget: React.FC = () => {
       });
   };
   
-
+  // Fetch budget data when the component loads
   useEffect(() => {
     getBudgetData(currentMonth);
   }, [currentMonth]);
-
+ 
+  // Montly navigation functions
   const handlePreviousMonth = () => {
     setCurrentMonth(prev => prev.subtract(1, 'month'));
   };
@@ -50,6 +52,7 @@ const Budget: React.FC = () => {
     setCurrentMonth(prev => prev.add(1, 'month'));
   };
 
+  //Function to add an item
   const handleAddBudget = (newItem: { amount: string; category: string; transaction_type: string }) => {
     // Prepare the data to send to the backend
     const budgetItem = {
@@ -61,14 +64,12 @@ const Budget: React.FC = () => {
     // Send POST request to backend to save the item
     Axios.post('data/budget/', budgetItem)
       .then((response) => {
-        // Extract the saved item with the backend-generated ID
         const savedItem = response.data;
   
-        // Update the frontend state with the item, including the backend-generated ID
         setBudgetData((prevData) => [
           ...prevData,
           {
-            id: savedItem.id, // Use the backend-generated ID
+            id: savedItem.id,
             value: parseFloat(savedItem.amount),
             label: savedItem.category,
             type: savedItem.transaction_type,

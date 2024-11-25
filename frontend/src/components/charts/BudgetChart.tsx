@@ -3,7 +3,7 @@ import * as React from 'react';
 import { PieChart } from '@mui/x-charts/PieChart';
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
-// Assuming useDrawingArea is not available, we will create a mock implementation
+
 const useDrawingArea = () => ({
   width: 600,
   height: 400,
@@ -12,7 +12,6 @@ const useDrawingArea = () => ({
 });
 
 interface BudgetData {
-
   id: number;
   value: number;
   label: string;
@@ -119,7 +118,7 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
         //marginLeft: '27.5%',
       }}
     >
-      {/* Container for the Pie Chart and Center Label */}
+      {/* Pie Chart Section */}
       <Box sx={{ position: 'relative', marginLeft: '5%' }}>
       <PieChart 
           series={[{ 
@@ -127,7 +126,7 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
             innerRadius: 140,
           }]} 
           slotProps={{
-            legend: { hidden: true }  // Hide the built-in legend
+            legend: { hidden: true }  // Hiding built in legend
           }}
           {...size}
         />

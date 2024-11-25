@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model, authenticate
 from knox.models import AuthToken
 User = get_user_model()
 
+#Login Viewset
 class LoginViewset(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
     serializer_class = LoginSerializer
@@ -17,6 +18,7 @@ class LoginViewset(viewsets.ViewSet):
             email = serializer.validated_data['email']
             password = serializer.validated_data['password']
             user = authenticate(request, email=email, password=password)
+            #If vaild user create token
             if user:
                 _, token = AuthToken.objects.create(user)
                 return Response({'user': self.serializer_class(user).data, 'token': token}, status=200)
@@ -25,6 +27,7 @@ class LoginViewset(viewsets.ViewSet):
         else:
             return Response(serializer.errors, status=400)
 
+#Register Viewset
 class RegisterViewset(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
     queryset = User.objects.all()

@@ -1,11 +1,6 @@
 from rest_framework import serializers
 from .models import *
 
-class SupermarketsalesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Supermarketsales
-        fields = '__all__'
-
 class BranchDataSerializer(serializers.Serializer):
     id = serializers.CharField()  # This will be used as the id in the chart
     total_sales = serializers.DecimalField(max_digits=10, decimal_places=2)  # Total sales as a decimal
@@ -33,3 +28,20 @@ class StockDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = StockData
         fields = ['ticker', 'date', 'open_price', 'high_price', 'low_price', 'close_price', 'adj_close_price', 'volume']
+
+class StockHoldingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StockHolding
+        fields = ['ticker', 'quantity']
+
+class PortfolioSerializer(serializers.ModelSerializer):
+    holdings = StockHoldingSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Portfolio
+        fields = ['balance', 'holdings']
+
+class TransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transaction
+        fields = ['ticker', 'transaction_type', 'quantity', 'price_per_share', 'date']

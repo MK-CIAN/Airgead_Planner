@@ -139,22 +139,6 @@ class MonthlyBudget(models.Model):
     class Meta:
         db_table = 'monthly_budget'
 
-
-class Supermarketsales(models.Model):
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    quantity = models.IntegerField(blank=True, null=True)
-    date = models.DateField(blank=True, null=True)
-    country = models.CharField(max_length=50, blank=True, null=True)
-    gender = models.CharField(max_length=10, blank=True, null=True)
-    customertype = models.CharField(max_length=20, blank=True, null=True)
-    branch = models.CharField(max_length=10, blank=True, null=True)
-    productline = models.CharField(max_length=50, blank=True, null=True)
-    payment = models.CharField(max_length=20, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'supermarketsales'
-
 class SavingsGoal(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
@@ -198,3 +182,21 @@ class StockData(models.Model):
 
     def __str__(self):
         return f"{self.ticker} on {self.date}"
+    
+class Portfolio(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    balance = models.DecimalField(max_digits=12, decimal_places=2, default=10000.00)
+
+class StockHolding(models.Model):
+    portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE)
+    ticker = models.CharField(max_length=10)
+    quantity = models.IntegerField()
+
+class Transaction(models.Model):
+    portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE)
+    ticker = models.CharField(max_length=10)
+    transaction_type = models.CharField(max_length=10)
+    quantity = models.IntegerField()
+    price_per_share = models.DecimalField(max_digits=10, decimal_places=2)
+    date = models.DateField(auto_now_add=True)
+    
