@@ -15,12 +15,20 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+from decouple import config
+# Load sensitive variables from .env
+API_KEY = config("API_KEY")
+BASE_URL = config("BASE_URL")
+DEFAULT_COUNTRY = config("DEFAULT_COUNTRY")
+DEFAULT_CATEGORY = config("DEFAULT_CATEGORY")
+KEYWORD_QUERY = config("KEYWORD_QUERY")
+FETCH_ARTICLES_INTERVAL_DAYS = config("FETCH_ARTICLES_INTERVAL_DAYS", default=7, cast=int)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-(%o@^ey#_udy8car0bdej)3ktx0uxrp7sirr_jowb61896t*8a'
+SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

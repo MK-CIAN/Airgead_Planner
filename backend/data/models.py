@@ -199,4 +199,17 @@ class Transaction(models.Model):
     quantity = models.IntegerField()
     price_per_share = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField(auto_now_add=True)
-    
+
+# Financial Articles
+class FinancialArticle(models.Model):
+    article_id = models.CharField(max_length=255, unique=True)
+    title = models.CharField(max_length=500)
+    link = models.URLField(max_length=2000)
+    description = models.TextField(null=True, blank=True)
+    source_name = models.CharField(max_length=255)
+    pub_date = models.DateTimeField()
+    image_url = models.URLField(max_length=2000, null=True, blank=True)
+    keywords = models.JSONField(default=list)
+
+    def __str__(self):
+        return self.title
