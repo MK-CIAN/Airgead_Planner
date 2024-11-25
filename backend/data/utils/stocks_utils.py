@@ -1,6 +1,6 @@
 import yfinance as yf
 from datetime import datetime, timedelta
-from .models import StockData
+from ..models import StockData
 
 FAANG_TICKERS = ['META', 'AMZN', 'AAPL', 'NFLX', 'GOOGL']
 

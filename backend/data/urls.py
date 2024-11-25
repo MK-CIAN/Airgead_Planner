@@ -11,4 +11,6 @@ router.register('loans', LoanViewSet, basename='loans')
 router.register('stocks', StockDataViewSet, basename='stocks')
 router.register('portfolio', PortfolioViewSet, basename='portfolio') 
 
-urlpatterns = router.urls
+urlpatterns = router.urls + [
+    path('reccomended-articles/', RecommendedArticlesView.as_view(), name='reccomended-articles'),
+]

@@ -45,3 +45,9 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = ['ticker', 'transaction_type', 'quantity', 'price_per_share', 'date']
+
+class FinancialArticleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FinancialArticle
+        fields = [
+            "id", "article_id", "title", "link", "description", "source_name", "pub_date", "image_url", "keywords"]

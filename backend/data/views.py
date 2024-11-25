@@ -4,8 +4,10 @@ from rest_framework import viewsets, permissions
 from .serializers import *
 from .models import *
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from django.db.models import F, Sum
 from datetime import datetime, timedelta
+from data.utils.news_utils import recommend_articles
 
 # Monthly Budget Viewset
 class MonthlyBudgetViewSet(viewsets.ModelViewSet):
@@ -160,3 +162,20 @@ class PortfolioViewSet(viewsets.ViewSet):
         )
 
         return Response(TransactionSerializer(transaction).data)
+    
+
+class RecommendedArticlesView(APIView):
+    permission_classes = [permissions.IsAuthenticated]  # Ensure only authenticated users can access this view
+
+    def get(self, request):
+        # For now, hardcoding user interests
+        recommended_article_ids = recommend_articles()
+        
+        # Fetch articles matching the recommended IDs
+        articles = FinancialArticle.objects.filter(id__in=recommended_article_ids)
+        
+        # Serialize the data
+        serializer = FinancialArticleSerializer(articles, many=True)
+        
+        # Return the serialized data
+        return Response(serializer.data)

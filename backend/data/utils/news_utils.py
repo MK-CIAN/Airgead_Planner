@@ -1,4 +1,4 @@
-from .models import FinancialArticle
+from ..models import FinancialArticle
 from decouple import config
 import requests
 import re
@@ -94,3 +94,31 @@ def extract_keywords(title, description):
     prioritized_keywords = main_keywords + other_keywords
     # Limit to top 5 keywords
     return prioritized_keywords[:5]  
+
+def recommend_articles():
+    """
+    Recommend articles based on hardcoded user-selected interests.
+    """
+    # Hardcoded user interests
+    user_interests = ["finance", "investment", "taxes", "economy", "health"]
+    
+    user_keywords = set(user_interests)
+    articles = FinancialArticle.objects.all()
+
+    recommendations = []
+    for article in articles:
+        article_keywords = set(article.keywords or [])
+        similarity = jaccard_similarity(user_keywords, article_keywords)
+        recommendations.append({"article_id": article.id, "similarity": similarity})
+
+    recommendations.sort(key=lambda x: x["similarity"], reverse=True)
+    return [rec["article_id"] for rec in recommendations[:5]]
+
+
+def jaccard_similarity(set1, set2):
+    """
+    Calculate Jaccard similarity between two sets.
+    """
+    intersection = len(set1 & set2)
+    union = len(set1 | set2)
+    return intersection / union if union != 0 else 0
