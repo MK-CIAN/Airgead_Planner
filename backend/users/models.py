@@ -9,7 +9,7 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 # Create your models here.
-
+# Custom User Manager
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -25,7 +25,8 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         return self.create_user(email, password, **extra_fields)
-
+    
+# Custom User model
 class CustomUser(AbstractUser):
     email = models.EmailField(max_length=200, unique=True)
     username = models.CharField(max_length=200, null=True, blank=True)
@@ -36,6 +37,7 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = []
     USERNAME_FIELD = 'email'
 
+# Signal to send email when password reset token is created
 @receiver(reset_password_token_created)
 def password_reset_token_created(reset_password_token, *args, **kwargs):
     sitelink = "http://localhost:5173/"

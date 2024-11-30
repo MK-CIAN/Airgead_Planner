@@ -4,10 +4,10 @@ import { useForm, Controller } from "react-hook-form";
 import { TextField, Button } from "@mui/material";
 import "../../App.css";
 
-// Utility function to get today's date as YYYY-MM-DD
+// Utility function to get today's date in right format
 const getTodayDate = () => {
   const today = new Date();
-  return today.toISOString().split("T")[0]; // Formats as 'YYYY-MM-DD'
+  return today.toISOString().split("T")[0];
 };
 
 interface SavingsFormProps {
@@ -42,7 +42,7 @@ const SavingsForm: React.FC<SavingsFormProps> = ({ onAddSavingsGoal }) => {
     };
 
     onAddSavingsGoal(formData); // Pass the processed form data
-    reset(); // Clear form fields
+    reset(); // Clearing form fields
   };
 
   return (

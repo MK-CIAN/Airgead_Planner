@@ -13,7 +13,7 @@ const TickerForm: React.FC<StockFormProps> = ({ onSubmit }) => {
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        onSubmit(selectedTicker); // Pass the selected ticker to the parent component
+        onSubmit(selectedTicker);
     };
 
     return (

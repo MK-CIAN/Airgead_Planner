@@ -1,4 +1,3 @@
-// LoanCalculator.tsx
 import React, { useState, useEffect } from "react";
 import Axios from "./Axios";
 import LoanForm from "./forms/LoanForm";
@@ -21,7 +20,6 @@ interface LoanData {
 }
 
 const LoanCalculator: React.FC = () => {
-  // State variables
   const [loans, setLoans] = useState<LoanData[]>([]);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [editingLoan, setEditingLoan] = useState<string | null>(null);
@@ -52,7 +50,7 @@ const LoanCalculator: React.FC = () => {
       totalInterestPaid += interestForMonth;
       currentBalance -= principalPayment;
 
-      // Add the remaining balance to the schedule
+      // Add current balance to schedule
       schedule.push(currentBalance > 0 ? currentBalance : 0);
       if (currentBalance <= 0) break;
     }
@@ -204,8 +202,8 @@ const LoanCalculator: React.FC = () => {
                 : l
             )
           );
-          setEditingLoan(null); // Close the edit mode
-          setCustomMonthlyPayment(null); // Reset custom monthly payment
+          setEditingLoan(null);
+          setCustomMonthlyPayment(null); 
           console.log("Loan updated with custom monthly payment.");
         })
         .catch((error) => {
@@ -309,7 +307,7 @@ const LoanCalculator: React.FC = () => {
         </Box>
       )}
 
-      {/* Remaining Loans in a Row */}
+      {/* Remaining Loans */}
       <Box
         display="grid"
         gridTemplateColumns="repeat(auto-fill, minmax(300px, 1fr))"

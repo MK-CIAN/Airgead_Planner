@@ -10,8 +10,6 @@ interface DonutChartProps {
 const DonutChart: React.FC<DonutChartProps> = ({ principal, interest }) => {
   const theme = useTheme();
   const total = principal + interest;
-  
-  // Avoid NaN or undefined values in calculations
   const principalPercentage = total > 0 ? (principal / total) * 100 : 0;
   const interestPercentage = 100 - principalPercentage;
 

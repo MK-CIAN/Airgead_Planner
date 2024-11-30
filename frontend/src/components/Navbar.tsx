@@ -47,7 +47,6 @@ export default function NavBar({ content }: NavBarProps) {
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1,
-      //backgroundColor: 'rgb(7, 148, 0)',
       background: 'linear-gradient(333deg, rgba(132,250,142,0.710504270067402) 0%, rgba(6,170,19,0.8477591720281863) 50%, rgba(21,94,27,1) 100%)',
       }}>
         <Toolbar>

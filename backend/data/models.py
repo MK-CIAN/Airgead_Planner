@@ -123,7 +123,7 @@ class DjangoSession(models.Model):
         managed = False
         db_table = 'django_session'
 
-
+# Monthly Budget
 class MonthlyBudget(models.Model):
     CATEGORY_CHOICES = [
         ('income', 'Income'),
@@ -139,6 +139,7 @@ class MonthlyBudget(models.Model):
     class Meta:
         db_table = 'monthly_budget'
 
+# Savings Goal
 class SavingsGoal(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
@@ -151,6 +152,7 @@ class SavingsGoal(models.Model):
     class Meta:
         db_table = 'savings_goal'
 
+# Loan
 class Loan(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
@@ -167,6 +169,7 @@ class Loan(models.Model):
     def __str__(self):
         return self.name
 
+# Stock Data
 class StockData(models.Model):
     ticker = models.CharField(max_length=10)
     date = models.DateField()
@@ -182,16 +185,19 @@ class StockData(models.Model):
 
     def __str__(self):
         return f"{self.ticker} on {self.date}"
-    
+   
+# Portfolio 
 class Portfolio(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     balance = models.DecimalField(max_digits=12, decimal_places=2, default=10000.00)
 
+# Stock Holdings
 class StockHolding(models.Model):
     portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE)
     ticker = models.CharField(max_length=10)
     quantity = models.IntegerField()
 
+# Transactions
 class Transaction(models.Model):
     portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE)
     ticker = models.CharField(max_length=10)

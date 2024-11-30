@@ -37,8 +37,8 @@ const Savings: React.FC = () => {
           progress: (goal.current_amount / goal.target_amount) * 100,
           displayed_amount: Number(goal.current_amount),
           currentMonth: dayjs().startOf("month"),
-          start_date: goal.start_date ? dayjs(goal.start_date) : null, // Convert start_date to Dayjs
-          target_date: goal.target_date ? dayjs(goal.target_date) : null, // Convert target_date to Dayjs if applicable
+          start_date: goal.start_date ? dayjs(goal.start_date) : null, 
+          target_date: goal.target_date ? dayjs(goal.target_date) : null,
         }));
         setSavingsData(formattedData);
       })
@@ -69,10 +69,10 @@ const Savings: React.FC = () => {
           currentMonth: dayjs().startOf("month"),
           start_date: response.data.start_date
             ? dayjs(response.data.start_date)
-            : null, // Convert to Dayjs
+            : null,
           target_date: response.data.target_date
             ? dayjs(response.data.target_date)
-            : null, // Convert to Dayjs if applicable
+            : null,
         };
         setSavingsData((prevData) => [...prevData, savedGoal]);
         setIsFormVisible(false);
@@ -101,13 +101,13 @@ const Savings: React.FC = () => {
     setSavingsData((prevData) =>
       prevData.map((goal) => {
         if (goal.id === id) {
-          const today = dayjs().startOf("month"); // Get today's date at the start of the month
+          const today = dayjs().startOf("month"); 
           const newMonth = goal.currentMonth.add(1, "month");
 
-          // Stop forward navigation entirely if displayed_amount has reached or exceeded target_amount
+          // Stop forward navigation if displayed_amount has reached or is more then target_amount
           if (goal.displayed_amount >= goal.target_amount) {
             console.log("Target amount reached; forward navigation stopped.");
-            return goal; // No changes, forward navigation stopped
+            return goal;
           }
 
 
@@ -118,7 +118,7 @@ const Savings: React.FC = () => {
             );
             return {
               ...goal,
-              currentMonth: newMonth, // Update month without incrementing amount
+              currentMonth: newMonth,
             };
           }
 
@@ -150,7 +150,7 @@ const Savings: React.FC = () => {
     setSavingsData((prevData) =>
       prevData.map((goal) => {
         if (goal.id === id) {
-          // Check if start_date exists and prevent going back before it
+          // Check if start_date exists
           if (
             goal.start_date &&
             goal.currentMonth.isSame(goal.start_date, "month")
@@ -196,19 +196,19 @@ const Savings: React.FC = () => {
         </Button>
       </div>
 
-      {/* Conditionally Render Savings Form */}
+      {/* Conditionally Rendering Savings Form */}
       {isFormVisible && (
         <div style={{ marginTop: "16px" }}>
           <SavingsForm onAddSavingsGoal={handleAddSavingsGoal} />
         </div>
       )}
 
-      {/* Title for Savings Goals */}
+      
       <Typography variant="h6" className="savings-title">
         Your Savings Goals
       </Typography>
 
-      {/* List of Savings Goals with Gauge Charts */}
+      {/* List of Savings Goals */}
       <div className="savings-grid">
         {savingsData.map((goal) => (
           <div key={goal.id} className="savings-item">

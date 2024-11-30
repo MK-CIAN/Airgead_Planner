@@ -13,7 +13,7 @@ import {
   Legend,
 } from 'chart.js';
 
-// Register necessary Chart.js components
+// Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -26,7 +26,7 @@ ChartJS.register(
 
 interface LoanChartProps {
   repaymentSchedule: number[];
-  customRepaymentSchedule?: number[]; // Optional custom schedule
+  customRepaymentSchedule?: number[];
   totalInterest: number;
   loanBalance: number;
   isEditing: boolean;
@@ -49,7 +49,7 @@ const LoanChart: React.FC<LoanChartProps> = ({ repaymentSchedule, customRepaymen
               data: customRepaymentSchedule,
               fill: false,
               borderColor: 'red',
-              borderDash: [5, 5], // Dashed line for custom schedule
+              borderDash: [5, 5],
             },
           ]
         : []),

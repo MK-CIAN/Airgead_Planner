@@ -13,17 +13,17 @@ const SavingsChart: React.FC<SavingsChartProps> = ({ progress }) => {
       <Gauge
         width={200}
         height={200}
-        value={progress}  // Set the gauge's value to the progress percentage
+        value={progress}  // Setting the gauge's value to the progress percentage
         cornerRadius="50%"
         sx={{
           [`& .${gaugeClasses.valueText}`]: {
-            display: 'none',  // Hide the default value text
+            display: 'none', 
           },
           [`& .${gaugeClasses.valueArc}`]: {
             fill: 'rgba(6,170,19,0.8477591720281863)',  // Color for the progress arc
           },
           [`& .${gaugeClasses.referenceArc}`]: {
-            fill: '#cccccc',  // Color for the background arc (reference arc)
+            fill: '#cccccc',
           },
         }}
       />

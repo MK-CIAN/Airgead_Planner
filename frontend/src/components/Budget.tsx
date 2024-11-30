@@ -54,7 +54,6 @@ const Budget: React.FC = () => {
 
   //Function to add an item
   const handleAddBudget = (newItem: { amount: string; category: string; transaction_type: string }) => {
-    // Prepare the data to send to the backend
     const budgetItem = {
       amount: newItem.amount,
       category: newItem.category,

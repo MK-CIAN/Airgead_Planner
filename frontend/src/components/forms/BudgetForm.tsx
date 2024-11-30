@@ -29,7 +29,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget, month }) => {
     Axios.post('data/budget/', formData)
       .then((response) => {
         onAddBudget(response.data);  // Update chart data after submission
-        reset();  // Clear form fields
+        reset();
       })
       .catch((error) => {
         console.error("Error adding budget:", error);

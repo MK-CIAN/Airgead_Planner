@@ -43,7 +43,7 @@ function PieCenterLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Predefined color palette for expenses
+// Predefined Random Colours for Expenses
 const expenseColors = [
   '#3357FF', // Bright blue
   '#FF33A8', // Magenta
@@ -115,7 +115,6 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
         justifyContent: 'center',
         alignItems: 'center',
         margin: 'auto',
-        //marginLeft: '27.5%',
       }}
     >
       {/* Pie Chart Section */}

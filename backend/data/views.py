@@ -62,7 +62,7 @@ class StockDataViewSet(viewsets.ViewSet):
         if not ticker:
             return Response({'error': 'Please provide a ticker'}, status=400)
 
-        start_date = start_date or (datetime.now() - timedelta(days=365)).date()  # Default to 1 year ago
+        start_date = start_date or (datetime.now() - timedelta(days=365)).date()  # Defaulting to 1 year ago
 
         stock_data = StockData.objects.filter(
             ticker=ticker,
@@ -139,7 +139,6 @@ class PortfolioViewSet(viewsets.ViewSet):
 
     # Helper method for selling stocks
     def _sell_stock(self, portfolio, ticker, quantity, price_per_share):
-        # Ensure proper decimal handling
         quantity = int(quantity)
         price_per_share = Decimal(price_per_share)
         total_earnings = Decimal(quantity) * price_per_share
@@ -171,7 +170,7 @@ class PortfolioViewSet(viewsets.ViewSet):
     
 # Financial Articles View
 class RecommendedArticlesView(APIView):
-    permission_classes = [permissions.IsAuthenticated]  # Ensure only authenticated users can access this view
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
         # Hardcoding user interests needs to be dynamic later
