@@ -28,7 +28,7 @@ const StockSim: React.FC = () => {
 
   // Fetch current day's data for each stock
   const fetchCurrentDayData = async (ticker: string) => {
-    const today = "2024-11-11"
+    const today = "2024-12-06"
     try {
         const response = await Axios.get(`data/stocks/`, {
             params: { ticker, start_date: today, end_date: today },
@@ -60,8 +60,8 @@ const StockSim: React.FC = () => {
   // Fetch a full year of data for a selected stock
   const fetchYearlyData = async (ticker: string) => {
     setExpandedLoading(true);
-    const startDate = "2023-11-11" //Hardcoding start date due to yfinance api limitations for now
-    const endDate = "2024-11-11"
+    const startDate = "2023-12-06" //Hardcoding start date due to yfinance api limitations for now
+    const endDate = "2024-12-06"
 
     try {
       const response = await Axios.get(`data/stocks/`, {
@@ -135,7 +135,7 @@ const StockSim: React.FC = () => {
       {expandedStock ? (
         // Full-screen expanded view for selected stock
         <Box display="flex" flexDirection="column" alignItems="center" p={4}>
-          <Card style={{ width: "100%", maxWidth: 800 }}>
+          <Card style={{ width: "100%", maxWidth: 800}}>
             <CardContent>
               {expandedStockData && expandedStockData.length > 0 && (
                 <>

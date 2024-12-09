@@ -91,7 +91,7 @@ def extract_keywords(title, description):
 
 def recommend_articles():
     # Hardcoded user interests
-    user_interests = ["finance", "investment", "taxes", "economy", "health"]
+    user_interests = ["technology", "money", "taxes", "economy", "politics"]
     
     user_keywords = set(user_interests)
     articles = FinancialArticle.objects.all()

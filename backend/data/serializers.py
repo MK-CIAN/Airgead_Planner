@@ -40,6 +40,11 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = ['ticker', 'transaction_type', 'quantity', 'price_per_share', 'date']
+        
+class PortfolioHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PortfolioHistory
+        fields = ['timestamp', 'total_value', 'cash_balance', 'transaction_label']
 
 class FinancialArticleSerializer(serializers.ModelSerializer):
     class Meta:

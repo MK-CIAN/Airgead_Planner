@@ -300,3 +300,62 @@
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); /* Add shadow to selected button */
 }
 
+.portfolio-container {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+}
+
+.holdings-section {
+  flex: 2; /* Holdings section takes 40% of the space */
+  display: flex;
+  flex-direction: column;
+}
+
+.holdings-scrollable {
+  max-height: 300px; /* Limit height and make it scrollable */
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.holding-card {
+  margin-bottom: 10px;
+}
+
+.chart-section {
+  flex: 3; /* Chart section takes 60% of the space */
+  display: flex;
+  align-items: center; /* Center the chart vertically */
+  justify-content: center; /* Center the chart horizontally */
+}
+
+.chart-container {
+  align-items: center; /* Center the chart vertically */
+  width: 100%; /* Make the chart take full width */
+  height: 400px; /* Set a proper height for the chart */
+}
+
+.transaction-section {
+  margin-top: 16px;
+
+}
+
+.transaction-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  margin-bottom: 4%;
+  
+}
+
+.chart-header-container {
+  text-align: center;
+  width: 60%;
+}
+
+.chart-header {
+  display: inline-block;
+  font-weight: bold;
+}

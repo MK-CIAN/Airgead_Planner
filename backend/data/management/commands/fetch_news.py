@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from backend.data.utils.news_utils import fetch_and_store_financial_news
+from data.utils.news_utils import fetch_and_store_financial_news
 
 # Command to fetch financial news articles and store them in the database
 class Command(BaseCommand):

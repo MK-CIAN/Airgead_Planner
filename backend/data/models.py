@@ -206,6 +206,17 @@ class Transaction(models.Model):
     price_per_share = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField(auto_now_add=True)
 
+# Portfolio History 
+class PortfolioHistory(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    total_value = models.DecimalField(max_digits=12, decimal_places=2)
+    cash_balance = models.DecimalField(max_digits=12, decimal_places=2)
+    transaction_label = models.CharField(max_length=255, null=True, blank=True)
+    
+    def __str__(self):
+        return f"{self.user} - {self.timestamp}"
+    
 # Financial Articles
 class FinancialArticle(models.Model):
     article_id = models.CharField(max_length=255, unique=True)

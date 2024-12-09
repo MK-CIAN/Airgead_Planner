@@ -76,31 +76,42 @@ class StockDataViewSet(viewsets.ViewSet):
 class PortfolioViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
+    def _get_stock_price(self, ticker):
+        """
+        Retrieve the latest stock price for the given ticker.
+        """
+        latest_stock = StockData.objects.filter(ticker=ticker).order_by('-date').first()
+        if latest_stock:
+            return latest_stock.close_price
+        return 0  # Return 0 if no stock data is available
+
     def list(self, request):
-        # Fetch the user's portfolio and holdings
         portfolio, created = Portfolio.objects.get_or_create(user=request.user)
         holdings = StockHolding.objects.filter(portfolio=portfolio)
 
-        # Prepare the response data
         response_data = {
-            "balance": str(portfolio.balance),  # Convert Decimal to string
-            "holdings": [{"ticker": h.ticker, "quantity": h.quantity} for h in holdings],
+            "balance": str(portfolio.balance),
+            "holdings": [
+                {
+                    "ticker": h.ticker,
+                    "quantity": h.quantity,
+                    "current_price": self._get_stock_price(h.ticker),  # Include current stock price
+                }
+                for h in holdings
+            ],
         }
         return Response(response_data)
 
     def create(self, request):
-        # Making sure the user has a portfolio before making transactions
         portfolio = Portfolio.objects.get(user=request.user)
         ticker = request.data.get("ticker")
         transaction_type = request.data.get("transaction_type")
         quantity = int(request.data.get("quantity", 0))
         price_per_share = float(request.data.get("price_per_share", 0))
 
-        # Validate the transaction data
         if not ticker or quantity <= 0 or price_per_share <= 0:
             return Response({"error": "Invalid transaction data"}, status=400)
-        
-        # Pass the transaction handling based on the transaction type to helper functions
+
         if transaction_type == "BUY":
             return self._buy_stock(portfolio, ticker, quantity, price_per_share)
         elif transaction_type == "SELL":
@@ -108,9 +119,8 @@ class PortfolioViewSet(viewsets.ViewSet):
         else:
             return Response({"error": "Invalid transaction type"}, status=400)
 
-    # Helper methods for buying stocks
     def _buy_stock(self, portfolio, ticker, quantity, price_per_share):
-        total_cost = Decimal(quantity) * Decimal(price_per_share)  # Ensure total_cost is a Decimal
+        total_cost = Decimal(quantity) * Decimal(price_per_share)
 
         if portfolio.balance < total_cost:
             return Response({"error": "Insufficient balance"}, status=400)
@@ -118,13 +128,9 @@ class PortfolioViewSet(viewsets.ViewSet):
         portfolio.balance -= total_cost
         portfolio.save()
 
-        # Update or create the stock holding
         holding, created = StockHolding.objects.get_or_create(
-            portfolio=portfolio,
-            ticker=ticker,
-            defaults={"quantity": 0}
+            portfolio=portfolio, ticker=ticker, defaults={"quantity": 0}
         )
-
         holding.quantity += quantity
         holding.save()
 
@@ -133,22 +139,24 @@ class PortfolioViewSet(viewsets.ViewSet):
             ticker=ticker,
             transaction_type="BUY",
             quantity=quantity,
-            price_per_share=Decimal(price_per_share)  # Ensure this is a Decimal
+            price_per_share=Decimal(price_per_share),
         )
+
+        self._update_portfolio_history(
+            portfolio=portfolio, transaction_type="BUY", ticker=ticker, quantity=quantity
+        )
+
         return Response(TransactionSerializer(transaction).data)
 
-    # Helper method for selling stocks
     def _sell_stock(self, portfolio, ticker, quantity, price_per_share):
         quantity = int(quantity)
         price_per_share = Decimal(price_per_share)
         total_earnings = Decimal(quantity) * price_per_share
 
-        # Retrieve the holding and validate availability
         holding = StockHolding.objects.filter(portfolio=portfolio, ticker=ticker).first()
         if not holding or holding.quantity < quantity:
             return Response({"error": "Not enough shares to sell"}, status=400)
 
-        # Update portfolio balance and holding quantity
         portfolio.balance += total_earnings
         holding.quantity -= quantity
         if holding.quantity == 0:
@@ -157,16 +165,49 @@ class PortfolioViewSet(viewsets.ViewSet):
             holding.save()
         portfolio.save()
 
-        # Record the transaction
         transaction = Transaction.objects.create(
             portfolio=portfolio,
             ticker=ticker,
             transaction_type="SELL",
             quantity=quantity,
-            price_per_share=price_per_share
+            price_per_share=price_per_share,
+        )
+
+        self._update_portfolio_history(
+            portfolio=portfolio, transaction_type="SELL", ticker=ticker, quantity=quantity
         )
 
         return Response(TransactionSerializer(transaction).data)
+
+    def _update_portfolio_history(self, portfolio, transaction_type=None, ticker=None, quantity=None):
+        holdings = StockHolding.objects.filter(portfolio=portfolio)
+        total_holdings_value = sum(
+            holding.quantity * self._get_stock_price(holding.ticker) for holding in holdings
+        )
+        total_value = portfolio.balance + total_holdings_value
+
+        transaction_label = None
+        if transaction_type and ticker and quantity:
+            action = "Bought" if transaction_type == "BUY" else "Sold"
+            transaction_label = f"{action} {quantity} {ticker} shares"
+
+        PortfolioHistory.objects.create(
+            user=portfolio.user,
+            total_value=total_value,
+            cash_balance=portfolio.balance,
+            transaction_label=transaction_label,
+            timestamp=datetime.now(),
+        )
+        
+
+class PortfolioHistoryView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        history = PortfolioHistory.objects.filter(user=request.user).order_by('timestamp')
+        serializer = PortfolioHistorySerializer(history, many=True)
+        return Response(serializer.data)
+
     
 # Financial Articles View
 class RecommendedArticlesView(APIView):
