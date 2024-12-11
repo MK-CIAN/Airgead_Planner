@@ -3,11 +3,12 @@ import React, { useState, useEffect } from "react";
 import Axios from "./Axios";
 import SavingsChart from "./charts/SavingsChart";
 import SavingsForm from "./forms/SavingsForms";
-import { Button, Typography, IconButton } from "@mui/material";
+import { Button, Typography, IconButton, useMediaQuery } from "@mui/material";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import dayjs, { Dayjs } from "dayjs";
 import "../App.css";
+import "../styles/Savings.css";
 
 interface SavingsGoalData {
   id: string;
@@ -25,6 +26,9 @@ interface SavingsGoalData {
 const Savings: React.FC = () => {
   const [savingsData, setSavingsData] = useState<SavingsGoalData[]>([]);
   const [isFormVisible, setIsFormVisible] = useState(false);
+
+  const isMobile = useMediaQuery("(max-width: 480px)"); // Check if the screen size is less than 480px
+  const isTablet = useMediaQuery("(max-width: 768px)"); // Check if the screen size is less than 768px
 
   const getSavingsData = () => {
     Axios.get(`data/savings`)
@@ -184,13 +188,18 @@ const Savings: React.FC = () => {
 
   return (
     <div>
-      <h1>Savings</h1>
+      <h1 style={{ fontSize: isMobile ? "1.5rem" : isTablet ? "1.8rem" : "2rem" }}>Savings</h1>
+
       {/* Toggle Button for Savings Form */}
       <div className="savings-submit">
         <Button
           variant="contained"
           color="primary"
           onClick={toggleFormVisibility}
+          style={{
+            fontSize: isMobile ? "0.8rem" : "1rem", // Adjust button font size
+            padding: isMobile ? "8px 12px" : "10px 20px",
+          }}
         >
           {isFormVisible ? "Hide Form" : "Add Savings Goal"}
         </Button>
@@ -203,16 +212,29 @@ const Savings: React.FC = () => {
         </div>
       )}
 
-      
-      <Typography variant="h6" className="savings-title">
+      <Typography
+        variant="h6"
+        className="savings-title"
+        style={{ fontSize: isMobile ? "1rem" : isTablet ? "1.2rem" : "1.5rem" }}
+      >
         Your Savings Goals
       </Typography>
 
       {/* List of Savings Goals */}
       <div className="savings-grid">
         {savingsData.map((goal) => (
-          <div key={goal.id} className="savings-item">
-            <Typography variant="subtitle1" align="center">
+          <div
+            key={goal.id}
+            className="savings-item"
+            style={{
+              padding: isMobile ? "12px" : "16px", // Adjust padding based on screen size
+            }}
+          >
+            <Typography
+              variant={isMobile ? "body2" : "subtitle1"}
+              align="center"
+              style={{ fontSize: isMobile ? "0.9rem" : "1rem" }}
+            >
               {goal.name} - €{Number(goal.displayed_amount).toFixed(2)} / €
               {Number(goal.target_amount).toFixed(2)}
             </Typography>
@@ -223,16 +245,22 @@ const Savings: React.FC = () => {
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                marginTop: "8px",
+                marginTop: isMobile ? "4px" : "8px",
               }}
             >
-              <IconButton onClick={() => handlePreviousMonth(goal.id)}>
+              <IconButton
+                onClick={() => handlePreviousMonth(goal.id)}
+                size={isMobile ? "small" : "medium"} // Adjust icon size
+              >
                 <ArrowBackIosIcon />
               </IconButton>
-              <Typography variant="body2">
+              <Typography variant="body2" style={{ fontSize: isMobile ? "0.8rem" : "1rem" }}>
                 {goal.currentMonth.format("MMMM YYYY")}
               </Typography>
-              <IconButton onClick={() => handleNextMonth(goal.id)}>
+              <IconButton
+                onClick={() => handleNextMonth(goal.id)}
+                size={isMobile ? "small" : "medium"} // Adjust icon size
+              >
                 <ArrowForwardIosIcon />
               </IconButton>
             </div>
@@ -247,7 +275,10 @@ const Savings: React.FC = () => {
                 onClick={() => handleRemoveSavingsGoal(goal.id)}
                 variant="outlined"
                 color="secondary"
-                style={{ marginTop: 8 }}
+                style={{
+                  fontSize: isMobile ? "0.7rem" : "0.9rem", // Adjust button font size
+                  marginTop: isMobile ? "4px" : "8px",
+                }}
               >
                 Remove
               </Button>

@@ -130,7 +130,7 @@ const StockSim: React.FC = () => {
 
   return (
     <div>
-      <h1>FAANG Stocks Overview</h1>
+      <h1>Stock Market Simulator</h1>
       <Portfolio stocks={stocks} />
       {expandedStock ? (
         // Full-screen expanded view for selected stock
