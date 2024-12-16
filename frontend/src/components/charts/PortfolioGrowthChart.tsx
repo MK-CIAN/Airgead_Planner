@@ -20,27 +20,26 @@ const PortfolioGrowthChart: React.FC = () => {
   }, []);
 
   const data = {
-    labels: history.map((entry) => entry.timestamp), // X-axis: timestamps
+    labels: history.map((entry) => new Date(entry.timestamp).toLocaleDateString()), // X-axis: date labels
     datasets: [
       {
-        // No label for the dataset
-        data: history.map((entry) => entry.total_value), // Y-axis: portfolio value
+        data: history.map((entry) => entry.total_value), // Portfolio value line
         borderColor: "blue",
         backgroundColor: "rgba(0, 0, 255, 0.2)",
-        fill: false,
-        pointHoverRadius: 8,
-        pointBackgroundColor: "green",
+        fill: true,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        pointBackgroundColor: history.map((entry) =>
+          entry.transaction_label ? "green" : "blue" // Highlight transaction points
+        ),
       },
     ],
   };
 
   const options = {
-    responsive: true, // Ensure the chart is responsive
-    maintainAspectRatio: false, // Disable aspect ratio for custom sizing
+    responsive: true,
+    maintainAspectRatio: false,
     plugins: {
-      legend: {
-        display: false, // Disable the legend
-      },
       tooltip: {
         callbacks: {
           label: function (context: any) {
@@ -50,6 +49,9 @@ const PortfolioGrowthChart: React.FC = () => {
           },
         },
       },
+      legend: {
+        display: false, // Disable legend
+      },
     },
     scales: {
       x: {
@@ -58,11 +60,8 @@ const PortfolioGrowthChart: React.FC = () => {
           text: "Date",
         },
         ticks: {
-          callback: function (value: any, index: any) {
-            // Directly format `entry.timestamp` into YYYY-MM-DD
-            const timestamp = history[index]?.timestamp;
-            return timestamp ? timestamp.split("T")[0] : ""; // Shortened date format (YYYY-MM-DD)
-          },
+          maxRotation: 0, // Prevent overlap
+          autoSkip: true,
         },
       },
       y: {

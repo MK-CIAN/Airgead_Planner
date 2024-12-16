@@ -90,7 +90,7 @@ const Portfolio: React.FC<PortfolioProps> = ({ stocks }) => {
           ) : portfolio ? (
             <>
               <Typography variant="h6">
-                Balance: $
+                Cash Balance: $
                 {typeof portfolio.balance === "number"
                   ? portfolio.balance.toFixed(2)
                   : parseFloat(portfolio.balance || "0").toFixed(2)}

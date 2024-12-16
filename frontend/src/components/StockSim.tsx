@@ -25,43 +25,59 @@ const StockSim: React.FC = () => {
   const [expandedLoading, setExpandedLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedStock, setExpandedStock] = useState<string | null>(null); // Tracks which stock is expanded
-
+  const today = dayjs().format("YYYY-MM-DD"); // Get today's date dynamically
   // Fetch current day's data for each stock
   const fetchCurrentDayData = async (ticker: string) => {
-    const today = "2024-12-06"
-    try {
+    const fetchDataForDate = async (date: string) => {
+      try {
         const response = await Axios.get(`data/stocks/`, {
-            params: { ticker, start_date: today, end_date: today },
+          params: { ticker, start_date: date, end_date: date },
         });
-
-        // Check if data exists in the response
         if (response.data && response.data.length > 0) {
-            const entry = response.data[0];
-            return {
-                ticker,
-                close_price: Number(entry.close_price),
-                open_price: Number(entry.open_price),
-                high_price: Number(entry.high_price),
-                low_price: Number(entry.low_price),
-                adj_close_price: Number(entry.adj_close_price),
-                volume: Number(entry.volume),
-                date: dayjs(entry.date).format("YYYY-MM-DD"),
-            };
-        } else {
-            console.warn(`No data found for ${ticker} on ${today}`);
-            return null; // Return null if no data is found for today
+          const entry = response.data[0];
+          return {
+            ticker,
+            close_price: Number(entry.close_price),
+            open_price: Number(entry.open_price),
+            high_price: Number(entry.high_price),
+            low_price: Number(entry.low_price),
+            adj_close_price: Number(entry.adj_close_price),
+            volume: Number(entry.volume),
+            date: dayjs(entry.date).format("YYYY-MM-DD"),
+          };
         }
-    } catch (error) {
-        console.error(`Error fetching current day data for ${ticker}:`, error);
-        throw error;
+        return null;
+      } catch (error) {
+        console.error(`Error fetching data for ${ticker} on ${date}:`, error);
+        return null;
+      }
+    };
+  
+    let currentDate = dayjs(); // Start with today's date
+    let data = null;
+  
+    // Attempt to find valid stock data (fallback to previous days)
+    for (let i = 0; i < 5; i++) { // Look back up to 5 days
+      const dateStr = currentDate.format("YYYY-MM-DD");
+      console.log(`Attempting to fetch data for ${ticker} on ${dateStr}`);
+      data = await fetchDataForDate(dateStr);
+      if (data) break; // Exit loop if valid data is found
+      currentDate = currentDate.subtract(1, "day"); // Move to the previous day
     }
+  
+    if (!data) {
+      console.warn(`No recent data found for ${ticker}`);
+    }
+  
+    return data;
   };
+  
 
   // Fetch a full year of data for a selected stock
   const fetchYearlyData = async (ticker: string) => {
     setExpandedLoading(true);
-    const startDate = "2023-12-06" //Hardcoding start date due to yfinance api limitations for now
-    const endDate = "2024-12-06"
+    const startDate = dayjs().subtract(1, "year").format("YYYY-MM-DD"); // One year ago from today
+    const endDate = today;
 
     try {
       const response = await Axios.get(`data/stocks/`, {

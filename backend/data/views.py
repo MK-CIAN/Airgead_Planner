@@ -6,7 +6,7 @@ from .models import *
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import F, Sum
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from data.utils.news_utils import recommend_articles
 
 # Monthly Budget Viewset
@@ -203,10 +203,83 @@ class PortfolioViewSet(viewsets.ViewSet):
 class PortfolioHistoryView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    def _get_stock_price(self, ticker):
+        """
+        Retrieve the latest stock price for the given ticker.
+        """
+        latest_stock = StockData.objects.filter(ticker=ticker).order_by('-date').first()
+        if latest_stock:
+            return latest_stock.close_price
+        return 0  # Return 0 if no stock data is available
+
+    def _calculate_portfolio_value(self, portfolio):
+        """
+        Calculate the current total value of the portfolio.
+        """
+        holdings = StockHolding.objects.filter(portfolio=portfolio)
+        total_holdings_value = sum(
+            holding.quantity * self._get_stock_price(holding.ticker) for holding in holdings
+        )
+        return portfolio.balance + total_holdings_value
+
     def get(self, request):
-        history = PortfolioHistory.objects.filter(user=request.user).order_by('timestamp')
-        serializer = PortfolioHistorySerializer(history, many=True)
+        user = request.user
+        portfolio = Portfolio.objects.get(user=user)
+        history = PortfolioHistory.objects.filter(user=user).order_by('timestamp')
+
+        # Calculate current portfolio value
+        current_value = self._calculate_portfolio_value(portfolio)
+
+        # Add current portfolio value to the response if it's different from the latest entry
+        if history.exists():
+            latest_history = history.last()
+            if latest_history.total_value != current_value:
+                PortfolioHistory.objects.create(
+                    user=user,
+                    total_value=current_value,
+                    cash_balance=portfolio.balance,
+                    transaction_label="Portfolio Updated with Current Prices",
+                    timestamp=datetime.now(),
+                )
+
+        # Dynamically create history data points (e.g., daily, weekly, monthly)
+        start_date = history.first().timestamp.date() if history.exists() else datetime.now().date()
+        end_date = datetime.now().date()
+        date_range = self._generate_date_range(start_date, end_date)  # Ensure this returns a list
+
+        # Fill gaps in the portfolio history
+        filled_history = []
+        for date in date_range:  # Iterate over the date range
+            entry = history.filter(timestamp__date=date).first()
+            if entry:
+                filled_history.append(entry)
+            else:
+                filled_history.append(
+                    PortfolioHistory(
+                        user=user,
+                        total_value=current_value,
+                        cash_balance=portfolio.balance,
+                        transaction_label=None,
+                        timestamp=datetime.combine(date, datetime.min.time()),
+                    )
+                )
+
+        # Serialize and return
+        serializer = PortfolioHistorySerializer(filled_history, many=True)
         return Response(serializer.data)
+
+
+    def _generate_date_range(self, start_date, end_date):
+        """
+        Generate a list of dates from start_date to end_date (inclusive).
+        """
+        delta = timedelta(days=1)
+        current_date = start_date
+        dates = []
+        while current_date <= end_date:
+            dates.append(current_date)
+            current_date += delta
+        return dates
 
     
 # Financial Articles View

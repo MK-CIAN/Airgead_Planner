@@ -1,15 +1,23 @@
-// BudgetChart.tsx
-import * as React from 'react';
-import { PieChart } from '@mui/x-charts/PieChart';
-import { styled } from '@mui/material/styles';
-import Box from '@mui/material/Box';
+import * as React from "react";
+import { PieChart } from "@mui/x-charts/PieChart";
+import { styled } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import { Typography } from "@mui/material";
 
-const useDrawingArea = () => ({
-  width: 600,
-  height: 400,
-  left: 0,
-  top: 0,
-});
+// Utility for dynamic chart sizing
+const getChartSize = () => {
+  const width = Math.min(window.innerWidth * 0.95, 500); // Use 95% of the screen width, max 500px
+  const height = width; // Keep the chart square
+  return { width, height };
+};
+
+// Styled text for the center label
+const StyledText = styled("text")(({ theme }) => ({
+  fill: theme.palette.text.primary,
+  textAnchor: "middle",
+  dominantBaseline: "central",
+  fontSize: 40,
+}));
 
 interface BudgetData {
   id: number;
@@ -22,120 +30,98 @@ interface BudgetChartProps {
   data: BudgetData[];
 }
 
-const size = {
-  width: 600,
-  height: 400,
-};
-
-const StyledText = styled('text')(({ theme }) => ({
-  fill: theme.palette.text.primary,
-  textAnchor: 'middle',
-  dominantBaseline: 'central',
-  fontSize: 40,
-}));
-
-function PieCenterLabel({ children }: { children: React.ReactNode }) {
-  const { width, height, left, top } = useDrawingArea();
-  return (
-    <StyledText x={left + width / 2} y={top + height / 2}>
-      {children}
-    </StyledText>
-  );
-}
-
-// Predefined Random Colours for Expenses
+// Random colors for expenses
 const expenseColors = [
-  '#3357FF', // Bright blue
-  '#FF33A8', // Magenta
-  '#8A2BE2', // Blue-violet
-  '#FFD700', // Gold
-  '#FF8F33', // Orange
-  '#DA70D6', // Orchid (purple-pink)
-  '#7D33FF', // Deep purple
-  '#FF1493', // Deep pink
-  '#00CED1', // Dark turquoise
-  '#9370DB'  // Medium purple
+  "#3357FF", "#FF33A8", "#8A2BE2", "#FFD700", "#FF8F33",
+  "#DA70D6", "#7D33FF", "#FF1493", "#00CED1", "#9370DB",
 ];
 
+// Function to get random color for expenses
+const getRandomExpenseColor = () => expenseColors[Math.floor(Math.random() * expenseColors.length)];
 
-// Function to pick a random color from the predefined options
-const getRandomExpenseColor = () => {
-  const randomIndex = Math.floor(Math.random() * expenseColors.length);
-  return expenseColors[randomIndex];
-};
+function PieCenterLabel({ children }: { children: React.ReactNode }) {
+  return <StyledText>{children}</StyledText>;
+}
 
 const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
+  const [chartSize, setChartSize] = React.useState(getChartSize());
+
+  // Handle window resizing
+  React.useEffect(() => {
+    const handleResize = () => setChartSize(getChartSize());
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   // When there's no data, display an empty pie chart
   if (data.length === 0) {
     return (
-      <Box 
+      <Box
         sx={{
-          margin: 'auto',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          margin: "auto",
         }}
       >
-        <PieChart series={[{ data: [], innerRadius: 140 }]} {...size}>
-          <PieCenterLabel> </PieCenterLabel>
+        <PieChart series={[{ data: [], innerRadius: 100 }]} {...chartSize}>
+          <PieCenterLabel>No Data</PieCenterLabel>
         </PieChart>
       </Box>
     );
   }
-  // Calculate totals for income and expenses
-  const totalIncome = data
-    .filter(item => item.type === 'income')
-    .reduce((total, item) => total + item.value, 0);
 
-  const totalExpenses = data
-    .filter(item => item.type === 'expense')
-    .reduce((total, item) => total + item.value, 0);
-  
-  const totalDebt = data
-  .filter(item => item.type === 'debt')
-  .reduce((total, item) => total + item.value, 0);
-
-  // Add color property to each data point based on type
-  console.log("Chart Data:", data)
-  const chartData = data.map(item => ({
-    ...item,
-    color: item.type === 'debt'
-      ? 'red'
-      : item.type === 'expense'
-      ? getRandomExpenseColor() 
-      : 'rgba(6,170,19,0.8477591720281863)', // Green for income or other types
+  // Process data and add colors
+  const chartData = data.map((item) => ({
+    value: item.value,
+    label: item.label,
+    color:
+      item.type === "debt"
+        ? "red"
+        : item.type === "expense"
+        ? getRandomExpenseColor()
+        : "rgba(6,170,19,0.85)", // Green for income
   }));
 
-  // Calculate total budget (income - expenses)
-  const totalBudget = totalIncome - (totalExpenses + totalDebt);
+  // Calculate total budget
+  const totalBudget = data
+    .filter((item) => item.type === "income")
+    .reduce((sum, item) => sum + item.value, 0)
+    - data.filter((item) => item.type === "expense" || item.type === "debt").reduce((sum, item) => sum + item.value, 0);
+
   return (
-    <Box 
+    <Box
       sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        margin: 'auto',
+        display: "flex",
+        flexDirection: window.innerWidth < 600 ? "column" : "row", // Stack legend and chart on small screens
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 4,
+        marginTop: 4,
       }}
     >
       {/* Pie Chart Section */}
-      <Box sx={{ position: 'relative', marginLeft: '5%' }}>
-      <PieChart 
-          series={[{ 
-            data: chartData.map(item => ({ value: item.value, label: item.label, color: item.color })),
-            innerRadius: 140,
-          }]} 
+      <Box sx={{ position: "relative", margin: "auto" }}>
+        <PieChart
+          series={[
+            {
+              data: chartData,
+              innerRadius: chartSize.width < 400 ? 90 : 130,
+              outerRadius: chartSize.width < 400 ? 130 : 170,
+            },
+          ]}
           slotProps={{
-            legend: { hidden: true }  // Hiding built in legend
+            legend: { hidden: true },
           }}
-          {...size}
+          {...chartSize}
         />
-        <Box 
+        {/* Center Label */}
+        <Box
           sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '42.5%',
-            transform: 'translate(-50%, -50%)',
-            fontSize: '50px',
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-75%, -50%)",
           }}
         >
           <PieCenterLabel>€{totalBudget.toFixed(2)}</PieCenterLabel>
@@ -143,27 +129,25 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
       </Box>
 
       {/* Custom Legend Section */}
-      <Box 
-        sx={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          alignItems: 'flex-start',
-          minWidth: '150px', 
-          
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+          gap: 1,
         }}
       >
-        {chartData.map(item => (
-          <Box key={item.id} sx={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-            <Box 
-              sx={{ 
-                width: '16px', 
-                height: '16px', 
-                backgroundColor: item.color, 
-                marginRight: '8px', 
-                borderRadius: '3px'  
-              }} 
+        {chartData.map((item, index) => (
+          <Box key={index} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Box
+              sx={{
+                width: 16,
+                height: 16,
+                backgroundColor: item.color,
+                borderRadius: "3px",
+              }}
             />
-            <span style={{ fontSize: '16px' }}>{item.label}</span>
+            <Typography variant="body2">{item.label}</Typography>
           </Box>
         ))}
       </Box>
