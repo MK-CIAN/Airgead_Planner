@@ -15,4 +15,5 @@ router.register('portfolio', PortfolioViewSet, basename='portfolio')
 urlpatterns = router.urls + [
     path('reccomended-articles/', RecommendedArticlesView.as_view(), name='reccomended-articles'),
     path('portfolio/history/', PortfolioHistoryView.as_view(), name='portfolio-history'),
+    path('interests/', UserInterestsView.as_view(), name='user-interests')
 ]

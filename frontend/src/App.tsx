@@ -14,6 +14,7 @@ import PasswordResetRequest from './components/PasswordResetRequest'
 import PasswordReset from './components/PasswordReset'
 import Savings from './components/Savings'
 import Income from './components/Income'
+import UserInterest from './components/UserInterests'
 
 function App() {
   const location = useLocation()
@@ -45,6 +46,7 @@ function App() {
                 <Route path="/stocksim" element={<StockSim/>}/>
                 <Route path="/news" element={<News/>}/>
                 <Route path="/income" element={<Income/>}/>
+                <Route path="/userinterests" element={<UserInterest/>}/>
               </Route>
             </Routes>
           }

@@ -230,3 +230,17 @@ class FinancialArticle(models.Model):
 
     def __str__(self):
         return self.title
+    
+class UserInterest(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='user_interests'
+    )
+    interests = models.JSONField(default=list)  # Store selected interests as a list of keywords
+
+    def __str__(self):
+        return f"{self.user.username}'s Interests"
+
+    class Meta:
+        db_table = 'user_interest'

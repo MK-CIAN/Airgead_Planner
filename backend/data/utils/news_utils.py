@@ -1,4 +1,4 @@
-from ..models import FinancialArticle
+from ..models import FinancialArticle, UserInterest
 from decouple import config
 import requests
 import re
@@ -89,11 +89,12 @@ def extract_keywords(title, description):
     # Limit to top 5 keywords
     return prioritized_keywords[:5]  
 
-def recommend_articles():
-    # Hardcoded user interests
-    user_interests = ["technology", "money", "taxes", "economy", "politics"]
+def recommend_articles(user):
+    user_interests = UserInterest.objects.filter(user=user).first()
+    if not user_interests or not user_interests.interests:
+        return []
     
-    user_keywords = set(user_interests)
+    user_keywords = set(user_interests.interests)
     articles = FinancialArticle.objects.all()
 
     recommendations = []

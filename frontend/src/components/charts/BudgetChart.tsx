@@ -32,12 +32,32 @@ interface BudgetChartProps {
 
 // Random colors for expenses
 const expenseColors = [
-  "#3357FF", "#FF33A8", "#8A2BE2", "#FFD700", "#FF8F33",
-  "#DA70D6", "#7D33FF", "#FF1493", "#00CED1", "#9370DB",
+  "#3357FF",
+  "#FF33A8",
+  "#8A2BE2",
+  "#FFD700",
+  "#FF8F33",
+  "#DA70D6",
+  "#7D33FF",
+  "#FF1493",
+  "#00CED1",
+  "#9370DB",
 ];
 
-// Function to get random color for expenses
-const getRandomExpenseColor = () => expenseColors[Math.floor(Math.random() * expenseColors.length)];
+// Function to generate a consistent random color for a label
+const getColorForLabel = (label: string) => {
+  // Create a hash value based on the label
+  let hash = 0;
+  for (let i = 0; i < label.length; i++) {
+    hash = (hash * 31 + label.charCodeAt(i)) % expenseColors.length;
+  }
+
+  // Use hash to randomly shuffle the array index
+  return expenseColors[
+    (hash + Math.floor(Math.random() * expenseColors.length)) %
+      expenseColors.length
+  ];
+};
 
 function PieCenterLabel({ children }: { children: React.ReactNode }) {
   return <StyledText>{children}</StyledText>;
@@ -53,41 +73,42 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // When there's no data, display an empty pie chart
+  // Memoize chart data for performance
+  const chartData = React.useMemo(
+    () =>
+      data.map((item) => ({
+        value: item.value,
+        label: item.label,
+        color:
+          item.type === "debt"
+            ? "red"
+            : item.type === "expense"
+            ? getColorForLabel(item.label) // Consistent random colors
+            : "rgba(6,170,19,0.85)", // Green for income
+      })),
+    [data]
+  );
+
+  // Calculate total budget
+  const totalBudget = React.useMemo(() => {
+    const totalIncome = data
+      .filter((item) => item.type === "income")
+      .reduce((sum, item) => sum + item.value, 0);
+    const totalExpenses = data
+      .filter((item) => item.type === "expense" || item.type === "debt")
+      .reduce((sum, item) => sum + item.value, 0);
+    return totalIncome - totalExpenses;
+  }, [data]);
+
+  // Handle no data case after Hooks
   if (data.length === 0) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          margin: "auto",
-        }}
-      >
-        <PieChart series={[{ data: [], innerRadius: 100 }]} {...chartSize}>
-          <PieCenterLabel>No Data</PieCenterLabel>
-        </PieChart>
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", margin: "auto" }}>
+        <PieChart series={[{ data: [], innerRadius: 80 }]} width={chartSize.width} height={chartSize.height} />
+        <StyledText>No Data</StyledText>
       </Box>
     );
   }
-
-  // Process data and add colors
-  const chartData = data.map((item) => ({
-    value: item.value,
-    label: item.label,
-    color:
-      item.type === "debt"
-        ? "red"
-        : item.type === "expense"
-        ? getRandomExpenseColor()
-        : "rgba(6,170,19,0.85)", // Green for income
-  }));
-
-  // Calculate total budget
-  const totalBudget = data
-    .filter((item) => item.type === "income")
-    .reduce((sum, item) => sum + item.value, 0)
-    - data.filter((item) => item.type === "expense" || item.type === "debt").reduce((sum, item) => sum + item.value, 0);
 
   return (
     <Box
@@ -138,7 +159,10 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
         }}
       >
         {chartData.map((item, index) => (
-          <Box key={index} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box
+            key={index}
+            sx={{ display: "flex", alignItems: "center", gap: 1 }}
+          >
             <Box
               sx={{
                 width: 16,

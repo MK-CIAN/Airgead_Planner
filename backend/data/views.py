@@ -288,9 +288,33 @@ class RecommendedArticlesView(APIView):
 
     def get(self, request):
         # Hardcoding user interests needs to be dynamic later
-        recommended_article_ids = recommend_articles()
+        user = request.user
+        recommended_article_ids = recommend_articles(user)
 
         # Fetch articles matching the recommended IDs
         articles = FinancialArticle.objects.filter(id__in=recommended_article_ids)
         serializer = FinancialArticleSerializer(articles, many=True)
         return Response(serializer.data)
+    
+class UserInterestsView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        interests = request.data.get('interests', [])
+        if not isinstance(interests, list) or not interests:
+            return Response({"error": "Interests must be a non-empty list."}, status='400')
+
+        # Create or update user interests
+        UserInterest.objects.update_or_create(
+            user=user,
+            defaults={'interests': interests}
+        )
+        return Response({"message": "Interests updated successfully"}, status='200')
+
+    def get(self, request):
+        user = request.user
+        user_interests = UserInterest.objects.filter(user=user).first()
+        if user_interests:
+            return Response({"interests": user_interests.interests}, status='200')
+        return Response({"interests": []}, status='200')

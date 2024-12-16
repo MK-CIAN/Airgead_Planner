@@ -23,7 +23,7 @@ const RecommendedArticles: React.FC = () => {
   const fetchArticles = async () => {
     try {
       setLoading(true);
-      const response = await Axios.get("/data/reccomended-articles/");
+      const response = await Axios.get(`/data/reccomended-articles/`);
       setArticles(response.data);
     } catch (err: any) {
       setError("Failed to fetch articles. Please try again later.");
