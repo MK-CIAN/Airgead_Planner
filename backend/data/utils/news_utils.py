@@ -11,7 +11,22 @@ DEFAULT_COUNTRY = config("DEFAULT_COUNTRY")
 DEFAULT_CATEGORY = config("DEFAULT_CATEGORY")
 KEYWORD_QUERY = config("KEYWORD_QUERY")
 
-MAIN_KEYWORDS = {"stock", "market", "investment", "finance", "economy", "health", "money", "insurance", "taxes", "credit"}
+MAIN_KEYWORDS = {
+    # Debt-related
+    "credit", "student", "car", "medical", "loans", "debt",
+    
+    # Savings and Goals
+    "emergency", "home", "retirement", "holiday", "investments", "car", "savings", "goal",
+    
+    # Transportation
+    "bike", "car", "transit", "walk", "rideshare", "travel",
+    
+    # Investing Interests
+    "stocks", "bonds", "realestate", "crypto", "etfs", "index", "investment", "finance",
+    
+    # General Financial Keywords
+    "market", "money", "taxes", "economy", "insurance", "budget", "wealth", "income"
+}
 
 def fetch_and_store_financial_news():
     # Parameters for the API request

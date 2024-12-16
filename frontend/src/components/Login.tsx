@@ -21,21 +21,42 @@ const Login = () => {
     const navigate = useNavigate();
     const [ShowMessage, setShowMessage] = useState(false);
     
-    // Function to submit login form
     const submission: SubmitHandler<IFormInput> = (data) => {
         Axios.post(`login/`, {
             email: data.email,
             password: data.password
-        }).then((response) => {
-            console.log(response)
-            localStorage.setItem('Token', response.data.token);
-            navigate(`/home`);
+        })
+        .then((response) => {
+            console.log(response);
+            const token = response.data.token;
+            localStorage.setItem('Token', token);
+    
+            // Check for user interests
+            Axios.get(`data/interests/`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            .then((interestResponse) => {
+                const interests = interestResponse.data.interests;
+    
+                if (!interests || interests.length === 0) {
+                    // Redirect to UserInterests page if no interests found
+                    navigate(`/userinterests`);
+                } else {
+                    // Redirect to home if interests exist
+                    navigate(`/home`);
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching user interests", error);
+                // Fallback: Redirect to UserInterests page
+                navigate(`/userinterests`);
+            });
         })
         .catch((error) => {
             setShowMessage(true);
-            console.log("Error during login", error)
+            console.error("Error during login", error);
         });
-    }
+    };
     return (
         <div className={"myBackground"}>
             {ShowMessage ? <MyMessage text={"Login Failed, Please Try Again"} color={"#EC5A76"}/> : null}

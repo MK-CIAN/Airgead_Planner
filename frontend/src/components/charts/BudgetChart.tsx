@@ -105,7 +105,6 @@ const BudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", margin: "auto" }}>
         <PieChart series={[{ data: [], innerRadius: 80 }]} width={chartSize.width} height={chartSize.height} />
-        <StyledText>No Data</StyledText>
       </Box>
     );
   }
