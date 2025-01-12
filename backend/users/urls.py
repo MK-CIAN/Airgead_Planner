@@ -7,4 +7,7 @@ router = DefaultRouter()
 router.register('register', RegisterViewset, basename='register')
 router.register('login', LoginViewset, basename='login')
 
-urlpatterns = router.urls
+# Use path for APIView-based views
+urlpatterns = router.urls + [
+    path('user', UserDetailView.as_view(), name='user-detail'),
+]

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import AppBar from "@mui/material/AppBar";
@@ -24,22 +24,39 @@ import Axios from "./Axios";
 import { useNavigate } from "react-router-dom";
 import { IconButton, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import "../Styles/NavBar.css";
 
 const drawerWidth = 300;
 const color = "rgba(6,170,19,0.8477591720281863)";
 const gradient =
-  "linear-gradient(333deg, rgba(132,250,142,0.71) 0%, rgba(6,170,19,0.85) 50%, rgba(21,94,27,1) 100%)";
+  "linear-gradient(333deg, rgba(6,170,19,0.85) 5%, rgba(6,170,19,0.85) 40%, rgba(21,94,27,1) 100%)";
 
 interface NavBarProps {
   content: React.ReactNode;
 }
 
 export default function NavBar({ content }: NavBarProps) {
+  const [username, setUsername] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md")); // Detect screen size
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Fetch the user's username
+  useEffect(() => {
+    Axios.get(`user`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("Token")}`, // Add the token to the request
+      },
+    })
+      .then((response) => {
+        setUsername(response.data.username); // Set the username from the response
+      })
+      .catch((error) => {
+        console.error("Failed to fetch username:", error);
+      });
+  }, []);
 
   const toggleDrawer = () => {
     setMobileOpen(!mobileOpen);
@@ -78,7 +95,8 @@ export default function NavBar({ content }: NavBarProps) {
           to="budget"
           selected={"/budget" === location.pathname}
           sx={{
-            backgroundImage: location.pathname === "/budget" ? gradient : "none",
+            backgroundImage:
+              location.pathname === "/budget" ? gradient : "none",
             backgroundSize: "cover",
           }}
         >
@@ -216,7 +234,7 @@ export default function NavBar({ content }: NavBarProps) {
           background: gradient,
         }}
       >
-        <Toolbar>
+        <Toolbar className="navbar">
           {isMobile && (
             <IconButton
               color="inherit"
@@ -228,14 +246,15 @@ export default function NavBar({ content }: NavBarProps) {
               <MenuIcon />
             </IconButton>
           )}
-          <img
-            src="/src/assets/harpIcon.png"
-            alt="Harp Icon"
-            style={{ width: 40, height: 40, marginRight: 16 }}
-          />
-          <Typography variant="h5" noWrap component="div">
+          <div className="navbar-title">
+            <img
+              src="/src/assets/harpIcon.png"
+              alt="Harp Icon"
+              style={{ width: 40, height: 40 }}
+            />
             Airgead Planner
-          </Typography>
+          </div>
+          <div className="navbar-user">Hello, {username || "User"}</div>
         </Toolbar>
       </AppBar>
 
@@ -246,7 +265,10 @@ export default function NavBar({ content }: NavBarProps) {
           sx={{
             width: drawerWidth,
             flexShrink: 0,
-            [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box" },
+            [`& .MuiDrawer-paper`]: {
+              width: drawerWidth,
+              boxSizing: "border-box",
+            },
           }}
         >
           <Toolbar />
@@ -257,24 +279,25 @@ export default function NavBar({ content }: NavBarProps) {
       {/* Temporary Drawer for Mobile */}
       {isMobile && (
         <Drawer
-        variant={isMobile ? "temporary" : "permanent"}
-        open={isMobile ? mobileOpen : true}
-        onClose={toggleDrawer}
-        ModalProps={{
-          keepMounted: true, // Improve mobile performance
-        }}
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box" },
-        }}
-      >
-        {/* Add Toolbar for spacing */}
-        <Toolbar />
-        <Box sx={{ overflow: "auto" }}>
-          {drawerContent}
-        </Box>
-      </Drawer>
+          variant={isMobile ? "temporary" : "permanent"}
+          open={isMobile ? mobileOpen : true}
+          onClose={toggleDrawer}
+          ModalProps={{
+            keepMounted: true, // Improve mobile performance
+          }}
+          sx={{
+            width: drawerWidth,
+            flexShrink: 0,
+            [`& .MuiDrawer-paper`]: {
+              width: drawerWidth,
+              boxSizing: "border-box",
+            },
+          }}
+        >
+          {/* Add Toolbar for spacing */}
+          <Toolbar />
+          <Box sx={{ overflow: "auto" }}>{drawerContent}</Box>
+        </Drawer>
       )}
 
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>

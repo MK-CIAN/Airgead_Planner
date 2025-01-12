@@ -1,0 +1,30 @@
+/* General styling for the navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+/* Styling for the webpage name */
+.navbar-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+  display: flex;
+  align-items: center;
+}
+
+/* Adds space between the logo and text */
+.navbar-title img {
+  margin-right: 10px;
+}
+
+/* Styling for the username greeting */
+.navbar-user {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+  margin-left: 20px; /* Space between title and username */
+  outline: green;
+}
