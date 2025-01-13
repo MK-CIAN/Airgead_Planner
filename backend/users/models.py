@@ -1,13 +1,14 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
-
 from django_rest_passwordreset.signals import reset_password_token_created
 from django.dispatch import receiver
 from django.urls import reverse
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
+
 # Create your models here.
 # Custom User Manager
 class CustomUserManager(BaseUserManager):
@@ -69,3 +70,40 @@ def password_reset_token_created(reset_password_token, *args, **kwargs):
 
     msg.attach_alternative(html_message, "text/html")
     msg.send()
+    
+# Friend Request Model
+class FriendRequest(models.Model):
+    sender = models.ForeignKey(CustomUser, related_name='sent_requests', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(CustomUser, related_name='received_requests', on_delete=models.CASCADE)
+    status = models.CharField(
+        max_length=20,
+        choices=[('pending', 'Pending'), ('accepted', 'Accepted'), ('rejected', 'Rejected')],
+        default='pending'
+    )
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.sender.username} -> {self.receiver.username} ({self.status})"
+    
+# Friendship Model
+class Friendship(models.Model):
+    user1 = models.ForeignKey(CustomUser, related_name='friends', on_delete=models.CASCADE)
+    user2 = models.ForeignKey(CustomUser, related_name='+', on_delete=models.CASCADE)  # Avoid reverse relation
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Friendship: {self.user1.username} - {self.user2.username}"
+    
+class Notification(models.Model):
+    user = models.ForeignKey(CustomUser, related_name="notifications", on_delete=models.CASCADE)
+    sender = models.ForeignKey(CustomUser, related_name="sent_notifications", on_delete=models.CASCADE, null=True, blank=True)
+    type = models.CharField(max_length=20, choices=[
+        ("friend_request", "Friend Request"),
+        ("other", "Other"),
+    ])
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Notification for {self.user.username}: {self.type}"

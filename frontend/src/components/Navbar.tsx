@@ -24,6 +24,9 @@ import Axios from "./Axios";
 import { useNavigate } from "react-router-dom";
 import { IconButton, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import SearchIcon from "@mui/icons-material/Search";
+import Search from "./Search";
+import Notifications from "./Notifications";
 import "../Styles/NavBar.css";
 
 const drawerWidth = 300;
@@ -42,6 +45,7 @@ export default function NavBar({ content }: NavBarProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md")); // Detect screen size
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false)
 
   // Fetch the user's username
   useEffect(() => {
@@ -254,10 +258,14 @@ export default function NavBar({ content }: NavBarProps) {
             />
             Airgead Planner
           </div>
+          <IconButton color="inherit" onClick={() => setSearchOpen(true)}>
+            <SearchIcon />
+          </IconButton>
+          <Notifications />
           <div className="navbar-user">Hello, {username || "User"}</div>
         </Toolbar>
       </AppBar>
-
+  
       {/* Permanent Drawer for Desktop */}
       {!isMobile && (
         <Drawer
@@ -275,7 +283,7 @@ export default function NavBar({ content }: NavBarProps) {
           {drawerContent}
         </Drawer>
       )}
-
+  
       {/* Temporary Drawer for Mobile */}
       {isMobile && (
         <Drawer
@@ -294,16 +302,19 @@ export default function NavBar({ content }: NavBarProps) {
             },
           }}
         >
-          {/* Add Toolbar for spacing */}
           <Toolbar />
           <Box sx={{ overflow: "auto" }}>{drawerContent}</Box>
         </Drawer>
       )}
-
+  
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
         {content}
       </Box>
+  
+      {/* Search Component */}
+      <Search open={searchOpen} onClose={() => setSearchOpen(false)} />
     </Box>
   );
+  
 }
