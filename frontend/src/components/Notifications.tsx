@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-  Dialog,
+  Popover,
   List,
   ListItem,
   ListItemText,
@@ -22,7 +22,15 @@ interface Notification {
 
 const Notifications: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [open, setOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -43,7 +51,9 @@ const Notifications: React.FC = () => {
       await Axios.post(
         `notifications/accept`,
         { notification_id: id },
-        { headers: { Authorization: `Bearer ${localStorage.getItem("Token")}` } }
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("Token")}` },
+        }
       );
       setNotifications((prev) => prev.filter((n) => n.id !== id));
     } catch (error) {
@@ -56,7 +66,9 @@ const Notifications: React.FC = () => {
       await Axios.post(
         `notifications/deny`,
         { notification_id: id },
-        { headers: { Authorization: `Bearer ${localStorage.getItem("Token")}` } }
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("Token")}` },
+        }
       );
       setNotifications((prev) => prev.filter((n) => n.id !== id));
     } catch (error) {
@@ -66,42 +78,86 @@ const Notifications: React.FC = () => {
 
   return (
     <>
-      <IconButton color="inherit" onClick={() => setOpen(true)}>
+      <IconButton color="inherit" onClick={handleOpen}>
         <Badge badgeContent={notifications.length} color="error">
           <NotificationsIcon />
         </Badge>
       </IconButton>
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
-        <Box p={2}>
-          <Typography variant="h6">Notifications</Typography>
+      <Popover
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        <Box p={2} width={350} sx={{ maxHeight: 400, overflowY: "auto" }}>
+          <Typography variant="h6" sx={{ marginBottom: 2 }}>
+            Notifications
+          </Typography>
           <List>
-            {notifications.map((notification) => (
-              <ListItem key={notification.id}>
-                <ListItemText
-                  primary={notification.message}
-                  secondary={notification.sender || ""}
-                />
-                {notification.type === "friend_request" && (
-                  <>
-                    <Button
-                      onClick={() => handleAccept(notification.id)}
-                      color="primary"
+            {notifications.length === 0 ? (
+              <Typography
+                variant="body2"
+                color="textSecondary"
+                sx={{ textAlign: "center" }}
+              >
+                No new notifications
+              </Typography>
+            ) : (
+              notifications.map((notification) => (
+                <ListItem
+                  key={notification.id}
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 1, // Add spacing between items
+                  }}
+                >
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography variant="body1">
+                      {notification.message}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      sx={{ fontSize: "0.85rem" }}
                     >
-                      Accept
-                    </Button>
-                    <Button
-                      onClick={() => handleDeny(notification.id)}
-                      color="secondary"
-                    >
-                      Deny
-                    </Button>
-                  </>
-                )}
-              </ListItem>
-            ))}
+                      {notification.sender || "Unknown sender"}
+                    </Typography>
+                  </Box>
+                  {notification.type === "friend_request" && (
+                    <Box sx={{ display: "flex", gap: 1 }}>
+                      <Button
+                        onClick={() => handleAccept(notification.id)}
+                        variant="contained"
+                        color="success"
+                        size="small"
+                      >
+                        Accept
+                      </Button>
+                      <Button
+                        onClick={() => handleDeny(notification.id)}
+                        variant="outlined"
+                        color="error"
+                        size="small"
+                      >
+                        Deny
+                      </Button>
+                    </Box>
+                  )}
+                </ListItem>
+              ))
+            )}
           </List>
         </Box>
-      </Dialog>
+      </Popover>
     </>
   );
 };

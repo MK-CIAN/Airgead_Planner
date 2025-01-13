@@ -258,9 +258,7 @@ export default function NavBar({ content }: NavBarProps) {
             />
             Airgead Planner
           </div>
-          <IconButton color="inherit" onClick={() => setSearchOpen(true)}>
-            <SearchIcon />
-          </IconButton>
+          <Search />
           <Notifications />
           <div className="navbar-user">Hello, {username || "User"}</div>
         </Toolbar>
@@ -312,8 +310,6 @@ export default function NavBar({ content }: NavBarProps) {
         {content}
       </Box>
   
-      {/* Search Component */}
-      <Search open={searchOpen} onClose={() => setSearchOpen(false)} />
     </Box>
   );
   

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
-  Dialog,
+  Popover,
   TextField,
   List,
   ListItem,
@@ -8,52 +8,51 @@ import {
   Button,
   Box,
   Typography,
+  IconButton,
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import Axios from "./Axios";
 
 interface User {
   id: number;
   username: string;
   email: string;
-  status: "pending" | "friends" | "none"; // Add status to the user object
+  status: "pending" | "friends" | "none";
 }
 
-interface SearchComponentProps {
-  open: boolean;
-  onClose: () => void;
-}
-
-const Search: React.FC<SearchComponentProps> = ({ open, onClose }) => {
+const Search: React.FC = () => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState<User[]>([]);
+
+  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   useEffect(() => {
     const fetchSearchResults = async () => {
       if (query.trim() === "") {
-        setSearchResults([]); // Clear results if query is empty
+        setSearchResults([]);
         return;
       }
       try {
         const response = await Axios.get(`search`, {
           params: { q: query },
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("Token")}`,
-          },
+          headers: { Authorization: `Bearer ${localStorage.getItem("Token")}` },
         });
-        console.log("Search Response:", response.data); // Log the response
-        setSearchResults(response.data); // Ensure response includes the "status" field
+        setSearchResults(response.data);
       } catch (error) {
         console.error("Error during search:", error);
       }
     };
-  
-    const delayDebounceFn = setTimeout(() => {
-      fetchSearchResults();
-    }, 300); // Add a 300ms debounce
-  
-    return () => clearTimeout(delayDebounceFn); // Cleanup debounce
+
+    const debounceTimer = setTimeout(() => fetchSearchResults(), 300);
+    return () => clearTimeout(debounceTimer);
   }, [query]);
-  
 
   const sendFriendRequest = async (receiverId: number) => {
     try {
@@ -64,8 +63,6 @@ const Search: React.FC<SearchComponentProps> = ({ open, onClose }) => {
           headers: { Authorization: `Bearer ${localStorage.getItem("Token")}` },
         }
       );
-      alert("Friend request sent!");
-      // Update the status in the search results
       setSearchResults((prev) =>
         prev.map((user) =>
           user.id === receiverId ? { ...user, status: "pending" } : user
@@ -77,39 +74,53 @@ const Search: React.FC<SearchComponentProps> = ({ open, onClose }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <Box p={2}>
-        <TextField
-          fullWidth
-          label="Search for users"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <List>
-          {searchResults.map((user) => (
-            <ListItem key={user.id}>
-              <ListItemText
-                primary={user.username}
-                secondary={user.email}
-              />
-              {/* Render the correct button or status text */}
-              {user.status === "none" ? (
-                <Button
-                  onClick={() => sendFriendRequest(user.id)}
-                  color="primary"
-                >
-                  Add Friend
-                </Button>
-              ) : user.status === "pending" ? (
-                <Typography color="textSecondary">Request Pending</Typography>
-              ) : (
-                <Typography color="primary">Friends</Typography>
-              )}
-            </ListItem>
-          ))}
-        </List>
-      </Box>
-    </Dialog>
+    <>
+      <IconButton color="inherit" onClick={handleOpen}>
+        <SearchIcon />
+      </IconButton>
+      <Popover
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+      >
+        <Box p={2} width={400} sx={{ maxHeight: 400, overflowY: "auto" }}>
+          <TextField
+            fullWidth
+            label="Search for users"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            sx={{ marginBottom: 2 }}
+          />
+          <List>
+            {searchResults.map((user) => (
+              <ListItem key={user.id}>
+                <ListItemText primary={user.username} secondary={user.email} />
+                {user.status === "none" ? (
+                  <Button
+                    onClick={() => sendFriendRequest(user.id)}
+                    color="primary"
+                  >
+                    Add Friend
+                  </Button>
+                ) : user.status === "pending" ? (
+                  <Typography color="textSecondary">Request Pending</Typography>
+                ) : (
+                  <Typography color="primary">Friends</Typography>
+                )}
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+      </Popover>
+    </>
   );
 };
 
