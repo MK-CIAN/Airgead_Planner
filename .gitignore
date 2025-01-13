@@ -105,6 +105,7 @@ backend/users/__pycache__/urls.cpython-312.pyc
 backend/users/__pycache__/views.cpython-312.pyc
 database/data/postmaster.pid
 database/
+database
 backend/users/__pycache__/models.cpython-312.pyc
 backend/users/__pycache__/urls.cpython-312.pyc
 backend/users/__pycache__/views.cpython-312.pyc
