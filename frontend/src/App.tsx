@@ -15,6 +15,8 @@ import PasswordReset from './components/PasswordReset'
 import Savings from './components/Savings'
 import Income from './components/Income'
 import UserInterest from './components/UserInterests'
+import CustomBudget from './components/CustomBudget'
+import CustomBudgetDetails from './components/CustomBudgetDetails'
 
 function App() {
   const location = useLocation()
@@ -40,6 +42,8 @@ function App() {
               <Route element={<ProtectedRoute/>}>
                 <Route path="/home" element={<Dashboard/>}/>
                 <Route path="/budget" element={<Budget/>}/>
+                <Route path="/custom-budget" element={<CustomBudget/>}/>
+                <Route path="/custom-budget/:id" element={<CustomBudgetDetails />} />
                 <Route path="/savings" element={<Savings/>}/>
                 <Route path="/loans" element={<Loans/>}/>
                 <Route path="/pensions" element={<Pensions/>}/>

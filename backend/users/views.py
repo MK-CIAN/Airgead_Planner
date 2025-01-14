@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets, permissions
+
+from data.models import CustomBudget
 from .serializers import *
 from .models import *
 from rest_framework.response import Response
@@ -135,55 +137,115 @@ class NotificationListView(APIView):
 
     def get(self, request):
         notifications = Notification.objects.filter(user=request.user, is_read=False)
-        data = [{
-            "id": n.id,
-            "type": n.type,
-            "message": n.message,
-            "sender": n.sender.username if n.sender else None,
-        } for n in notifications]
+        data = []
+        for n in notifications:
+            notification_data = {
+                "id": n.id,
+                "type": n.type,
+                "message": n.message,
+                "sender": n.sender.username if n.sender else None,
+            }
+            if n.type == "budget_invite":
+                notification_data["budget_id"] = n.budget.id if n.budget else None
+            data.append(notification_data)
         return Response(data)
 
-class AcceptFriendRequestView(APIView):
+class AcceptNotificationView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
         notification_id = request.data.get("notification_id")
         try:
-            notification = Notification.objects.get(id=notification_id, user=request.user, type="friend_request")
-            friend_request = FriendRequest.objects.get(sender=notification.sender, receiver=request.user, status="pending")
-            friend_request.status = "accepted"
-            friend_request.save()
+            # Retrieve the notification
+            notification = Notification.objects.get(id=notification_id, user=request.user)
 
-            # Create a friendship
-            Friendship.objects.create(user1=friend_request.sender, user2=friend_request.receiver)
+            if notification.type == "friend_request":
+                # Process friend request
+                friend_request = FriendRequest.objects.get(
+                    sender=notification.sender, receiver=request.user, status="pending"
+                )
+                friend_request.status = "accepted"
+                friend_request.save()
 
-            # Mark notification as read
+                # Create a friendship
+                Friendship.objects.create(user1=friend_request.sender, user2=friend_request.receiver)
+
+            elif notification.type == "budget_invite" and notification.budget:
+                # Process budget invite
+                budget = notification.budget
+                budget.contributors.add(request.user)
+                budget.save()
+
+            # Mark the notification as read
             notification.is_read = True
             notification.save()
 
-            return Response({"message": "Friend request accepted."})
+            return Response({"message": "Notification accepted."}, status=200)
+
         except Notification.DoesNotExist:
             return Response({"error": "Notification not found."}, status=404)
         except FriendRequest.DoesNotExist:
             return Response({"error": "Friend request not found."}, status=404)
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
 
-class DenyFriendRequestView(APIView):
+
+
+        
+class DenyNotificationView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
         notification_id = request.data.get("notification_id")
-        try:
-            notification = Notification.objects.get(id=notification_id, user=request.user, type="friend_request")
-            friend_request = FriendRequest.objects.get(sender=notification.sender, receiver=request.user, status="pending")
-            friend_request.status = "rejected"
-            friend_request.save()
+        budget_id = request.data.get("budget_id", None)  # For denying budget invites
 
-            # Mark notification as read
+        try:
+            notification = Notification.objects.get(id=notification_id, user=request.user)
+            
+            if notification.type == "friend_request":
+                # Deny a friend request
+                friend_request = FriendRequest.objects.get(
+                    sender=notification.sender, receiver=request.user, status="pending"
+                )
+                friend_request.status = "rejected"
+                friend_request.save()
+
+            elif notification.type == "budget_invite" and budget_id:
+                # Deny a budget invite (mark the notification as read)
+                # No changes are made to the CustomBudget as the invite is simply ignored.
+
+                pass  # Optional: Log or track that the budget invite was denied.
+
+            # Mark the notification as read or processed
             notification.is_read = True
             notification.save()
 
-            return Response({"message": "Friend request denied."})
+            return Response({"message": "Notification denied."}, status=200)
+
         except Notification.DoesNotExist:
             return Response({"error": "Notification not found."}, status=404)
         except FriendRequest.DoesNotExist:
             return Response({"error": "Friend request not found."}, status=404)
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
+
+        
+class FriendsListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        # Retrieve all friends for the authenticated user
+        friendships = Friendship.objects.filter(Q(user1=user) | Q(user2=user))
+
+        friends = []
+        for friendship in friendships:
+            friend = friendship.user2 if friendship.user1 == user else friendship.user1
+            friends.append({
+                "id": friend.id,
+                "username": friend.username,
+                "email": friend.email,
+            })
+
+        return Response(friends)

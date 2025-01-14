@@ -1,13 +1,19 @@
 from decimal import Decimal
 from django.shortcuts import render
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 from .serializers import *
 from .models import *
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import action
 from django.db.models import F, Sum
 from datetime import date, datetime, timedelta
 from data.utils.news_utils import recommend_articles
+from django.contrib.auth import get_user_model
+from users.models import Notification
+CustomUser = get_user_model()  # Retrieve the custom user model
+
+
 
 # Monthly Budget Viewset
 class MonthlyBudgetViewSet(viewsets.ModelViewSet):
@@ -23,6 +29,79 @@ class MonthlyBudgetViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+        
+class CustomBudgetViewSet(viewsets.ModelViewSet):
+    queryset = CustomBudget.objects.all()
+    serializer_class = CustomBudgetSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        """
+        Fetch all budgets created by the user or where the user is a contributor.
+        """
+        return CustomBudget.objects.filter(
+            models.Q(user=self.request.user) | models.Q(contributors=self.request.user)
+        ).distinct()
+
+    def perform_create(self, serializer):
+        """
+        Create a custom budget explicitly only when requested.
+        """
+        serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=['post'], url_path='items')
+    def add_item(self, request, pk=None):
+        """
+        Add an item to a specific budget.
+        """
+        print("add_item called with data:", request.data)  # DEBUG
+        budget = self.get_object()
+
+        serializer = BudgetItemSerializer(data=request.data)
+        if serializer.is_valid():
+            saved_item = serializer.save(budget=budget)  # Link the item to the budget
+            return Response(BudgetItemSerializer(saved_item).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=True, methods=['delete'], url_path='items/(?P<item_id>[^/.]+)')
+    def delete_item(self, request, pk=None, item_id=None):
+        """
+        Delete an item from a specific budget.
+        """
+        try:
+            budget = self.get_object()
+            item = budget.items.get(id=item_id)
+            item.delete()
+            return Response({"message": "Item deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+        except BudgetItem.DoesNotExist:
+            return Response({"error": "Item not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+    @action(detail=True, methods=['post'], url_path='invite-friend')
+    def invite_friend(self, request, pk=None):
+        """
+        Invite a friend to join a budget.
+        """
+        budget = self.get_object()
+        friend_id = request.data.get('friend_id')
+
+        if not friend_id:
+            return Response({"error": "Friend ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            friend = CustomUser.objects.get(id=friend_id)
+            # Create a notification with the budget reference
+            Notification.objects.create(
+                user=friend,
+                sender=request.user,
+                type="budget_invite",
+                message=f"{request.user.username} has invited you to join the budget '{budget.name}'.",
+                budget=budget  # Add the budget reference here
+            )
+            return Response({"message": "Invitation sent successfully."}, status=status.HTTP_200_OK)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "Friend not found."}, status=status.HTTP_404_NOT_FOUND)
+
 
 # Savings Goal Viewset
 class SavingsGoalViewSet(viewsets.ModelViewSet):

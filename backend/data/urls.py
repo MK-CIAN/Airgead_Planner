@@ -6,6 +6,7 @@ from .views import *
 
 router = DefaultRouter()
 router.register('budget', MonthlyBudgetViewSet, basename='budget')
+router.register('custom-budget', CustomBudgetViewSet, basename='custom-budget')
 router.register('savings', SavingsGoalViewSet, basename='savings')
 router.register('loans', LoanViewSet, basename='loans')
 router.register('stocks', StockDataViewSet, basename='stocks')

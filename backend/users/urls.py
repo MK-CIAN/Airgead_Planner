@@ -13,6 +13,7 @@ urlpatterns = router.urls + [
     path('search', UserSearchView.as_view(), name='user-search'),
     path('friend-request', SendFriendRequestView.as_view(), name='send-friend-request'),
     path("notifications", NotificationListView.as_view(), name="notifications"),
-    path("notifications/accept", AcceptFriendRequestView.as_view(), name="accept-friend-request"),
-    path("notifications/deny", DenyFriendRequestView.as_view(), name="deny-friend-request"),
+    path("notifications/accept", AcceptNotificationView.as_view(), name="accept-notification"),
+    path("notifications/deny", DenyNotificationView.as_view(), name="deny-notification"),
+    path('friends/', FriendsListView.as_view(), name='friends-list'),
 ]

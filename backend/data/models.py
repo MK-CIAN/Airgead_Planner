@@ -6,6 +6,7 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
+from django.forms import ValidationError
 
 from dashboard import settings
 
@@ -138,6 +139,39 @@ class MonthlyBudget(models.Model):
 
     class Meta:
         db_table = 'monthly_budget'
+        
+# Custom Budget
+class CustomBudget(models.Model):
+    name = models.CharField(max_length=255, blank=False)  # Budget Name
+    start_date = models.DateField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    contributors = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name='custom_budget', blank=True
+    )
+
+    class Meta:
+        db_table = 'custom_budget'
+        
+class BudgetItem(models.Model):
+    CATEGORY_CHOICES = [
+        ('income', 'Income'),
+        ('expense', 'Expense'),
+        ('debt', 'Debt'),
+    ]
+    budget = models.ForeignKey(
+        'CustomBudget',
+        on_delete=models.CASCADE,
+        related_name='items'  # Enables reverse lookup (budget.items)
+    )
+    category = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    transaction_type = models.CharField(max_length=7, choices=CATEGORY_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'budget_item'
+
 
 # Savings Goal
 class SavingsGoal(models.Model):
