@@ -5,6 +5,7 @@ import SavingsChart from './charts/SavingsChart';
 import "../App.css";
 import { Box, Grid, LinearProgress, Paper, Typography } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
+import TestBudgetChart from './charts/TestBudgetChart';
 
 interface BudgetData {
   id: number;
@@ -83,7 +84,7 @@ const Dashboard = () => {
             <Typography variant="h6" gutterBottom>
               Monthly Budget
             </Typography>
-            <BudgetChart data={budgetData} />
+            <TestBudgetChart data={budgetData} />
           </Paper>
         </Grid>
 

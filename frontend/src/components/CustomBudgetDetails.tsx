@@ -15,6 +15,7 @@ import { useParams } from "react-router-dom";
 import ShowFriends from "./ShowFriends";
 import "../App.css";
 import ChatRoom from "./ChatRoom";
+import TestBudgetChart from "./charts/TestBudgetChart";
 
 interface BudgetData {
   id: number;
@@ -229,7 +230,7 @@ const CustomBudgetDetails: React.FC = () => {
       <div
         style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
       >
-        <BudgetChart data={budgetData} />
+        <TestBudgetChart data={budgetData} />
       </div>
       <div style={{ marginTop: "20px" }}>
         <h3>Chatroom</h3>

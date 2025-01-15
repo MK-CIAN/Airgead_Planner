@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Axios from './Axios';
 import BudgetChart from "./charts/BudgetChart";
+import TestBudgetChart from './charts/TestBudgetChart';
 import BudgetForm from './forms/BudgetForm';
 import { Button, IconButton, List, ListItem, ListItemText, Typography, useMediaQuery } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
@@ -147,7 +148,7 @@ const Budget: React.FC = () => {
 
     {/* Responsive Budget Chart */}
     <div style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}>
-      <BudgetChart data={budgetData} />
+      <TestBudgetChart data={budgetData} />
     </div>
   </div>
   );
