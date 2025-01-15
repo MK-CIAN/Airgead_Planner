@@ -48,6 +48,7 @@ class CustomBudgetViewSet(viewsets.ModelViewSet):
         Create a custom budget explicitly only when requested.
         """
         serializer.save(user=self.request.user)
+        
 
     @action(detail=True, methods=['post'], url_path='items')
     def add_item(self, request, pk=None):
@@ -114,6 +115,28 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+        
+    @action(detail=True, methods=['post'], url_path='invite-friend')
+    def invite_friend(self, request, pk=None):
+        savings_goal = self.get_object()
+        friend_id = request.data.get('friend_id')
+
+        if not friend_id:
+            return Response({"error": "Friend ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            friend = CustomUser.objects.get(id=friend_id)
+            # Create a notification with the budget reference
+            Notification.objects.create(
+                user=friend,
+                sender=request.user,
+                type="savings_invite",
+                message=f"{request.user.username} has invited you to join the savings goal '{savings_goal.name}'.",
+                savings_goal=savings_goal
+            )
+            return Response({"message": "Invitation sent successfully."}, status=status.HTTP_200_OK)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "Friend not found."}, status=status.HTTP_404_NOT_FOUND)
 
 # Loans Viewset
 class LoanViewSet(viewsets.ModelViewSet):

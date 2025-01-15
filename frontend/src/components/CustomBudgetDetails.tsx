@@ -204,7 +204,8 @@ const CustomBudgetDetails: React.FC = () => {
       {/* Contributors Section */}
       <div style={{ textAlign: "right" }}>
         <ShowFriends
-          budgetId={id}
+          entityId={id} // Budget ID
+          entityType="budget" // Context is budget
           onInvite={handleInviteFriend}
           triggerElement={
             <Button
@@ -213,7 +214,7 @@ const CustomBudgetDetails: React.FC = () => {
               style={{
                 padding: "8px 16px",
                 fontSize: "14px",
-                marginTop: "1px",
+                marginTop: "px",
               }}
               className="inviteButton"
             >

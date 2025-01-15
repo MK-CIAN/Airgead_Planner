@@ -114,6 +114,24 @@ export default function NavBar({ content }: NavBarProps) {
       <ListItem key={3} disablePadding>
         <ListItemButton
           component={Link}
+          to="custom-budget"
+          selected={"/custom-budget" === location.pathname}
+          sx={{
+            backgroundImage:
+              location.pathname === "/custom-budget" ? gradient : "none",
+            backgroundSize: "cover",
+          }}
+        >
+          <ListItemIcon>
+            <PieChartIcon sx={{ color: color }} />
+          </ListItemIcon>
+          <ListItemText primary="Custom Budgets" />
+        </ListItemButton>
+      </ListItem>
+
+      <ListItem key={4} disablePadding>
+        <ListItemButton
+          component={Link}
           to="savings"
           selected={"/savings" === location.pathname}
           sx={{
@@ -129,7 +147,7 @@ export default function NavBar({ content }: NavBarProps) {
         </ListItemButton>
       </ListItem>
 
-      <ListItem key={4} disablePadding>
+      <ListItem key={5} disablePadding>
         <ListItemButton
           component={Link}
           to="pensions"
@@ -147,7 +165,7 @@ export default function NavBar({ content }: NavBarProps) {
         </ListItemButton>
       </ListItem>
 
-      <ListItem key={5} disablePadding>
+      <ListItem key={6} disablePadding>
         <ListItemButton
           component={Link}
           to="stocksim"
@@ -165,7 +183,7 @@ export default function NavBar({ content }: NavBarProps) {
         </ListItemButton>
       </ListItem>
 
-      <ListItem key={6} disablePadding>
+      <ListItem key={7} disablePadding>
         <ListItemButton
           component={Link}
           to="news"
@@ -182,7 +200,7 @@ export default function NavBar({ content }: NavBarProps) {
         </ListItemButton>
       </ListItem>
 
-      <ListItem key={7} disablePadding>
+      <ListItem key={8} disablePadding>
         <ListItemButton
           component={Link}
           to="loans"
@@ -199,7 +217,7 @@ export default function NavBar({ content }: NavBarProps) {
         </ListItemButton>
       </ListItem>
 
-      <ListItem key={8} disablePadding>
+      <ListItem key={9} disablePadding>
         <ListItemButton
           component={Link}
           to="income"
@@ -217,7 +235,7 @@ export default function NavBar({ content }: NavBarProps) {
         </ListItemButton>
       </ListItem>
 
-      <ListItem key={9} disablePadding>
+      <ListItem key={10} disablePadding>
         <ListItemButton onClick={logoutUser}>
           <ListItemIcon>
             <LogoutIcon sx={{ color: color }} />

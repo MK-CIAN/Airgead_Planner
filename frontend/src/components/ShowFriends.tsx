@@ -13,49 +13,64 @@ import Axios from "./Axios";
 interface Friend {
   id: number;
   username: string;
-  status: "none" | "pending" | "joined"; // Relationship with the budget
+  status: "none" | "joined"; // Relationship with the entity
 }
 
 interface ShowFriendsProps {
   onInvite: (friendId: number) => void; // Function to handle inviting a friend
   triggerElement: React.ReactNode; // The element that triggers the popup
-  budgetId: string | undefined; // Current budget ID to check contributors
+  entityId: string | undefined; // ID of the budget or savings goal
+  entityType: "budget" | "savingsGoal"; // Context to distinguish between budgets and savings goals
 }
 
 const ShowFriends: React.FC<ShowFriendsProps> = ({
   onInvite,
   triggerElement,
-  budgetId,
+  entityId,
+  entityType,
 }) => {
   const [friends, setFriends] = useState<Friend[]>([]);
+  const [contributors, setContributors] = useState<number[]>([]); // Store contributor IDs separately
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
-    const fetchFriends = async () => {
+    const fetchFriendsAndContributors = async () => {
       try {
-        const response = await Axios.get(`/friends/`); // Fetch all friends
+        console.log("Fetching friends and contributors...");
+
+        // Fetch all friends
+        const friendsResponse = await Axios.get(`/friends/`);
+        console.log("Friends fetched:", friendsResponse.data);
+
+        // Fetch contributors based on entity type
         const contributorsResponse = await Axios.get(
-          `/data/custom-budget/${budgetId}/`
-        ); // Fetch contributors for the budget
+          `/data/${entityType === "budget" ? "custom-budget" : "savings"}/${entityId}/`
+        );
+        console.log(
+          "Contributors fetched for entity:",
+          contributorsResponse.data.contributors
+        );
 
-        const contributors = contributorsResponse.data.contributors || [];
+        const contributorsList = contributorsResponse.data.contributors || [];
+        setContributors(contributorsList); // Store contributor IDs directly
 
-        // Map friends with their relationship to the budget
-        const friendsWithStatus = response.data.map((friend: Friend) => {
-          if (contributors.some((c: any) => c.id === friend.id)) {
-            return { ...friend, status: "joined" };
+        // Map friends with their relationship to the entity
+        const friendsWithStatus = friendsResponse.data.map((friend: Friend) => {
+          if (contributorsList.includes(friend.id)) {
+            return { ...friend, status: "joined" }; // Check against the array of IDs
           }
-          return friend; // Default to "none" unless specified below
+          return { ...friend, status: "none" }; // Default to "none"
         });
 
+        console.log("Mapped friends with status:", friendsWithStatus);
         setFriends(friendsWithStatus);
       } catch (error) {
         console.error("Error fetching friends or contributors:", error);
       }
     };
 
-    if (budgetId) fetchFriends(); // Only fetch if budgetId is available
-  }, [budgetId]);
+    if (entityId) fetchFriendsAndContributors(); // Only fetch if entityId is available
+  }, [entityId, entityType]);
 
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -63,6 +78,10 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const getStatus = (friendId: number): "none" | "joined" => {
+    return contributors.includes(friendId) ? "joined" : "none"; // Check if friendId exists in contributors
   };
 
   return (
@@ -74,11 +93,11 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
         onClose={handleClose}
         anchorOrigin={{
           vertical: "bottom",
-          horizontal: "right", // Anchor to the bottom-left of the button
+          horizontal: "right", // Anchor to the bottom-right of the button
         }}
         transformOrigin={{
           vertical: "top",
-          horizontal: "left", // Align the popup's top-right corner to the button
+          horizontal: "left", // Align the popup's top-left corner to the button
         }}
       >
         <Box sx={{ p: 2, width: "300px", maxHeight: 400, overflowY: "auto" }}>
@@ -92,7 +111,7 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
                 sx={{ display: "flex", justifyContent: "space-between" }}
               >
                 <ListItemText primary={friend.username} />
-                {friend.status === "none" ? (
+                {getStatus(friend.id) === "none" ? (
                   <Button
                     variant="contained"
                     color="primary"
@@ -101,8 +120,6 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
                   >
                     Invite
                   </Button>
-                ) : friend.status === "pending" ? (
-                  <Typography color="textSecondary">Invite Pending</Typography>
                 ) : (
                   <Typography color="primary">Joined</Typography>
                 )}

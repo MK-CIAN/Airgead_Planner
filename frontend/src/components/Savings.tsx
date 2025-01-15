@@ -9,6 +9,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import dayjs, { Dayjs } from "dayjs";
 import "../App.css";
 import "../styles/Savings.css";
+import { useNavigate } from "react-router-dom";
 
 interface SavingsGoalData {
   id: string;
@@ -29,6 +30,7 @@ const Savings: React.FC = () => {
 
   const isMobile = useMediaQuery("(max-width: 480px)"); // Check if the screen size is less than 480px
   const isTablet = useMediaQuery("(max-width: 768px)"); // Check if the screen size is less than 768px
+  const navigate = useNavigate();
 
   const getSavingsData = () => {
     Axios.get(`data/savings`)
@@ -226,6 +228,7 @@ const Savings: React.FC = () => {
           <div
             key={goal.id}
             className="savings-item"
+            onClick={() => navigate(`/savings/${goal.id}`)}
             style={{
               padding: isMobile ? "12px" : "16px", // Adjust padding based on screen size
             }}

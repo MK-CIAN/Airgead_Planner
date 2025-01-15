@@ -29,9 +29,15 @@ class CustomBudgetSerializer(serializers.ModelSerializer):
         read_only_fields = ['user']
         
 class SavingsGoalSerializer(serializers.ModelSerializer):
+    contributors = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=get_user_model().objects.all(),
+        required=False
+    )
+    
     class Meta:
         model = SavingsGoal
-        fields = ['id', 'user', 'name', 'target_amount', 'current_amount', 'start_date', 'target_date', 'monthly_contribution']
+        fields = ['id', 'user', 'name', 'target_amount', 'current_amount', 'start_date', 'target_date', 'monthly_contribution', 'contributors']
         read_only_fields = ['user']
 
 class LoanSerializer(serializers.ModelSerializer):

@@ -147,6 +147,8 @@ class NotificationListView(APIView):
             }
             if n.type == "budget_invite":
                 notification_data["budget_id"] = n.budget.id if n.budget else None
+            if n.type == "savings_invite":
+                notification_data["savings_goal_id"] = n.savings_goal.id if n.savings_goal else None
             data.append(notification_data)
         return Response(data)
 
@@ -175,6 +177,12 @@ class AcceptNotificationView(APIView):
                 budget = notification.budget
                 budget.contributors.add(request.user)
                 budget.save()
+                
+            elif notification.type == "savings_invite" and notification.savings_goal:
+                # Process budget invite
+                savings_goal = notification.savings_goal
+                savings_goal.contributors.add(request.user)
+                savings_goal.save()
 
             # Mark the notification as read
             notification.is_read = True

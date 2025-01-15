@@ -1,25 +1,29 @@
 import React, { useState, useEffect } from "react";
 import Axios from "./Axios";
 import {
-  Grid,
-  Paper,
-  Typography,
   Button,
+  Typography,
   TextField,
   Box,
+  Card,
+  CardContent,
+  CardActions,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import dayjs, { Dayjs } from "dayjs";
+import BudgetChart from "./charts/BudgetChart";
 
 interface CustomBudget {
   id: number;
   name: string;
   start_date: string;
   end_date: string;
+  items: { id: number; value: number; label: string; type: string }[];
 }
 
 const CustomBudget: React.FC = () => {
   const [customBudgets, setCustomBudgets] = useState<CustomBudget[]>([]);
+  const [isFormVisible, setIsFormVisible] = useState(false);
   const [name, setName] = useState("");
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
@@ -40,6 +44,11 @@ const CustomBudget: React.FC = () => {
     fetchCustomBudgets();
   }, []);
 
+  // Toggle form visibility
+  const toggleFormVisibility = () => {
+    setIsFormVisible(!isFormVisible);
+  };
+
   // Create a new custom budget
   const handleCreateBudget = () => {
     if (!name.trim() || !startDate || !endDate) {
@@ -59,6 +68,7 @@ const CustomBudget: React.FC = () => {
         setName("");
         setStartDate(null);
         setEndDate(null);
+        setIsFormVisible(false); // Hide the form after submission
       })
       .catch((error) => {
         console.error("Error creating custom budget:", error.response?.data);
@@ -71,63 +81,104 @@ const CustomBudget: React.FC = () => {
         Your Custom Budgets
       </Typography>
 
-      {/* Create New Budget Form */}
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2, marginBottom: 4 }}>
-        <Typography variant="h6">Create a New Custom Budget</Typography>
-        <TextField
-          label="Budget Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          fullWidth
-        />
-        <Box sx={{ display: "flex", gap: 2 }}>
-          <TextField
-            label="Start Date"
-            type="date"
-            value={startDate ? startDate.format("YYYY-MM-DD") : ""}
-            onChange={(e) => setStartDate(dayjs(e.target.value))}
-            InputLabelProps={{ shrink: true }}
-            fullWidth
-          />
-          <TextField
-            label="End Date"
-            type="date"
-            value={endDate ? endDate.format("YYYY-MM-DD") : ""}
-            onChange={(e) => setEndDate(dayjs(e.target.value))}
-            InputLabelProps={{ shrink: true }}
-            fullWidth
-          />
-        </Box>
+      {/* Toggle Button for the Form */}
+      <Box sx={{ textAlign: "center", marginBottom: "16px" }}>
         <Button
           variant="contained"
           color="primary"
-          onClick={handleCreateBudget}
+          onClick={toggleFormVisibility}
         >
-          Create Budget
+          {isFormVisible ? "Hide Form" : "Add New Budget"}
         </Button>
       </Box>
 
-      {/* Grid View of Budgets */}
-      <Grid container spacing={3}>
-        {customBudgets.map((budget) => (
-          <Grid
-            item
-            xs={12}
-            sm={6}
-            md={4}
-            key={budget.id}
-            onClick={() => navigate(`/custom-budget/${budget.id}`)}
-            style={{ cursor: "pointer" }}
+      {/* Conditional Form Rendering */}
+      {isFormVisible && (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            marginBottom: 4,
+            background: "#f9f9f9",
+            padding: "16px",
+            borderRadius: "8px",
+          }}
+        >
+          <Typography variant="h6">Create a New Custom Budget</Typography>
+          <TextField
+            label="Budget Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            fullWidth
+          />
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <TextField
+              label="Start Date"
+              type="date"
+              value={startDate ? startDate.format("YYYY-MM-DD") : ""}
+              onChange={(e) => setStartDate(dayjs(e.target.value))}
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+            />
+            <TextField
+              label="End Date"
+              type="date"
+              value={endDate ? endDate.format("YYYY-MM-DD") : ""}
+              onChange={(e) => setEndDate(dayjs(e.target.value))}
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+            />
+          </Box>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleCreateBudget}
           >
-            <Paper elevation={3} style={{ padding: "16px", height: "100%" }}>
+            Create Budget
+          </Button>
+        </Box>
+      )}
+
+      {/* Display Budgets */}
+      <Typography variant="h6" style={{ marginBottom: "16px" }}>
+        Your Budgets
+      </Typography>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+          gap: "16px",
+        }}
+      >
+        {customBudgets.map((budget) => (
+          <Card
+            key={budget.id}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              height: "250px",
+              cursor: "pointer",
+              "&:hover": { boxShadow: 6 },
+            }}
+            onClick={() => navigate(`/custom-budget/${budget.id}`)}
+          >
+            <CardContent>
               <Typography variant="h6">{budget.name}</Typography>
-              <Typography variant="body2">
-                Start: {budget.start_date} | End: {budget.end_date}
+              <Typography variant="body2" color="textSecondary">
+                Start: {budget.start_date}
               </Typography>
-            </Paper>
-          </Grid>
+              <Typography variant="body2" color="textSecondary">
+                End: {budget.end_date}
+              </Typography>
+            </CardContent>
+            <Box sx={{ padding: "8px" }}>
+              <BudgetChart data={budget.items} />
+            </Box>
+          </Card>
         ))}
-      </Grid>
+      </Box>
     </Box>
   );
 };
