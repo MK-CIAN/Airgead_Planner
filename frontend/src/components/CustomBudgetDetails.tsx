@@ -14,6 +14,7 @@ import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
 import ShowFriends from "./ShowFriends";
 import "../App.css";
+import ChatRoom from "./ChatRoom";
 
 interface BudgetData {
   id: number;
@@ -229,6 +230,10 @@ const CustomBudgetDetails: React.FC = () => {
         style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
       >
         <BudgetChart data={budgetData} />
+      </div>
+      <div style={{ marginTop: "20px" }}>
+        <h3>Chatroom</h3>
+        <ChatRoom entityId={Number(id)} entityType="budget" />
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Axios from "./Axios";
 import { useParams } from "react-router-dom";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Button,
   Typography,
@@ -11,6 +12,7 @@ import {
 } from "@mui/material";
 import ShowFriends from "./ShowFriends";
 import SavingsChart from "./charts/SavingsChart";
+import ChatRoom from "./ChatRoom";
 
 interface Contributor {
   id: number;
@@ -28,6 +30,7 @@ interface SavingsGoal {
 const SavingsGoalDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [savingsGoal, setSavingsGoal] = useState<SavingsGoal | null>(null);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
 
   useEffect(() => {
     Axios.get(`data/savings/${id}/`)
@@ -46,20 +49,51 @@ const SavingsGoalDetails: React.FC = () => {
 
   const handleInviteFriend = async (friendId: number) => {
     Axios.post(`data/savings/${id}/invite-friend/`, {
-        friend_id: friendId,
+      friend_id: friendId,
     })
-      .then(() => alert("Contributor invited!"))
-      .catch((error) => console.error("Error inviting contributor:", error));
+      .then(() => {
+        setAlertMessage("Invite to join goal sent.");
+        setTimeout(() => setAlertMessage(null), 3000); // Dismiss after 3 seconds
+      })
+      .catch((error) => {
+        console.error("Error inviting contributor:", error);
+        setAlertMessage("Failed to invite contributor.");
+        setTimeout(() => setAlertMessage(null), 3000); // Dismiss after 3 seconds
+      });
   };
 
   if (!savingsGoal) {
     return <Typography>Loading...</Typography>;
   }
 
-  const progress = (savingsGoal.current_amount / savingsGoal.target_amount) * 100;
+  const progress =
+    (savingsGoal.current_amount / savingsGoal.target_amount) * 100;
 
   return (
     <Box sx={{ padding: "16px" }}>
+      {/* Centered Alert */}
+      {alertMessage && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            zIndex: 1000,
+            width: "fit-content",
+            maxWidth: "90%",
+            background: "white",
+            borderRadius: "8px",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
+            padding: "16px",
+          }}
+        >
+          <Alert>
+            <AlertTitle style={{ fontSize: "1.25rem", fontWeight: "bold" }}>Notification</AlertTitle>
+            <AlertDescription style={{ fontSize: "1rem" }}>{alertMessage}</AlertDescription>
+          </Alert>
+        </Box>
+      )}
       <Typography variant="h4">{savingsGoal.name}</Typography>
       <Typography>
         Current Amount: €{savingsGoal.current_amount.toFixed(2)} / €
@@ -89,6 +123,7 @@ const SavingsGoalDetails: React.FC = () => {
           </Button>
         }
       />
+      <ChatRoom entityId={Number(id)} entityType="savingsGoal" />
     </Box>
   );
 };

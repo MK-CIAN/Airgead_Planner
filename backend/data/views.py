@@ -11,6 +11,7 @@ from datetime import date, datetime, timedelta
 from data.utils.news_utils import recommend_articles
 from django.contrib.auth import get_user_model
 from users.models import Notification
+from chat.models import ChatRoom
 CustomUser = get_user_model()  # Retrieve the custom user model
 
 
@@ -47,7 +48,8 @@ class CustomBudgetViewSet(viewsets.ModelViewSet):
         """
         Create a custom budget explicitly only when requested.
         """
-        serializer.save(user=self.request.user)
+        budget = serializer.save(user=self.request.user)
+        ChatRoom.objects.create(budget=budget)
         
 
     @action(detail=True, methods=['post'], url_path='items')
@@ -110,11 +112,16 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
     serializer_class = SavingsGoalSerializer
 
     def get_queryset(self):
-        queryset = SavingsGoal.objects.filter(user=self.request.user)
-        return queryset
+        user = self.request.user
+
+        # Include savings goals where the user is a contributor
+        return SavingsGoal.objects.filter(
+            models.Q(user=user) | models.Q(contributors=user)
+        ).distinct()
     
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        savings_goal = serializer.save(user=self.request.user)
+        ChatRoom.objects.create(savings_goal=savings_goal)
         
     @action(detail=True, methods=['post'], url_path='invite-friend')
     def invite_friend(self, request, pk=None):

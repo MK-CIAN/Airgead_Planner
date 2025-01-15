@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'knox',
     'django_rest_passwordreset',
+    'chat',
 ]
 
 MIDDLEWARE = [
@@ -92,6 +93,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'dashboard.wsgi.application'
 REST_FRAMEWORK = { 'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',) }

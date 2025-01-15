@@ -138,8 +138,8 @@ const Notifications: React.FC = () => {
                       {notification.sender || "Unknown sender"}
                     </Typography>
                   </Box>
-                  {(notification.type === "friend_request" ||
-                    notification.type === "budget_invite") || notification.type === "savings_invite" && (
+                  {((notification.type === "friend_request" ||
+                    notification.type === "budget_invite") || notification.type === "savings_invite") && (
                     <Box sx={{ display: "flex", gap: 1 }}>
                       <Button
                         onClick={() => handleAccept(notification)}
