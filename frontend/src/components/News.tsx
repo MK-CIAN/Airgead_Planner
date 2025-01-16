@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Axios from "./Axios";
+import { HoverEffect } from "./ui/hover-effect"; // Ensure this is correctly imported based on your project structure
 
 // Article interface
 interface Article {
@@ -36,55 +37,24 @@ const RecommendedArticles: React.FC = () => {
     fetchArticles();
   }, []);
 
+  // Map articles to the HoverEffect component's expected structure
+  const mappedArticles = articles.map((article) => ({
+    title: article.title,
+    description: article.description,
+    link: article.link,
+    image: article.image_url, // Include the image URL
+  }));
+  
+
   return (
-    <div>
-      <h1>Recommended News Articles</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Recommended News Articles</h1>
       {loading && <p>Loading articles...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
       {!loading && !error && articles.length === 0 && (
         <p>No recommended articles found.</p>
       )}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-          gap: "16px",
-        }}
-      >
-        {articles.map((article) => (
-          <div
-            key={article.id}
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-              padding: "16px",
-            }}
-          >
-            <h2>{article.title}</h2>
-            {article.image_url && (
-              <img
-                src={article.image_url}
-                alt={article.title}
-                style={{ width: "100%", height: "auto", borderRadius: "8px" }}
-              />
-            )}
-            <p>{article.description}</p>
-            <p>
-              <strong>Source:</strong> {article.source_name}
-            </p>
-            <p>
-              <strong>Published:</strong>{" "}
-              {new Date(article.pub_date).toLocaleDateString()}
-            </p>
-            <div>
-              <strong>Keywords:</strong> {article.keywords.join(", ")}
-            </div>
-            <a href={article.link} target="_blank" rel="noopener noreferrer">
-              Read more
-            </a>
-          </div>
-        ))}
-      </div>
+      <HoverEffect items={mappedArticles} className="mt-4" />
     </div>
   );
 };

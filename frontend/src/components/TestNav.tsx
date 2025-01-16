@@ -73,6 +73,16 @@ export default function TestNav({ content }: { content: React.ReactNode }) {
   return (
     <SidebarProvider>
       <Sidebar>
+        {/* Sidebar Header with Logo and Title */}
+        <div className="flex items-center space-x-4 p-4 bg-green-600 text-white">
+          <img
+            src="/src/assets/harpIcon.png"
+            alt="Logo"
+            className="w-8 h-8"
+          />
+          <span className="text-lg font-bold">Airgead Planner</span>
+        </div>
+
         <nav className="flex flex-col space-y-2 p-4">
           {drawerItems.map(({ path, label, icon: Icon, custom, onClick }) =>
             custom ? (
