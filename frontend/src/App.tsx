@@ -18,6 +18,7 @@ import UserInterest from './components/UserInterests'
 import CustomBudget from './components/CustomBudget'
 import CustomBudgetDetails from './components/CustomBudgetDetails'
 import SavingsGoalDetails from './components/SavingGoalDetails'
+import TestNav from './components/TestNav'
 
 function App() {
   const location = useLocation()
@@ -37,7 +38,7 @@ function App() {
 
         :
 
-        <Navbar
+        <TestNav
           content = {
             <Routes>
               <Route element={<ProtectedRoute/>}>
