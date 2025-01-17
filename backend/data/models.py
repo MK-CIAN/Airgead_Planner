@@ -222,7 +222,21 @@ class StockData(models.Model):
 
     def __str__(self):
         return f"{self.ticker} on {self.date}"
-   
+    
+class IncomeTax(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    salary = models.DecimalField(max_digits=12, decimal_places=2)
+    pension_contribution = models.DecimalField(max_digits=12, decimal_places=2)
+    income_tax = models.DecimalField(max_digits=12, decimal_places=2)
+    usc = models.DecimalField(max_digits=12, decimal_places=2)
+    prsi = models.DecimalField(max_digits=12, decimal_places=2)
+    total_deductions = models.DecimalField(max_digits=12, decimal_places=2)
+    net_salary = models.DecimalField(max_digits=12, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'income_tax'
+        
 # Portfolio 
 class Portfolio(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

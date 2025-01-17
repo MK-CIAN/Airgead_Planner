@@ -45,6 +45,18 @@ class LoanSerializer(serializers.ModelSerializer):
         model = Loan
         fields = ['id', 'user', 'name', 'balance', 'interest_rate', 'term_length', 'monthly_payment', 'total_interest', 'created_at']
         read_only_fields = ['id', 'created_at', 'user']
+        
+class IncomeTaxSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IncomeTax
+        fields = [
+            'id', 'user', 'salary', 'pension_contribution', 'income_tax',
+            'usc', 'prsi', 'total_deductions', 'net_salary', 'created_at'
+        ]
+        read_only_fields = ['id', 'user', 'created_at']  # Only 'user' and 'created_at' are read-only
+
+
+
 
 class StockDataSerializer(serializers.ModelSerializer):
     class Meta:

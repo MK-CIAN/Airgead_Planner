@@ -157,6 +157,22 @@ class LoanViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Automatically associate the loan with the authenticated user
         serializer.save(user=self.request.user)
+        
+from decimal import Decimal
+
+class IncomeTaxViewSet(viewsets.ModelViewSet):
+    serializer_class = IncomeTaxSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return IncomeTax.objects.filter(user=self.request.user)
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+
+
 
 # Stock Data Viewset
 class StockDataViewSet(viewsets.ViewSet):

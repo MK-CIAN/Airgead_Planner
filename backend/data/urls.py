@@ -9,6 +9,7 @@ router.register('budget', MonthlyBudgetViewSet, basename='budget')
 router.register('custom-budget', CustomBudgetViewSet, basename='custom-budget')
 router.register('savings', SavingsGoalViewSet, basename='savings')
 router.register('loans', LoanViewSet, basename='loans')
+router.register('income-tax', IncomeTaxViewSet, basename='income')
 router.register('stocks', StockDataViewSet, basename='stocks')
 router.register('portfolio', PortfolioViewSet, basename='portfolio')
 
