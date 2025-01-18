@@ -154,7 +154,7 @@ const TestBudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
             fontSize: "16px", // Increase or adjust font size for the label
           }}
         >
-          Total Budget
+          Remaining Amount
         </tspan>
       </text>
     );

@@ -207,224 +207,248 @@ const IncomeTaxCalculator: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6 text-center">
         Income Tax Calculator
       </h1>
-
-      <div className="space-y-4 mb-6">
+  
+      {/* Responsive Grid for Inputs and Saved Salaries */}
+      <div
+        className={`grid gap-6 ${
+          savedBreakdowns.length > 0 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"
+        }`}
+      >
+        {/* Input Section */}
         <div>
-          <Label htmlFor="salary">Enter Salary</Label>
-          <Input
-            id="salary"
-            type="number"
-            value={salary}
-            onChange={(e) => setSalary(Number(e.target.value))}
-            placeholder="Enter your salary"
-            className="w-full"
-          />
-        </div>
-        <div>
-          <Label htmlFor="pension">Enter Pension Contribution</Label>
-          <Input
-            id="pension"
-            type="number"
-            value={pensionContribution}
-            onChange={(e) => setPensionContribution(Number(e.target.value))}
-            placeholder="Enter your pension contribution"
-            className="w-full"
-          />
-        </div>
-        <div>
-          <Label htmlFor="marital-status">Marital Status</Label>
-          <select
-            id="marital-status"
-            value={maritalStatus}
-            onChange={(e) => setMaritalStatus(e.target.value)}
-            className="w-full border border-gray-300 rounded-md p-2"
-          >
-            <option value="single">Single</option>
-            <option value="married">Married</option>
-          </select>
-        </div>
-        <Button
-          onClick={calculateTaxBreakdown}
-          className="w-full bg-green-600 text-white"
-        >
-          Calculate
-        </Button>
-      </div>
-
-      {breakdown && (
-        <div className="border border-gray-300 rounded-md p-4 shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Tax Breakdown</h2>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Type</TableCell>
-                <TableCell>Amount (€)</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              <TableRow>
-                <TableCell>Taxable Income</TableCell>
-                <TableCell>{breakdown.taxable_income.toFixed(2)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Income Tax</TableCell>
-                <TableCell>{breakdown.income_tax.toFixed(2)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Tax Credit</TableCell>
-                <TableCell>{breakdown.tax_credit.toFixed(2)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Net Tax</TableCell>
-                <TableCell>{breakdown.net_tax.toFixed(2)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>USC</TableCell>
-                <TableCell>{breakdown.usc.toFixed(2)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>PRSI</TableCell>
-                <TableCell>{breakdown.prsi.toFixed(2)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Total Deductions</TableCell>
-                <TableCell>{breakdown.total_deductions.toFixed(2)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Net Salary</TableCell>
-                <TableCell>{breakdown.net_salary.toFixed(2)}</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
+          <div className="space-y-4">
+            <Label htmlFor="salary">Enter Salary</Label>
+            <Input
+              id="salary"
+              type="number"
+              value={salary}
+              onChange={(e) => setSalary(Number(e.target.value))}
+              placeholder="Enter your salary"
+              className="w-full"
+            />
+          </div>
+          <div className="space-y-4 mt-4">
+            <Label htmlFor="pension">Enter Pension Contribution</Label>
+            <Input
+              id="pension"
+              type="number"
+              value={pensionContribution}
+              onChange={(e) => setPensionContribution(Number(e.target.value))}
+              placeholder="Enter your pension contribution"
+              className="w-full"
+            />
+          </div>
+          <div className="space-y-4 mt-4">
+            <Label htmlFor="marital-status">Marital Status</Label>
+            <select
+              id="marital-status"
+              value={maritalStatus}
+              onChange={(e) => setMaritalStatus(e.target.value)}
+              className="w-full border border-gray-300 rounded-md p-2"
+            >
+              <option value="single">Single</option>
+              <option value="married">Married</option>
+            </select>
+          </div>
           <Button
-            onClick={saveBreakdown}
-            className="mt-4 w-full bg-green-500 text-white"
+            onClick={calculateTaxBreakdown}
+            className="w-full mt-4 bg-green-600 text-white"
           >
-            {isSaving ? "Saving..." : "Save Breakdown"}
+            Calculate
+          </Button>
+  
+          {/* Breakdown Section */}
+          {breakdown && (
+            <div className="border border-gray-300 rounded-md p-4 shadow-md mt-6">
+              <h2 className="text-xl font-semibold mb-4">Tax Breakdown</h2>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Type</TableCell>
+                    <TableCell>Amount (€)</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>Taxable Income</TableCell>
+                    <TableCell>{breakdown.taxable_income.toFixed(2)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Income Tax</TableCell>
+                    <TableCell>{breakdown.income_tax.toFixed(2)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Tax Credit</TableCell>
+                    <TableCell>{breakdown.tax_credit.toFixed(2)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Net Tax</TableCell>
+                    <TableCell>{breakdown.net_tax.toFixed(2)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>USC</TableCell>
+                    <TableCell>{breakdown.usc.toFixed(2)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>PRSI</TableCell>
+                    <TableCell>{breakdown.prsi.toFixed(2)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Total Deductions</TableCell>
+                    <TableCell>{breakdown.total_deductions.toFixed(2)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Net Salary</TableCell>
+                    <TableCell>{breakdown.net_salary.toFixed(2)}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+              <Button
+                onClick={saveBreakdown}
+                className="mt-4 w-full bg-green-500 text-white"
+              >
+                {isSaving ? "Saving..." : "Save Breakdown"}
+              </Button>
+            </div>
+          )}
+        </div>
+  
+        {/* Saved Salaries Section */}
+        {savedBreakdowns.length > 0 && (
+          <div>
+            <h2 className="text-xl font-bold mb-4">Saved Incomes</h2>
+            <div className="space-y-4">
+              {savedBreakdowns.map((income) => (
+                <div
+                  key={income.id}
+                  className="border border-gray-300 rounded-md p-4 shadow-md"
+                >
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p>
+                        <strong>Salary:</strong> €{income.salary.toFixed(2)}
+                      </p>
+                      <p>
+                        <strong>Pension:</strong> €
+                        {income.pension_contribution.toFixed(2)}
+                      </p>
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button
+                        className="bg-green-500 text-white"
+                        onClick={() => toggleCardExpansion(income.id)}
+                      >
+                        {expandedCardId === income.id ? "Collapse" : "Expand"}
+                      </Button>
+                      <Button
+                        className="bg-red-500 text-white"
+                        onClick={() => handleRemoveSalary(income.id)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                  {expandedCardId === income.id && (
+                    <div className="mt-4">
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Type</TableCell>
+                            <TableCell>Amount (€)</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell>Taxable Income</TableCell>
+                            <TableCell>
+                              {income.taxable_income.toFixed(2)}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>Income Tax</TableCell>
+                            <TableCell>{income.income_tax.toFixed(2)}</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>Tax Credit</TableCell>
+                            <TableCell>{income.tax_credit.toFixed(2)}</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>Net Tax</TableCell>
+                            <TableCell>{income.net_tax.toFixed(2)}</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>USC</TableCell>
+                            <TableCell>{income.usc.toFixed(2)}</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>PRSI</TableCell>
+                            <TableCell>{income.prsi.toFixed(2)}</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>Total Deductions</TableCell>
+                            <TableCell>
+                              {income.total_deductions.toFixed(2)}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>Net Salary</TableCell>
+                            <TableCell>{income.net_salary.toFixed(2)}</TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+  
+      {/* Comparison Section */}
+      {savedBreakdowns.length > 1 && (
+        <div className="space-y-4 mb-6 mt-8">
+          <Label>Select Base Income</Label>
+          <Select onValueChange={(value) => setBaseIncomeId(Number(value))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select Base Income" />
+            </SelectTrigger>
+            <SelectContent>
+              {savedBreakdowns.map((income) => (
+                <SelectItem key={income.id} value={String(income.id)}>
+                  Salary: €{income.salary.toFixed(2)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+  
+          <Label>Select New Income</Label>
+          <Select onValueChange={(value) => setNewIncomeId(Number(value))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select New Income" />
+            </SelectTrigger>
+            <SelectContent>
+              {savedBreakdowns.map((income) => (
+                <SelectItem key={income.id} value={String(income.id)}>
+                  Salary: €{income.salary.toFixed(2)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+  
+          <Button
+            onClick={compareIncomes}
+            className="w-full bg-green-600 text-white"
+          >
+            Compare
           </Button>
         </div>
       )}
-
-      <h2 className="text-xl font-bold mt-6">Saved Incomes</h2>
-      <div className="space-y-4 mt-4">
-        {savedBreakdowns.map((income) => (
-          <div
-            key={income.id}
-            className="border border-gray-300 rounded-md p-4 shadow-md"
-            onClick={() => toggleCardExpansion(income.id!)}
-          >
-            <div className="flex justify-between">
-              <div>
-                <p>
-                  <strong>Salary:</strong> €{income.salary.toFixed(2)}
-                </p>
-                <p>
-                  <strong>Pension:</strong> €
-                  {income.pension_contribution.toFixed(2)}
-                </p>
-              </div>
-              <Button className="bg-green-500 text-white">
-                {expandedCardId === income.id ? "Collapse" : "Expand"}
-              </Button>
-              <Button
-                className="bg-red-500 text-white"
-                onClick={() => handleRemoveSalary(income.id)}
-              >
-                Remove
-              </Button>
-            </div>
-            {expandedCardId === income.id && (
-              <div className="mt-4">
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Type</TableCell>
-                      <TableCell>Amount (€)</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>Taxable Income</TableCell>
-                      <TableCell>{income.taxable_income.toFixed(2)}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Income Tax</TableCell>
-                      <TableCell>{income.income_tax.toFixed(2)}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Tax Credit</TableCell>
-                      <TableCell>{income.tax_credit.toFixed(2)}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Net Tax</TableCell>
-                      <TableCell>{income.net_tax.toFixed(2)}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>USC</TableCell>
-                      <TableCell>{income.usc.toFixed(2)}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>PRSI</TableCell>
-                      <TableCell>{income.prsi.toFixed(2)}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Total Deductions</TableCell>
-                      <TableCell>
-                        {income.total_deductions.toFixed(2)}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Net Salary</TableCell>
-                      <TableCell>{income.net_salary.toFixed(2)}</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="space-y-4 mb-6">
-        <Label>Select Base Income</Label>
-        <Select onValueChange={(value) => setBaseIncomeId(Number(value))}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select Base Income" />
-          </SelectTrigger>
-          <SelectContent>
-            {savedBreakdowns.map((income) => (
-              <SelectItem key={income.id} value={String(income.id)}>
-                Salary: €{income.salary.toFixed(2)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Label>Select New Income</Label>
-        <Select onValueChange={(value) => setNewIncomeId(Number(value))}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select New Income" />
-          </SelectTrigger>
-          <SelectContent>
-            {savedBreakdowns.map((income) => (
-              <SelectItem key={income.id} value={String(income.id)}>
-                Salary: €{income.salary.toFixed(2)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Button
-          onClick={compareIncomes}
-          className="w-full bg-green-600 text-white"
-        >
-          Compare
-        </Button>
-      </div>
-
+  
       {comparisonData.baseIncome && comparisonData.newIncome && (
         <IncomeComparison
           data={{
@@ -434,7 +458,7 @@ const IncomeTaxCalculator: React.FC = () => {
         />
       )}
     </div>
-  );
+  );      
 };
 
 export default IncomeTaxCalculator;

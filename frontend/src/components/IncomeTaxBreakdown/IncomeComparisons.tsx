@@ -161,10 +161,10 @@ export const IncomeComparison: React.FC<IncomeComparisonProps> = ({ data }) => {
               </CardHeader>
               <CardContent>
                 <p>
-                  Based on an average cost of €25 per meal, you could afford{" "}
+                  Based on an average cost of €80 per meal for two people, you could afford{" "}
                   <strong>
                     {Math.floor(
-                      (newIncome.net_salary - baseIncome.net_salary) / 12 / 25
+                      (newIncome.net_salary - baseIncome.net_salary) / 12 / 80
                     )}
                   </strong>{" "}
                   additional meals out per month.
