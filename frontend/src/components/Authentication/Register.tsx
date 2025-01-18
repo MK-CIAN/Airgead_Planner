@@ -1,11 +1,11 @@
-import "../App.css";
+import "../../App.css";
 import { Box } from "@mui/system";
-import MyTextField from "./forms/MyTextField";
-import MyPassField from "./forms/MyPassField";
-import MyButton from "./forms/MyButton";
+import MyTextField from "../forms/MyTextField";
+import MyPassField from "../forms/MyPassField";
+import MyButton from "../forms/MyButton";
 import { Link } from "react-router-dom";
 import { useForm, SubmitHandler } from "react-hook-form";
-import Axios from "./Axios";
+import Axios from "../Axios";
 import { useNavigate } from "react-router-dom";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";

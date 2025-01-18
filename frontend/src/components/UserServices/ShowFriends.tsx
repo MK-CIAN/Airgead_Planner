@@ -8,7 +8,7 @@ import {
   Box,
   Typography,
 } from "@mui/material";
-import Axios from "./Axios";
+import Axios from "../Axios";
 
 interface Friend {
   id: number;

@@ -10,9 +10,9 @@ import {
   ListItemText,
   Box,
 } from "@mui/material";
-import ShowFriends from "./ShowFriends";
+import ShowFriends from "./UserServices/ShowFriends";
 import SavingsChart from "./charts/SavingsChart";
-import ChatRoom from "./ChatRoom";
+import ChatRoom from "./UserServices/ChatRoom";
 
 interface Contributor {
   id: number;

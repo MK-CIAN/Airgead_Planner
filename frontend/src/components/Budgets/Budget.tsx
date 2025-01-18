@@ -1,15 +1,15 @@
 // Budget.tsx
 import React, { useState, useEffect } from 'react';
-import Axios from './Axios';
-import BudgetChart from "./charts/BudgetChart";
-import TestBudgetChart from './charts/TestBudgetChart';
-import BudgetForm from './forms/BudgetForm';
+import Axios from '../Axios';
+import BudgetChart from "../charts/BudgetChart";
+import TestBudgetChart from '../charts/TestBudgetChart';
+import BudgetForm from '../forms/BudgetForm';
 import { Button, IconButton, List, ListItem, ListItemText, Typography, useMediaQuery } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import dayjs, { Dayjs } from 'dayjs';
 import { useTheme } from "@mui/material/styles";
-import '../App.css';
+import '../../App.css';
 
 interface BudgetData {
   id: number;

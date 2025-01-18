@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Axios from "./Axios";
+import Axios from "../Axios";
 import {
   Button,
   Typography,
@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import dayjs, { Dayjs } from "dayjs";
-import BudgetChart from "./charts/BudgetChart";
+import BudgetChart from "../charts/BudgetChart";
 
 interface CustomBudget {
   id: number;

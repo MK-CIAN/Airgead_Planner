@@ -15,7 +15,7 @@ import { useLocation, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Notification from "./Notifications"; // Assume a replacement exists
 import Axios from "./Axios";
-import Search from "./Search";
+import Search from "./UserServices/Search";
 import "../Styles/NavBar.css";
 
 import {

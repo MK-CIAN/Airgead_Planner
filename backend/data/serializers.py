@@ -50,7 +50,7 @@ class IncomeTaxSerializer(serializers.ModelSerializer):
     class Meta:
         model = IncomeTax
         fields = [
-            'id', 'user', 'salary', 'pension_contribution', 'income_tax',
+            'id', 'user', 'salary', 'pension_contribution', 'taxable_income', 'income_tax', 'tax_credit', 'net_tax',
             'usc', 'prsi', 'total_deductions', 'net_salary', 'created_at'
         ]
         read_only_fields = ['id', 'user', 'created_at']  # Only 'user' and 'created_at' are read-only

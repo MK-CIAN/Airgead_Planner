@@ -11,7 +11,7 @@ import {
   IconButton,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import Axios from "./Axios";
+import Axios from "../Axios";
 
 interface User {
   id: number;

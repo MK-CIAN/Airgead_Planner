@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import Axios from "./Axios";
-import BudgetChart from "./charts/BudgetChart";
-import CustomBudgetForm from "./forms/CustomBudgetForm";
+import Axios from "../Axios";
+import BudgetChart from "../charts/BudgetChart";
+import CustomBudgetForm from "../forms/CustomBudgetForm";
 import {
   Typography,
   List,
@@ -12,10 +12,10 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
-import ShowFriends from "./ShowFriends";
-import "../App.css";
-import ChatRoom from "./ChatRoom";
-import TestBudgetChart from "./charts/TestBudgetChart";
+import ShowFriends from "../UserServices/ShowFriends";
+import "../../App.css";
+import ChatRoom from "../UserServices/ChatRoom";
+import TestBudgetChart from "../charts/TestBudgetChart";
 
 interface BudgetData {
   id: number;

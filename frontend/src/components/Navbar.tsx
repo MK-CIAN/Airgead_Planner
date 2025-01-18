@@ -25,7 +25,7 @@ import { useNavigate } from "react-router-dom";
 import { IconButton, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
-import Search from "./Search";
+import Search from "./UserServices/Search";
 import Notifications from "./Notifications";
 import "../Styles/NavBar.css";
 
