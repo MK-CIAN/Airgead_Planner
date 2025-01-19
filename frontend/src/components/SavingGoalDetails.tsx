@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from "react";
-import Axios from "./Axios";
 import { useParams } from "react-router-dom";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Axios from "./Axios";
+import { Box, Typography } from "@mui/material";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Button,
-  Typography,
-  List,
-  ListItem,
-  ListItemText,
-  Box,
-} from "@mui/material";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from "@/components/ui/table";
+import SavingsChart from "./charts/TestSavingsChart";
+import UpdateSavingsForm from "./Savings/SavingsUpdateForms";
 import ShowFriends from "./UserServices/ShowFriends";
-import SavingsChart from "./charts/SavingsChart";
 import ChatRoom from "./UserServices/ChatRoom";
 
 interface Contributor {
@@ -37,7 +41,6 @@ const SavingsGoalDetails: React.FC = () => {
       .then((response) => {
         const data = response.data;
 
-        // Ensure amounts are numbers
         setSavingsGoal({
           ...data,
           current_amount: Number(data.current_amount),
@@ -47,19 +50,31 @@ const SavingsGoalDetails: React.FC = () => {
       .catch((error) => console.error("Error fetching savings goal:", error));
   }, [id]);
 
-  const handleInviteFriend = async (friendId: number) => {
-    Axios.post(`data/savings/${id}/invite-friend/`, {
-      friend_id: friendId,
-    })
-      .then(() => {
-        setAlertMessage("Invite to join goal sent.");
-        setTimeout(() => setAlertMessage(null), 3000); // Dismiss after 3 seconds
-      })
-      .catch((error) => {
-        console.error("Error inviting contributor:", error);
-        setAlertMessage("Failed to invite contributor.");
-        setTimeout(() => setAlertMessage(null), 3000); // Dismiss after 3 seconds
+  const handleUpdate = async (updatedGoal: SavingsGoal) => {
+    try {
+      const response = await Axios.get(`data/savings/${updatedGoal.id}/`);
+      setSavingsGoal({
+        ...response.data,
+        current_amount: Number(response.data.current_amount),
+        target_amount: Number(response.data.target_amount),
       });
+    } catch (error) {
+      console.error("Error fetching updated savings goal:", error);
+    }
+  };
+
+  const handleInviteFriend = async (friendId: number) => {
+    try {
+      await Axios.post(`data/savings/${id}/invite-friend/`, {
+        friend_id: friendId,
+      });
+      setAlertMessage("Invite to join goal sent.");
+      setTimeout(() => setAlertMessage(null), 3000);
+    } catch (error) {
+      console.error("Error inviting contributor:", error);
+      setAlertMessage("Failed to invite contributor.");
+      setTimeout(() => setAlertMessage(null), 3000);
+    }
   };
 
   if (!savingsGoal) {
@@ -70,61 +85,72 @@ const SavingsGoalDetails: React.FC = () => {
     (savingsGoal.current_amount / savingsGoal.target_amount) * 100;
 
   return (
-    <Box sx={{ padding: "16px" }}>
-      {/* Centered Alert */}
-      {alertMessage && (
-        <Box
-          sx={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            zIndex: 1000,
-            width: "fit-content",
-            maxWidth: "90%",
-            background: "white",
-            borderRadius: "8px",
-            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
-            padding: "16px",
-          }}
-        >
-          <Alert>
-            <AlertTitle style={{ fontSize: "1.25rem", fontWeight: "bold" }}>Notification</AlertTitle>
-            <AlertDescription style={{ fontSize: "1rem" }}>{alertMessage}</AlertDescription>
-          </Alert>
-        </Box>
-      )}
-      <Typography variant="h4">{savingsGoal.name}</Typography>
-      <Typography>
-        Current Amount: €{savingsGoal.current_amount.toFixed(2)} / €
-        {savingsGoal.target_amount.toFixed(2)}
-      </Typography>
+    <div className="max-w-7xl mx-auto p-6">
+      <h1 className="text-2xl font-bold text-center mb-6">{savingsGoal.name}</h1>
 
-      {/* Savings Chart */}
-      <SavingsChart progress={progress} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Chart and Summary */}
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle>Progress</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SavingsChart progress={progress} />
+            <Typography className="text-center mt-4">
+              {`€${savingsGoal.current_amount.toFixed(2)} / €${savingsGoal.target_amount.toFixed(
+                2
+              )}`}
+            </Typography>
+          </CardContent>
+        </Card>
 
-      <Typography variant="h6" style={{ marginTop: "16px" }}>
-        Contributors
-      </Typography>
-      <List>
-        {savingsGoal.contributors.map((contributor) => (
-          <ListItem key={contributor.id}>
-            <ListItemText primary={contributor.username} />
-          </ListItem>
-        ))}
-      </List>
-      <ShowFriends
-        entityId={id} // Savings Goal ID
-        entityType="savingsGoal" // Context is savings goal
-        onInvite={handleInviteFriend}
-        triggerElement={
-          <Button variant="contained" color="primary">
-            Invite Friends
-          </Button>
-        }
-      />
-      <ChatRoom entityId={Number(id)} entityType="savingsGoal" />
-    </Box>
+        {/* Contribution Form */}
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle>Add Contribution</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <UpdateSavingsForm savingsGoal={savingsGoal} onUpdate={handleUpdate} />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Contributors */}
+      <div className="mt-6">
+        <h2 className="text-xl font-semibold mb-4">Contributors</h2>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Contributor</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {savingsGoal.contributors.map((contributor) => (
+              <TableRow key={contributor.id}>
+                <TableCell>{contributor.username}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Invite Friend */}
+      <div className="mt-6">
+        <ShowFriends
+          entityId={id}
+          entityType="savingsGoal"
+          onInvite={handleInviteFriend}
+          triggerElement={
+            <Button className="w-full">Invite Friends</Button>
+          }
+        />
+      </div>
+
+      {/* Chat Room */}
+      <div className="mt-6">
+        <ChatRoom entityId={Number(id)} entityType="savingsGoal" />
+      </div>
+    </div>
   );
 };
 

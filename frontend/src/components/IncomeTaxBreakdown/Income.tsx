@@ -18,6 +18,7 @@ import {
   SelectValue,
   SelectContent,
 } from "../ui/select";
+import { toast } from "@/hooks/use-toast";
 
 interface IncomeTaxBreakdown {
   id: number;
@@ -150,7 +151,9 @@ const IncomeTaxCalculator: React.FC = () => {
 
     Axios.post("/data/income-tax/", breakdown)
       .then((response) => {
-        alert("Tax breakdown saved successfully!");
+        toast({
+          title: "Salray saved successfully!",
+        });
 
         // Add the saved breakdown to the list with the returned ID
         setSavedBreakdowns((prev) => [

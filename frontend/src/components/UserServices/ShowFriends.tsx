@@ -9,6 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import Axios from "../Axios";
+import { toast } from "@/hooks/use-toast";
 
 interface Friend {
   id: number;
@@ -116,7 +117,13 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
                     variant="contained"
                     color="primary"
                     size="small"
-                    onClick={() => onInvite(friend.id)}
+                    onClick={() => {
+                      onInvite(friend.id);
+                      toast({
+                        title: "Friend invited",
+                        description: friend.username,
+                      });
+                    }}
                   >
                     Invite
                   </Button>
