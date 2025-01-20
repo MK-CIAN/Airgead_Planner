@@ -123,6 +123,32 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
         savings_goal = serializer.save(user=self.request.user)
         ChatRoom.objects.create(savings_goal=savings_goal)
         
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        current_amount = request.data.get("current_amount", instance.current_amount)
+
+        # Ensure current_amount doesn't exceed the target_amount
+        if float(current_amount) > instance.target_amount:
+            instance.current_amount = instance.target_amount
+        else:
+            instance.current_amount = current_amount
+
+        instance.save()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=["post"], url_path="upload-image")
+    def upload_image(self, request, pk=None):
+        savings_goal = self.get_object()
+        image = request.FILES.get("image")
+
+        if not image:
+            return Response({"error": "No image provided."}, status=400)
+
+        savings_goal.image = image
+        savings_goal.save()
+        return Response({"image_url": savings_goal.image.url})
+        
     @action(detail=True, methods=['post'], url_path='invite-friend')
     def invite_friend(self, request, pk=None):
         savings_goal = self.get_object()

@@ -1,7 +1,7 @@
 // Savings.tsx
 import React, { useState, useEffect } from "react";
 import Axios from "./Axios";
-import SavingsChart from "./charts/SavingsChart";
+import SavingsChart from "./charts/TestSavingsChart";
 import SavingsForm from "./forms/SavingsForms";
 import { Button, Typography, IconButton, useMediaQuery } from "@mui/material";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
@@ -10,6 +10,7 @@ import dayjs, { Dayjs } from "dayjs";
 import "../App.css";
 import "../styles/Savings.css";
 import { useNavigate } from "react-router-dom";
+import { progress } from "framer-motion";
 
 interface SavingsGoalData {
   id: string;
@@ -270,7 +271,7 @@ const Savings: React.FC = () => {
 
             {/* Savings Chart */}
             <SavingsChart
-              progress={(goal.displayed_amount / goal.target_amount) * 100}
+              progress={goal.progress}
             />
 
             <div className="savings_goals_button">

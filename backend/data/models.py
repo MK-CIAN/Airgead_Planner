@@ -185,6 +185,7 @@ class SavingsGoal(models.Model):
     contributors = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="contributed_savings", blank=True
     )
+    image = models.ImageField(upload_to="savings_images/", null=True, blank=True)
 
     class Meta:
         db_table = 'savings_goal'

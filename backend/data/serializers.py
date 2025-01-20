@@ -28,17 +28,42 @@ class CustomBudgetSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['user']
         
+from rest_framework import serializers
+
 class SavingsGoalSerializer(serializers.ModelSerializer):
     contributors = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=get_user_model().objects.all(),
         required=False
     )
-    
+    image_url = serializers.SerializerMethodField()  # Add this field
+
     class Meta:
         model = SavingsGoal
-        fields = ['id', 'user', 'name', 'target_amount', 'current_amount', 'start_date', 'target_date', 'monthly_contribution', 'contributors']
+        fields = [
+            'id',
+            'user',
+            'name',
+            'target_amount',
+            'current_amount',
+            'start_date',
+            'target_date',
+            'monthly_contribution',
+            'contributors',
+            'image',
+            'image_url',  # Include the image URL
+        ]
         read_only_fields = ['user']
+
+    def get_image_url(self, obj):
+        """
+        Return the full URL for the image field if it exists.
+        """
+        request = self.context.get('request')  # Get the current request context
+        if obj.image:
+            return request.build_absolute_uri(obj.image.url)
+        return None
+
 
 class LoanSerializer(serializers.ModelSerializer):
     class Meta:
@@ -54,8 +79,6 @@ class IncomeTaxSerializer(serializers.ModelSerializer):
             'usc', 'prsi', 'total_deductions', 'net_salary', 'created_at'
         ]
         read_only_fields = ['id', 'user', 'created_at']  # Only 'user' and 'created_at' are read-only
-
-
 
 
 class StockDataSerializer(serializers.ModelSerializer):

@@ -9,19 +9,27 @@ interface UpdateSavingsFormProps {
   savingsGoal: {
     id: number;
     current_amount: number;
+    target_amount: number;
   };
   onUpdate: (updatedGoal: any) => void;
 }
 
-const UpdateSavingsForm: React.FC<UpdateSavingsFormProps> = ({ savingsGoal, onUpdate }) => {
+const UpdateSavingsForm: React.FC<UpdateSavingsFormProps> = ({
+  savingsGoal,
+  onUpdate,
+}) => {
   const [contribution, setContribution] = useState<number>(0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      // Calculate the new amount
-      const newAmount = savingsGoal.current_amount + contribution;
 
+    // Calculate new amount, ensuring it doesn't exceed the target
+    const newAmount = Math.min(
+      savingsGoal.current_amount + contribution,
+      savingsGoal.target_amount
+    );
+
+    try {
       const response = await Axios.patch(`data/savings/${savingsGoal.id}/`, {
         current_amount: newAmount,
       });
@@ -30,30 +38,35 @@ const UpdateSavingsForm: React.FC<UpdateSavingsFormProps> = ({ savingsGoal, onUp
       console.error("Error updating savings goal:", error);
     }
   };
-  
+
+  const remainingAmount =
+    savingsGoal.target_amount - savingsGoal.current_amount;
 
   return (
-    <Card className="mt-4">
-      <CardContent>
+    <div className="mt-4">
         <form onSubmit={handleSubmit}>
           <div className="flex flex-col space-y-4">
             <div>
-              <Label htmlFor="currentAmount">Current Amount</Label>
+              <Label htmlFor="contribution">Contribution Amount</Label>
               <Input
-                id="currentAmount"
+                id="contribution"
                 type="number"
                 value={contribution}
                 onChange={(e) => setContribution(Number(e.target.value))}
+                placeholder={`Max: €${remainingAmount.toFixed(2)}`}
                 className="mt-1"
               />
             </div>
-            <Button type="submit" className="w-full">
-              Update Goal
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={contribution <= 0 || contribution > remainingAmount}
+            >
+              Add Contribution
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+    </div>
   );
 };
 
