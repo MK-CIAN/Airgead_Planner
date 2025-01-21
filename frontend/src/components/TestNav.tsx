@@ -58,7 +58,7 @@ export default function TestNav({ content }: { content: React.ReactNode }) {
     { path: "/budget", label: "Budget", icon: PieChart },
     { path: "/custom-budget", label: "Custom Budgets", icon: PieChart },
     { path: "/savings", label: "Savings", icon: Savings },
-    { path: "/pensions", label: "Pension Strategies", icon: TrendingUp },
+    { path: "/pensions", label: "Pension Planner", icon: TrendingUp },
     { path: "/stocksim", label: "Stock Market Simulator", icon: SsidChart },
     { path: "/news", label: "News For You", icon: Newspaper },
     { path: "/loans", label: "Loan Repayment Calculator", icon: TrendingDown },

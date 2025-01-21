@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import Axios from "./Axios";
+import Axios from "../Axios";
 import { Box, Typography } from "@mui/material";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,11 +20,11 @@ import {
   TableHead,
   TableRow,
 } from "@/components/ui/table";
-import SavingsChart from "./charts/TestSavingsChart";
-import UpdateSavingsForm from "./Savings/SavingsUpdateForms";
-import ShowFriends from "./UserServices/ShowFriends";
-import ChatRoom from "./UserServices/ChatRoom";
-import ProgressiveImageReveal from "./Savings/ProgressiveImageReveal";
+import SavingsChart from "../charts/TestSavingsChart";
+import UpdateSavingsForm from "./SavingsUpdateForms";
+import ShowFriends from "../UserServices/ShowFriends";
+import ChatRoom from "../UserServices/ChatRoom";
+import ProgressiveImageReveal from "./ProgressiveImageReveal";
 
 interface Contributor {
   id: number;
@@ -163,6 +163,9 @@ const SavingsGoalDetails: React.FC = () => {
                       imageUrl={savingsGoal.image_url}
                       progress={Math.min(progress, 100)} // Ensure progress doesn't exceed 100%
                     />
+                    <div className="flex items-center gap-2 font-medium leading-none">
+                      Continuously Add to Your Savings Goal to Reveal the Image
+                    </div>
                   </CarouselItem>
                 )}
               </CarouselContent>
