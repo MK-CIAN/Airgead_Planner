@@ -197,17 +197,17 @@ const PensionPlanner: React.FC = () => {
                   <TableRow>
                     <TableCell>Total Contributions</TableCell>
                     <TableCell>
-                      {projection.total_contributions.toFixed(2)}
+                      €{projection.total_contributions.toFixed(2)}
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Total Growth</TableCell>
-                    <TableCell>{projection.total_growth.toFixed(2)}</TableCell>
+                    <TableCell>€{projection.total_growth.toFixed(2)}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Final Balance</TableCell>
                     <TableCell>
-                      {projection.final_pension_balance.toFixed(2)}
+                      €{projection.final_pension_balance.toFixed(2)}
                     </TableCell>
                   </TableRow>
                 </TableBody>

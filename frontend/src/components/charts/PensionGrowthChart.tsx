@@ -16,11 +16,11 @@ interface PensionGrowthChartProps {
 const chartConfig = {
   contributions: {
     label: "Total Contributions",
-    color: "hsl(200, 70%, 50%)", // Blue hue
+    color: "hsl(150, 70%, 45%)", // Green Hue
   },
   totalValue: {
     label: "Total Value",
-    color: "hsl(120, 70%, 40%)", // Green hue
+    color: "hsl(120, 60%, 40%)", // Darker Green hue
   },
 } satisfies ChartConfig;
 
@@ -79,24 +79,24 @@ export function PensionGrowthChart({
               <linearGradient id="fillContributions" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="hsl(200, 70%, 50%)"
+                  stopColor="hsl(150, 70%, 45%)"
                   stopOpacity={0.8}
                 />
                 <stop
                   offset="95%"
-                  stopColor="hsl(200, 70%, 50%)"
+                  stopColor="hsl(150, 70%, 45%)"
                   stopOpacity={0.1}
                 />
               </linearGradient>
               <linearGradient id="fillTotalValue" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="hsl(120, 70%, 40%)"
+                  stopColor="hsl(120, 60%, 40%)"
                   stopOpacity={0.8}
                 />
                 <stop
                   offset="95%"
-                  stopColor="hsl(120, 70%, 40%)"
+                  stopColor="hsl(120, 60%, 40%)"
                   stopOpacity={0.1}
                 />
               </linearGradient>
@@ -105,7 +105,7 @@ export function PensionGrowthChart({
               dataKey="contributions"
               type="monotone"
               fill="url(#fillContributions)"
-              stroke="hsl(200, 70%, 50%)"
+              stroke="hsl(150, 70%, 45%)"
               name="Contributions"
               strokeWidth={2}
             />
@@ -113,7 +113,7 @@ export function PensionGrowthChart({
               dataKey="totalValue"
               type="monotone"
               fill="url(#fillTotalValue)"
-              stroke="hsl(120, 70%, 40%)"
+              stroke="hsl(120, 60%, 40%)"
               name="Total Value"
               strokeWidth={2}
             />
