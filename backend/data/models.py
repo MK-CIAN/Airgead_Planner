@@ -223,6 +223,23 @@ class IncomeTax(models.Model):
 
     class Meta:
         db_table = 'income_tax'
+        
+class PensionProjection(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    starting_age = models.IntegerField()
+    retirement_age = models.IntegerField()
+    annual_salary = models.DecimalField(max_digits=12, decimal_places=2)
+    contribution_rate = models.DecimalField(max_digits=5, decimal_places=2)
+    employer_match = models.DecimalField(max_digits=5, decimal_places=2)
+    roi = models.DecimalField(max_digits=5, decimal_places=2)
+    total_contributions = models.DecimalField(max_digits=12, decimal_places=2)
+    total_growth = models.DecimalField(max_digits=12, decimal_places=2)
+    final_pension_balance = models.DecimalField(max_digits=12, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'pension_projection'
+
 
 # Stock Data
 class StockData(models.Model):

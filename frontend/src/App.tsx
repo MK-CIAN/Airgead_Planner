@@ -19,48 +19,47 @@ import CustomBudget from './components/Budgets/CustomBudget'
 import CustomBudgetDetails from './components/Budgets/CustomBudgetDetails'
 import SavingsGoalDetails from './components/Savings/SavingGoalDetails'
 import TestNav from './components/TestNav'
+import { Toaster } from './components/ui/toaster';
 
 function App() {
   const location = useLocation()
-  const noNavbar = location.pathname === "/" || location.pathname === "/register" || location.pathname.includes("password")
+  const noNavbar = location.pathname === "/" || location.pathname === "/register" || location.pathname.includes("password");
 
   return (
     <>
-      {
-        noNavbar ?
-
+      {/* Add Toaster here */}
+      <Toaster />
+      {noNavbar ? (
         <Routes>
-          <Route path="/" element={<Login/>}/>
-          <Route path="/register" element={<Register/>}/>
-          <Route path="/request/password_reset" element={<PasswordResetRequest/>}/>
-          <Route path="/password-reset/:token" element={<PasswordReset/>}/>
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/request/password_reset" element={<PasswordResetRequest />} />
+          <Route path="/password-reset/:token" element={<PasswordReset />} />
         </Routes>
-
-        :
-
+      ) : (
         <TestNav
-          content = {
+          content={
             <Routes>
-              <Route element={<ProtectedRoute/>}>
-                <Route path="/home" element={<Dashboard/>}/>
-                <Route path="/budget" element={<Budget/>}/>
-                <Route path="/custom-budget" element={<CustomBudget/>}/>
+              <Route element={<ProtectedRoute />}>
+                <Route path="/home" element={<Dashboard />} />
+                <Route path="/budget" element={<Budget />} />
+                <Route path="/custom-budget" element={<CustomBudget />} />
                 <Route path="/custom-budget/:id" element={<CustomBudgetDetails />} />
-                <Route path="/savings" element={<Savings/>}/>
+                <Route path="/savings" element={<Savings />} />
                 <Route path="/savings/:id" element={<SavingsGoalDetails />} />
-                <Route path="/loans" element={<Loans/>}/>
-                <Route path="/pensions" element={<Pensions/>}/>
-                <Route path="/stocksim" element={<StockSim/>}/>
-                <Route path="/news" element={<News/>}/>
-                <Route path="/income" element={<Income/>}/>
-                <Route path="/userinterests" element={<UserInterest/>}/>
+                <Route path="/loans" element={<Loans />} />
+                <Route path="/pensions" element={<Pensions />} />
+                <Route path="/stocksim" element={<StockSim />} />
+                <Route path="/news" element={<News />} />
+                <Route path="/income" element={<Income />} />
+                <Route path="/userinterests" element={<UserInterest />} />
               </Route>
             </Routes>
           }
         />
-      }
+      )}
     </>
-  )
+  );
 }
 
 export default App

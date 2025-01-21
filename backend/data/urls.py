@@ -10,6 +10,7 @@ router.register('custom-budget', CustomBudgetViewSet, basename='custom-budget')
 router.register('savings', SavingsGoalViewSet, basename='savings')
 router.register('loans', LoanViewSet, basename='loans')
 router.register('income-tax', IncomeTaxViewSet, basename='income')
+router.register('pension-planner', PensionProjectionViewSet, basename='pension-planner')
 router.register('stocks', StockDataViewSet, basename='stocks')
 router.register('portfolio', PortfolioViewSet, basename='portfolio')
 
@@ -17,6 +18,6 @@ router.register('portfolio', PortfolioViewSet, basename='portfolio')
 urlpatterns = router.urls + [
     path('reccomended-articles/', RecommendedArticlesView.as_view(), name='reccomended-articles'),
     path('portfolio/history/', PortfolioHistoryView.as_view(), name='portfolio-history'),
-    path('interests/', UserInterestsView.as_view(), name='user-interests')
+    path('interests/', UserInterestsView.as_view(), name='user-interests'),
 ]
 

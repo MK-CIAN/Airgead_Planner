@@ -80,7 +80,15 @@ class IncomeTaxSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'user', 'created_at']  # Only 'user' and 'created_at' are read-only
 
-
+class PensionProjectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PensionProjection
+        fields = ['id', 'user', 'starting_age', 'retirement_age', 'annual_salary', 'contribution_rate',
+                  'employer_match', 'roi', 'total_contributions', 'total_growth', 'final_pension_balance', 'created_at'
+        ]
+        
+        read_only_fields = ['id', 'user', 'created_at']  # Only 'user' and 'created_at' are read-only
+        
 class StockDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = StockData
