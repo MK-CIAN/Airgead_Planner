@@ -144,96 +144,47 @@ const PensionPlanner: React.FC = () => {
             value={startingAge}
             onChange={(e) => setStartingAge(Number(e.target.value))}
           />
-
+  
           <Label>Retirement Age</Label>
           <Input
             type="number"
             value={retirementAge}
             onChange={(e) => setRetirementAge(Number(e.target.value))}
           />
-
+  
           <Label>Annual Salary (€)</Label>
           <Input
             type="number"
             value={annualSalary}
             onChange={(e) => setAnnualSalary(Number(e.target.value))}
           />
-
+  
           <Label>Contribution Rate (%)</Label>
           <Input
             type="number"
             value={contributionRate}
             onChange={(e) => setContributionRate(Number(e.target.value))}
           />
-
+  
           <Label>Employer Match (%)</Label>
           <Input
             type="number"
             value={employerMatch}
             onChange={(e) => setEmployerMatch(Number(e.target.value))}
           />
-
+  
           <Label>Rate of Return (ROI %)</Label>
           <Input
             type="number"
             value={roi}
             onChange={(e) => setRoi(Number(e.target.value))}
           />
-
+  
           <Button onClick={calculateProjection} className="mt-4">
             Calculate
           </Button>
-          {projection && (
-            <div className="mt-6">
-              <h2 className="text-xl font-bold">Projection Details</h2>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Metric</TableCell>
-                    <TableCell>Value (€)</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableRow>
-                    <TableCell>Total Contributions</TableCell>
-                    <TableCell>
-                      €{projection.total_contributions.toFixed(2)}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Total Growth</TableCell>
-                    <TableCell>€{projection.total_growth.toFixed(2)}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Final Balance</TableCell>
-                    <TableCell>
-                      €{projection.final_pension_balance.toFixed(2)}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-              <Button onClick={saveProjection} className="mt-4">
-                {isSaving ? "Saving..." : "Save Projection"}
-              </Button>
-            </div>
-          )}
-
-          {/* Display Chart */}
-          {projection && (
-            <div className="mt-10">
-              <PensionGrowthChart
-                annualContribution={
-                  projection.annual_salary *
-                  ((projection.contribution_rate + projection.employer_match) /
-                    100)
-                }
-                rateOfReturn={projection.roi / 100}
-                years={projection.retirement_age - projection.starting_age}
-              />
-            </div>
-          )}
         </div>
-
+  
         {/* Saved Projections Section */}
         <div>
           <h2 className="text-xl font-bold mb-4">Saved Projections</h2>
@@ -259,8 +210,61 @@ const PensionPlanner: React.FC = () => {
           )}
         </div>
       </div>
+  
+      {/* Centered Breakdown Table and Chart */}
+      {projection && (
+        <div className="mt-10 flex flex-col items-center">
+          {/* Breakdown Table */}
+          <div className="w-full max-w-3xl">
+            <h2 className="text-xl font-bold mb-4 text-center">
+              Projection Details
+            </h2>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Metric</TableCell>
+                  <TableCell>Value (€)</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell>Total Contributions</TableCell>
+                  <TableCell>
+                    €{projection.total_contributions.toFixed(2)}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Total Growth</TableCell>
+                  <TableCell>€{projection.total_growth.toFixed(2)}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Final Balance</TableCell>
+                  <TableCell>
+                    €{projection.final_pension_balance.toFixed(2)}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+            <Button onClick={saveProjection} className="mt-4 w-full">
+              {isSaving ? "Saving..." : "Save Projection"}
+            </Button>
+          </div>
+  
+          {/* Growth Chart */}
+          <div className="mt-10 w-full max-w-4xl">
+            <PensionGrowthChart
+              annualContribution={
+                projection.annual_salary *
+                ((projection.contribution_rate + projection.employer_match) / 100)
+              }
+              rateOfReturn={projection.roi / 100}
+              years={projection.retirement_age - projection.starting_age}
+            />
+          </div>
+        </div>
+      )}
     </div>
-  );
+  );  
 };
 
 export default PensionPlanner;

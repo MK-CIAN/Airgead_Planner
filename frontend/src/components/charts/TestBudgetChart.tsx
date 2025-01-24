@@ -181,7 +181,28 @@ const TestBudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
           >
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent hideLabel />}
+              content={({ active, payload }) => {
+                if (active && payload && payload.length) {
+                  const { name, value, fill } = payload[0].payload;
+                  return (
+                    <div
+                      style={{
+                        backgroundColor: "#ffffff",
+                        border: `1px solid ${fill}`,
+                        borderRadius: "8px",
+                        padding: "8px 12px",
+                        fontSize: "14px",
+                        color: "#000",
+                      }}
+                    >
+                      <strong>{name}</strong>
+                      <div>€ {value.toLocaleString()}</div>{" "}
+                      {/* € sign and formatting */}
+                    </div>
+                  );
+                }
+                return null;
+              }}
             />
             <Pie
               data={chartData}

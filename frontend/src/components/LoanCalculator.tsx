@@ -2,7 +2,10 @@ import React, { useState, useEffect } from "react";
 import Axios from "./Axios";
 import LoanForm from "./forms/LoanForm";
 import LoanChart from "./charts/LoanChart";
-import {Button, Typography, Box, Card, CardContent, TextField} from "@mui/material";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Card, CardContent } from "./ui/card";
 import dayjs from "dayjs";
 import "../App.css";
 
@@ -218,59 +221,46 @@ const LoanCalculator: React.FC = () => {
   };
 
   return (
-    <div>
-      <h1>Loan Repayment Calculator</h1>
+    <div className="container mx-auto p-6">
+      <h1 className="text-3xl font-semibold mb-6">Loan Repayment Calculator</h1>
       <Button
-        className="loan-button"
-        variant="contained"
-        color="primary"
         onClick={toggleFormVisibility}
-        style={{ marginBottom: "20px" }}
+        className="bg-green-500 text-white px-4 py-2 mb-6 rounded"
       >
         {isFormVisible ? "Hide Form" : "Add New Loan"}
       </Button>
-    
+  
       {isFormVisible && (
-        <LoanForm onCalculateRepayment={handleCalculateRepayment} />
+        <div className="mb-6">
+          <LoanForm onCalculateRepayment={handleCalculateRepayment} />
+        </div>
       )}
-
+  
       {/* Expanded Loan View */}
       {editingLoan && (
-        <Box
-          className="expanded-loan-container"
-          style={{ width: "80%", marginBottom: "20px"}}
-        >
+        <div className="w-full lg:w-4/5 mx-auto mb-6">
           {loans
             .filter((loan) => loan.id === editingLoan)
             .map((loan) => (
-              <Card key={loan.id} style={{ width: "100%" }}>
+              <Card key={loan.id} className="w-full shadow-lg">
                 <CardContent>
-                  
-                  <Typography variant="subtitle1" align="center">
-                    {loan.name}
-                  </Typography>
-                  <Typography className="loan-detail">
-                    Initial Balance: €{loan.balance.toFixed(2)}
-                  </Typography>
-                  <Typography>Interest Rate: {loan.interestRate}%</Typography>
-                  <Typography>
+                  <h2 className="text-xl font-bold text-center mb-4">{loan.name}</h2>
+                  <p className="mb-2">Initial Balance: €{loan.balance.toFixed(2)}</p>
+                  <p className="mb-2">Interest Rate: {loan.interestRate}%</p>
+                  <p className="mb-2">
                     Monthly Payment: €{loan.monthlyPayment.toFixed(2)}
-                  </Typography>
-                  <Typography>
-                    Total Interest: €{loan.totalInterest.toFixed(2)}
-                  </Typography>
-                  <Typography>Term Length: {loan.termLength} months</Typography>
-
-                  <TextField
-                    className="custom-payment-input"
-                    label="Custom Monthly Payment"
+                  </p>
+                  <p className="mb-2">Total Interest: €{loan.totalInterest.toFixed(2)}</p>
+                  <p className="mb-4">Term Length: {loan.termLength} months</p>
+  
+                  <Input
                     type="number"
+                    placeholder="Custom Monthly Payment"
                     value={customMonthlyPayment || ""}
                     onChange={(e) => handleCustomMontlyPaymentChange(e, loan)}
-                    fullWidth
-                    style={{ marginBottom: "10px" }}
+                    className="mb-4"
                   />
-
+  
                   <LoanChart
                     repaymentSchedule={loan.repaymentSchedule}
                     customRepaymentSchedule={
@@ -280,23 +270,17 @@ const LoanCalculator: React.FC = () => {
                     loanBalance={loan.balance}
                     isEditing={editingLoan === loan.id}
                   />
-
-                  <div className="loan-buttons">
+  
+                  <div className="flex space-x-2 mt-4">
                     <Button
-                      className="loan-button"
-                      variant="contained"
-                      color="primary"
                       onClick={() => handleSaveCustomMonthlyPayment(loan)}
-                      style={{ marginTop: "10px" }}
+                      className="bg-green-600 text-white px-4 py-2 rounded"
                     >
                       Save Custom Payment
                     </Button>
                     <Button
-                      className="remove-loan-button"
-                      variant="contained"
-                      color="primary"
                       onClick={() => setEditingLoan(null)}
-                      style={{ marginTop: "10px" }}
+                      className="bg-red-600 text-white px-4 py-2 rounded"
                     >
                       Close
                     </Button>
@@ -304,68 +288,52 @@ const LoanCalculator: React.FC = () => {
                 </CardContent>
               </Card>
             ))}
-        </Box>
+        </div>
       )}
-
+  
       {/* Remaining Loans */}
-      <Box
-        display="grid"
-        gridTemplateColumns="repeat(auto-fill, minmax(300px, 1fr))"
-        gap={3}
-      >
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {!editingLoan &&
           loans.map((loan) => (
-            <Card key={loan.id} style={{ position: "relative" }}>
+            <Card key={loan.id} className="shadow-lg">
               <CardContent>
-                <Typography variant="subtitle1" align="center">
-                  {loan.name}
-                </Typography>
-                <Typography>
-                  Initial Balance: €{loan.balance.toFixed(2)}
-                </Typography>
-                <Typography>Interest Rate: {loan.interestRate}%</Typography>
-                <Typography>
+                <h2 className="text-xl font-bold text-center mb-4">{loan.name}</h2>
+                <p className="mb-2">Initial Balance: €{loan.balance.toFixed(2)}</p>
+                <p className="mb-2">Interest Rate: {loan.interestRate}%</p>
+                <p className="mb-2">
                   Monthly Payment: €{loan.monthlyPayment.toFixed(2)}
-                </Typography>
-                <Typography>
-                  Total Interest: €{loan.totalInterest.toFixed(2)}
-                </Typography>
-                <Typography>Term Length: {loan.termLength} months</Typography>
-
+                </p>
+                <p className="mb-2">Total Interest: €{loan.totalInterest.toFixed(2)}</p>
+                <p className="mb-4">Term Length: {loan.termLength} months</p>
+  
                 <LoanChart
                   repaymentSchedule={loan.repaymentSchedule}
                   totalInterest={loan.totalInterest}
                   loanBalance={loan.balance}
                   isEditing={false}
                 />
-
-                <div className="loan-buttons">
+  
+                <div className="flex space-x-2 mt-4">
                   <Button
-                    className="loan-button"
-                    variant="contained"
-                    color="primary"
-                    onClick={() => { handleEditLoan(loan); setIsFormVisible(false); }}
-                    style={{ marginTop: "10px" }}
+                    onClick={() => {
+                      handleEditLoan(loan);
+                      setIsFormVisible(false);
+                    }}
+                    className="bg-green-600 text-white px-4 py-2 rounded"
                   >
                     Edit
                   </Button>
                   {!loan.saved && (
                     <Button
-                      className="loan-button"
-                      variant="contained"
-                      color="primary"
                       onClick={() => handleSaveLoan(loan)}
-                      style={{ marginTop: "10px" }}
+                      className="bg-green-600 text-white px-4 py-2 rounded"
                     >
                       Save
                     </Button>
                   )}
                   <Button
-                    className="remove-loan-button"
-                    variant="contained"
-                    color="primary"
                     onClick={() => handleRemoveLoan(loan.id)}
-                    style={{ marginTop: "10px" }}
+                    className="bg-red-600 text-white px-4 py-2 rounded"
                   >
                     Remove
                   </Button>
@@ -373,9 +341,9 @@ const LoanCalculator: React.FC = () => {
               </CardContent>
             </Card>
           ))}
-      </Box>
+      </div>
     </div>
-  );
+  );    
 };
 
 export default LoanCalculator;

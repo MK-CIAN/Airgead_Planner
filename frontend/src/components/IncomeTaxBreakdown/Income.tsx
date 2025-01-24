@@ -10,6 +10,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import IncomeComparison from "./IncomeComparisons";
+import IncomeBreakdownChart from "../charts/IncomeBreakdownChart";
 import Axios from "../Axios";
 import {
   Select,
@@ -19,6 +20,13 @@ import {
   SelectContent,
 } from "../ui/select";
 import { toast } from "@/hooks/use-toast";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "../ui/carousel";
 
 interface IncomeTaxBreakdown {
   id: number;
@@ -214,11 +222,13 @@ const IncomeTaxCalculator: React.FC = () => {
       <h1 className="text-2xl font-bold mb-6 text-center">
         Income Tax Calculator
       </h1>
-  
+
       {/* Responsive Grid for Inputs and Saved Salaries */}
       <div
         className={`grid gap-6 ${
-          savedBreakdowns.length > 0 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"
+          savedBreakdowns.length > 0
+            ? "grid-cols-1 md:grid-cols-2"
+            : "grid-cols-1"
         }`}
       >
         {/* Input Section */}
@@ -263,63 +273,95 @@ const IncomeTaxCalculator: React.FC = () => {
           >
             Calculate
           </Button>
-  
+
           {/* Breakdown Section */}
           {breakdown && (
             <div className="border border-gray-300 rounded-md p-4 shadow-md mt-6">
-              <h2 className="text-xl font-semibold mb-4">Tax Breakdown</h2>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Amount (€)</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableRow>
-                    <TableCell>Taxable Income</TableCell>
-                    <TableCell>{breakdown.taxable_income.toFixed(2)}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Income Tax</TableCell>
-                    <TableCell>{breakdown.income_tax.toFixed(2)}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Tax Credit</TableCell>
-                    <TableCell>{breakdown.tax_credit.toFixed(2)}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Net Tax</TableCell>
-                    <TableCell>{breakdown.net_tax.toFixed(2)}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>USC</TableCell>
-                    <TableCell>{breakdown.usc.toFixed(2)}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>PRSI</TableCell>
-                    <TableCell>{breakdown.prsi.toFixed(2)}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Total Deductions</TableCell>
-                    <TableCell>{breakdown.total_deductions.toFixed(2)}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Net Salary</TableCell>
-                    <TableCell>{breakdown.net_salary.toFixed(2)}</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-              <Button
-                onClick={saveBreakdown}
-                className="mt-4 w-full bg-green-500 text-white"
-              >
-                {isSaving ? "Saving..." : "Save Breakdown"}
-              </Button>
+              <Carousel>
+                <CarouselContent>
+                  <CarouselItem>
+                    <h2 className="text-xl font-semibold mb-4">
+                      Tax Breakdown
+                    </h2>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Type</TableCell>
+                          <TableCell>Amount (€)</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>Taxable Income</TableCell>
+                          <TableCell>
+                            {breakdown.taxable_income.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Income Tax</TableCell>
+                          <TableCell>
+                            {breakdown.income_tax.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Tax Credit</TableCell>
+                          <TableCell>
+                            {breakdown.tax_credit.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Net Tax</TableCell>
+                          <TableCell>{breakdown.net_tax.toFixed(2)}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>USC</TableCell>
+                          <TableCell>{breakdown.usc.toFixed(2)}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>PRSI</TableCell>
+                          <TableCell>{breakdown.prsi.toFixed(2)}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Total Deductions</TableCell>
+                          <TableCell>
+                            {breakdown.total_deductions.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Net Salary</TableCell>
+                          <TableCell>
+                            {breakdown.net_salary.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                    <Button
+                      onClick={saveBreakdown}
+                      className="mt-4 w-full bg-green-500 text-white"
+                    >
+                      {isSaving ? "Saving..." : "Save Breakdown"}
+                    </Button>
+                  </CarouselItem>
+
+                  <CarouselItem>
+                    {/* Income Breakdown Chart */}
+                    <div>
+                      <IncomeBreakdownChart
+                        grossSalary={breakdown.taxable_income}
+                        netIncome={breakdown.net_salary}
+                        taxesPaid={breakdown.total_deductions}
+                        pensionContribution={breakdown.pension_contribution}
+                      />
+                    </div>
+                  </CarouselItem>
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
             </div>
           )}
         </div>
-  
+
         {/* Saved Salaries Section */}
         {savedBreakdowns.length > 0 && (
           <div>
@@ -348,7 +390,7 @@ const IncomeTaxCalculator: React.FC = () => {
                         {expandedCardId === income.id ? "Collapse" : "Expand"}
                       </Button>
                       <Button
-                        className="bg-red-500 text-white"
+                        className="bg-red-600 text-white"
                         onClick={() => handleRemoveSalary(income.id)}
                       >
                         Remove
@@ -357,52 +399,83 @@ const IncomeTaxCalculator: React.FC = () => {
                   </div>
                   {expandedCardId === income.id && (
                     <div className="mt-4">
-                      <Table>
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>Type</TableCell>
-                            <TableCell>Amount (€)</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          <TableRow>
-                            <TableCell>Taxable Income</TableCell>
-                            <TableCell>
-                              {income.taxable_income.toFixed(2)}
-                            </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell>Income Tax</TableCell>
-                            <TableCell>{income.income_tax.toFixed(2)}</TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell>Tax Credit</TableCell>
-                            <TableCell>{income.tax_credit.toFixed(2)}</TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell>Net Tax</TableCell>
-                            <TableCell>{income.net_tax.toFixed(2)}</TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell>USC</TableCell>
-                            <TableCell>{income.usc.toFixed(2)}</TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell>PRSI</TableCell>
-                            <TableCell>{income.prsi.toFixed(2)}</TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell>Total Deductions</TableCell>
-                            <TableCell>
-                              {income.total_deductions.toFixed(2)}
-                            </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell>Net Salary</TableCell>
-                            <TableCell>{income.net_salary.toFixed(2)}</TableCell>
-                          </TableRow>
-                        </TableBody>
-                      </Table>
+                      <Carousel>
+                        <CarouselContent>
+                          <CarouselItem>
+                            <Table>
+                              <TableHead>
+                                <TableRow>
+                                  <TableCell>Type</TableCell>
+                                  <TableCell>Amount (€)</TableCell>
+                                </TableRow>
+                              </TableHead>
+                              <TableBody>
+                                <TableRow>
+                                  <TableCell>Taxable Income</TableCell>
+                                  <TableCell>
+                                    {income.taxable_income.toFixed(2)}
+                                  </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>Income Tax</TableCell>
+                                  <TableCell>
+                                    {income.income_tax.toFixed(2)}
+                                  </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>Tax Credit</TableCell>
+                                  <TableCell>
+                                    {income.tax_credit.toFixed(2)}
+                                  </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>Net Tax</TableCell>
+                                  <TableCell>
+                                    {income.net_tax.toFixed(2)}
+                                  </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>USC</TableCell>
+                                  <TableCell>{income.usc.toFixed(2)}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>PRSI</TableCell>
+                                  <TableCell>
+                                    {income.prsi.toFixed(2)}
+                                  </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>Total Deductions</TableCell>
+                                  <TableCell>
+                                    {income.total_deductions.toFixed(2)}
+                                  </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>Net Salary</TableCell>
+                                  <TableCell>
+                                    {income.net_salary.toFixed(2)}
+                                  </TableCell>
+                                </TableRow>
+                              </TableBody>
+                            </Table>
+                          </CarouselItem>
+                          <CarouselItem>
+                            {/* Income Breakdown Chart */}
+                            <div>
+                              <IncomeBreakdownChart
+                                grossSalary={income.taxable_income}
+                                netIncome={income.net_salary}
+                                taxesPaid={income.total_deductions}
+                                pensionContribution={
+                                  income.pension_contribution
+                                }
+                              />
+                            </div>
+                          </CarouselItem>
+                        </CarouselContent>
+                        <CarouselPrevious />
+                        <CarouselNext />
+                      </Carousel>
                     </div>
                   )}
                 </div>
@@ -411,7 +484,7 @@ const IncomeTaxCalculator: React.FC = () => {
           </div>
         )}
       </div>
-  
+
       {/* Comparison Section */}
       {savedBreakdowns.length > 1 && (
         <div className="space-y-4 mb-6 mt-8">
@@ -428,7 +501,7 @@ const IncomeTaxCalculator: React.FC = () => {
               ))}
             </SelectContent>
           </Select>
-  
+
           <Label>Select New Income</Label>
           <Select onValueChange={(value) => setNewIncomeId(Number(value))}>
             <SelectTrigger>
@@ -442,7 +515,7 @@ const IncomeTaxCalculator: React.FC = () => {
               ))}
             </SelectContent>
           </Select>
-  
+
           <Button
             onClick={compareIncomes}
             className="w-full bg-green-600 text-white"
@@ -451,7 +524,7 @@ const IncomeTaxCalculator: React.FC = () => {
           </Button>
         </div>
       )}
-  
+
       {comparisonData.baseIncome && comparisonData.newIncome && (
         <IncomeComparison
           data={{
@@ -461,7 +534,7 @@ const IncomeTaxCalculator: React.FC = () => {
         />
       )}
     </div>
-  );      
+  );
 };
 
 export default IncomeTaxCalculator;
