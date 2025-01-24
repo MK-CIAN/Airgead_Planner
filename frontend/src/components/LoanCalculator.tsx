@@ -4,7 +4,6 @@ import LoanForm from "./forms/LoanForm";
 import LoanChart from "./charts/LoanChart";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Label } from "./ui/label";
 import { Card, CardContent } from "./ui/card";
 import dayjs from "dayjs";
 import "../App.css";
@@ -223,19 +222,26 @@ const LoanCalculator: React.FC = () => {
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-semibold mb-6">Loan Repayment Calculator</h1>
-      <Button
-        onClick={toggleFormVisibility}
-        className="bg-green-500 text-white px-4 py-2 mb-6 rounded"
-      >
-        {isFormVisible ? "Hide Form" : "Add New Loan"}
-      </Button>
-  
-      {isFormVisible && (
+
+      {/* Conditionally render "Add New Loan" button */}
+      {!editingLoan && (
+        <div className="flex justify-center mb-6">
+          <Button
+            onClick={toggleFormVisibility}
+            className="bg-green-500 text-white px-4 py-2 rounded"
+          >
+            {isFormVisible ? "Hide Form" : "Add New Loan"}
+          </Button>
+        </div>
+      )}
+
+      {/* Show Loan Form */}
+      {isFormVisible && !editingLoan && (
         <div className="mb-6">
           <LoanForm onCalculateRepayment={handleCalculateRepayment} />
         </div>
       )}
-  
+
       {/* Expanded Loan View */}
       {editingLoan && (
         <div className="w-full lg:w-4/5 mx-auto mb-6">
@@ -244,7 +250,9 @@ const LoanCalculator: React.FC = () => {
             .map((loan) => (
               <Card key={loan.id} className="w-full shadow-lg">
                 <CardContent>
-                  <h2 className="text-xl font-bold text-center mb-4">{loan.name}</h2>
+                  <h2 className="text-xl font-bold text-center mb-4">
+                    {loan.name}
+                  </h2>
                   <p className="mb-2">Initial Balance: €{loan.balance.toFixed(2)}</p>
                   <p className="mb-2">Interest Rate: {loan.interestRate}%</p>
                   <p className="mb-2">
@@ -252,7 +260,7 @@ const LoanCalculator: React.FC = () => {
                   </p>
                   <p className="mb-2">Total Interest: €{loan.totalInterest.toFixed(2)}</p>
                   <p className="mb-4">Term Length: {loan.termLength} months</p>
-  
+
                   <Input
                     type="number"
                     placeholder="Custom Monthly Payment"
@@ -260,7 +268,7 @@ const LoanCalculator: React.FC = () => {
                     onChange={(e) => handleCustomMontlyPaymentChange(e, loan)}
                     className="mb-4"
                   />
-  
+
                   <LoanChart
                     repaymentSchedule={loan.repaymentSchedule}
                     customRepaymentSchedule={
@@ -270,8 +278,9 @@ const LoanCalculator: React.FC = () => {
                     loanBalance={loan.balance}
                     isEditing={editingLoan === loan.id}
                   />
-  
-                  <div className="flex space-x-2 mt-4">
+
+                  {/* Centered Buttons */}
+                  <div className="flex justify-center space-x-4 mt-4">
                     <Button
                       onClick={() => handleSaveCustomMonthlyPayment(loan)}
                       className="bg-green-600 text-white px-4 py-2 rounded"
@@ -290,7 +299,7 @@ const LoanCalculator: React.FC = () => {
             ))}
         </div>
       )}
-  
+
       {/* Remaining Loans */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {!editingLoan &&
@@ -305,15 +314,16 @@ const LoanCalculator: React.FC = () => {
                 </p>
                 <p className="mb-2">Total Interest: €{loan.totalInterest.toFixed(2)}</p>
                 <p className="mb-4">Term Length: {loan.termLength} months</p>
-  
+
                 <LoanChart
                   repaymentSchedule={loan.repaymentSchedule}
                   totalInterest={loan.totalInterest}
                   loanBalance={loan.balance}
                   isEditing={false}
                 />
-  
-                <div className="flex space-x-2 mt-4">
+
+                {/* Centered Buttons */}
+                <div className="flex justify-center space-x-4 mt-4">
                   <Button
                     onClick={() => {
                       handleEditLoan(loan);

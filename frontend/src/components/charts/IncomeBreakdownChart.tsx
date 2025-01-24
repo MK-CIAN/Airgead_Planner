@@ -13,7 +13,6 @@ import {
 import {
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart";
 
 // Utility for dynamic chart sizing
@@ -176,8 +175,7 @@ const IncomeBreakdownChart: React.FC<IncomeBreakdownChartProps> = ({
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="leading-none text-muted-foreground">
-          Breakdown of your gross salary into net income, taxes, pension, and
-          other deductions.
+          Breakdown of your gross salary into net income, taxes, pension.
         </div>
       </CardFooter>
     </Card>

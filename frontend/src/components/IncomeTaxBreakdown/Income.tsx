@@ -413,47 +413,48 @@ const IncomeTaxCalculator: React.FC = () => {
                                 <TableRow>
                                   <TableCell>Taxable Income</TableCell>
                                   <TableCell>
-                                    {income.taxable_income.toFixed(2)}
+                                    € {income.taxable_income.toFixed(2)}
                                   </TableCell>
                                 </TableRow>
                                 <TableRow>
                                   <TableCell>Income Tax</TableCell>
                                   <TableCell>
-                                    {income.income_tax.toFixed(2)}
+                                    € {income.income_tax.toFixed(2)}
                                   </TableCell>
                                 </TableRow>
                                 <TableRow>
                                   <TableCell>Tax Credit</TableCell>
                                   <TableCell>
-                                    {income.tax_credit.toFixed(2)}
+                                    € {income.tax_credit.toFixed(2)}
                                   </TableCell>
                                 </TableRow>
                                 <TableRow>
                                   <TableCell>Net Tax</TableCell>
                                   <TableCell>
-                                    {income.net_tax.toFixed(2)}
+                                    € {income.net_tax.toFixed(2)}
                                   </TableCell>
                                 </TableRow>
                                 <TableRow>
                                   <TableCell>USC</TableCell>
-                                  <TableCell>{income.usc.toFixed(2)}</TableCell>
+                                  <TableCell>
+                                    € {income.usc.toFixed(2)}</TableCell>
                                 </TableRow>
                                 <TableRow>
                                   <TableCell>PRSI</TableCell>
                                   <TableCell>
-                                    {income.prsi.toFixed(2)}
+                                    € {income.prsi.toFixed(2)}
                                   </TableCell>
                                 </TableRow>
                                 <TableRow>
                                   <TableCell>Total Deductions</TableCell>
                                   <TableCell>
-                                    {income.total_deductions.toFixed(2)}
+                                    € {income.total_deductions.toFixed(2)}
                                   </TableCell>
                                 </TableRow>
                                 <TableRow>
                                   <TableCell>Net Salary</TableCell>
                                   <TableCell>
-                                    {income.net_salary.toFixed(2)}
+                                    € {income.net_salary.toFixed(2)}
                                   </TableCell>
                                 </TableRow>
                               </TableBody>

@@ -13,11 +13,10 @@ import {
 import {
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart";
 
 // Utility for dynamic chart sizing
-const getChartSize = () => {
+const getChartSize = (containerWidth: number) => {
   const width = Math.min(window.innerWidth * 0.95, 500);
   return { width, height: width };
 };
@@ -71,11 +70,23 @@ interface BudgetChartProps {
 }
 
 const TestBudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
-  const [chartSize, setChartSize] = useState(getChartSize());
+  const [containerWidth, setContainerWidth] = useState(500);
+  const [chartSize, setChartSize] = useState(getChartSize((containerWidth)));
 
-  // Handle window resizing
+  // Resize observer for dynamic resizing
   useEffect(() => {
-    const handleResize = () => setChartSize(getChartSize());
+    const handleResize = () => {
+      const container = document.querySelector(".chart-container");
+      if (container) {
+        const containerWidth = container.clientWidth;
+        setContainerWidth(containerWidth);
+        setChartSize(getChartSize(containerWidth));
+      }
+    };
+
+    // Initial sizing
+    handleResize();
+
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -122,6 +133,7 @@ const TestBudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
     }
 
     const { cx, cy } = viewBox;
+    const fontSize = Math.max(chartSize.width * 0.08, 16); // Dynamic font size based on chart size
 
     // Calculate the total (income + expenses + debt)
     const total = totals.income - totals.expensesAndDebt;
@@ -137,10 +149,10 @@ const TestBudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
         {/* Adjust the font size of the main total */}
         <tspan
           x={cx}
-          y={cy - 10} // Adjust positioning slightly to center vertically
+          y={cy - fontSize * 0.2} // Adjust positioning slightly to center vertically
           className="font-bold"
           style={{
-            fontSize: "32px", // Increase font size for the total
+            fontSize: `${fontSize}px`, // Increase font size for the total
           }}
         >
           €{total.toFixed(2)}
@@ -148,10 +160,10 @@ const TestBudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
         {/* Adjust the font size of the label */}
         <tspan
           x={cx}
-          y={cy + 30} // Position below the main text
+          y={cy + fontSize * 0.5} // Position below the main text
           className="fill-muted-foreground"
           style={{
-            fontSize: "16px", // Increase or adjust font size for the label
+            fontSize: `${fontSize * 0.5}px`, // Increase or adjust font size for the label
           }}
         >
           Remaining Amount
@@ -168,12 +180,8 @@ const TestBudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
-          className="mx-auto aspect-square"
-          config={
-            {
-              /* your config here */
-            }
-          }
+          className="mx-auto aspect-square chart-container"
+          config={{}}
         >
           <PieChart
             width={chartSize.width}
@@ -208,8 +216,8 @@ const TestBudgetChart: React.FC<BudgetChartProps> = ({ data }) => {
               data={chartData}
               dataKey="value"
               nameKey="name"
-              innerRadius={chartSize.width * 0.3} // Adjust dynamically to occupy more space
-              outerRadius={chartSize.width * 0.45} // Adjust dynamically to fill the card
+              innerRadius={chartSize.width * 0.28} // Adjust dynamically to occupy more space
+              outerRadius={chartSize.width * 0.40} // Adjust dynamically to fill the card
               stroke="#ffffff"
               strokeWidth={1}
             >
