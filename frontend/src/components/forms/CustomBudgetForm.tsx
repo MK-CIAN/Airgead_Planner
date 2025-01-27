@@ -1,10 +1,16 @@
 import React from "react";
 import { useForm, Controller } from "react-hook-form";
-import { TextField, Button, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
-import "../../App.css";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Select, SelectItem, SelectTrigger, SelectContent } from "@/components/ui/select";
 
 interface CustomBudgetFormProps {
-  onAddBudgetItem: (newItem: { amount: string; category: string; transaction_type: string }) => void;
+  onAddBudgetItem: (newItem: {
+    amount: string;
+    category: string;
+    transaction_type: string;
+  }) => void;
 }
 
 interface FormData {
@@ -17,81 +23,79 @@ const CustomBudgetForm: React.FC<CustomBudgetFormProps> = ({ onAddBudgetItem }) 
   const { control, handleSubmit, reset, watch } = useForm<FormData>();
 
   const onSubmit = (data: FormData) => {
-    // Pass the data to the parent
     onAddBudgetItem(data);
-    reset(); // Reset form after successful submission
+    reset();
   };
 
   const transactionTypeValue = watch("transaction_type");
 
   return (
-    <div className="budget-form">
-      <form onSubmit={handleSubmit(onSubmit)}>
+    <div className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Amount Field */}
-        <div className="budget-input">
+        <div>
+          <Label htmlFor="amount">Amount</Label>
           <Controller
             name="amount"
             control={control}
             defaultValue=""
             render={({ field }) => (
-              <TextField
+              <Input
                 {...field}
+                id="amount"
                 type="number"
-                label="Amount"
+                placeholder="Enter amount €"
                 required
-                fullWidth
               />
             )}
           />
         </div>
 
         {/* Category Field */}
-        <div className="budget-input">
+        <div>
+          <Label htmlFor="category">Item Label</Label>
           <Controller
             name="category"
             control={control}
             defaultValue=""
             render={({ field }) => (
-              <TextField
+              <Input
                 {...field}
-                label="Category"
+                id="category"
+                placeholder="Enter label"
                 required
-                fullWidth
               />
             )}
           />
         </div>
 
         {/* Transaction Type Field */}
-        <div className="budget-input">
+        <div>
+          <Label htmlFor="transaction_type">Transaction Type</Label>
           <Controller
             name="transaction_type"
             control={control}
             defaultValue=""
             render={({ field }) => (
-              <FormControl fullWidth required>
-                <InputLabel shrink={!!transactionTypeValue}>Transaction Type</InputLabel>
-                <Select
-                  {...field}
-                  displayEmpty
-                  fullWidth
-                  label="Transaction Type"
-                >
-                  <MenuItem value="income">Income</MenuItem>
-                  <MenuItem value="expense">Expense</MenuItem>
-                  <MenuItem value="debt">Debt</MenuItem>
-                </Select>
-              </FormControl>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value || ""}
+              >
+                <SelectTrigger id="transaction_type">
+                  {transactionTypeValue || "Select transaction type"}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="income">Income</SelectItem>
+                  <SelectItem value="expense">Expense</SelectItem>
+                  <SelectItem value="debt">Debt</SelectItem>
+                </SelectContent>
+              </Select>
             )}
           />
         </div>
 
         {/* Submit Button */}
-        <div className="budget-submit">
-          <Button type="submit" variant="contained" color="primary">
-            Add Budget Item
-          </Button>
-        </div>
+        <Button type="submit" className="mt-4 w-full bg-green-500 text-white">Add Budget Item</Button>
       </form>
     </div>
   );

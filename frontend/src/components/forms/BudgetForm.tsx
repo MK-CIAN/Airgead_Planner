@@ -1,34 +1,40 @@
-// BudgetForm.tsx
-import React from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { TextField, Button, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
-import Axios from '../Axios';
-import { Dayjs } from 'dayjs';
-import '../../App.css';
+import React from "react";
+import { useForm, Controller } from "react-hook-form";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Select, SelectItem, SelectTrigger, SelectContent } from "@/components/ui/select";
+import Axios from "../Axios";
+import { Dayjs } from "dayjs";
 
 interface BudgetFormProps {
-  onAddBudget: (newItem: { amount: string; category: string; transaction_type: string; month: string }) => void;
+  onAddBudget: (newItem: {
+    amount: string;
+    category: string;
+    transaction_type: string;
+    month: string;
+  }) => void;
   month: Dayjs;
 }
 
 interface FormData {
   category: string;
   amount: string;
-  transaction_type: string;  // Add transaction type field
+  transaction_type: string;
 }
 
 const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget, month }) => {
   const { control, handleSubmit, reset, watch } = useForm<FormData>();
 
   const onSubmit = (data: FormData) => {
-    const formData = { 
-      ...data, 
-      month: month.format('YYYY-MM-DD') 
+    const formData = {
+      ...data,
+      month: month.format("YYYY-MM-DD"),
     };
 
-    Axios.post('data/budget/', formData)
+    Axios.post("data/budget/", formData)
       .then((response) => {
-        onAddBudget(response.data);  // Update chart data after submission
+        onAddBudget(response.data);
         reset();
       })
       .catch((error) => {
@@ -39,70 +45,69 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget, month }) => {
   const transactionTypeValue = watch("transaction_type");
 
   return (
-    <div className="budget-form">
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className = "budget-input">
-        <Controller
-          name="amount"
-          control={control}
-          defaultValue=""
-          render={({ field }) => (
-            <TextField 
-              {...field}
-              type="number"
-              label="Amount"
-              required
-              fullWidth
-            />
-          )}
-        />
-      </div>
+    <div className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div>
+          <Label htmlFor="amount">Amount</Label>
+          <Controller
+            name="amount"
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <Input
+                {...field}
+                id="amount"
+                type="number"
+                placeholder="Enter amount €"
+                required
+              />
+            )}
+          />
+        </div>
 
-      <div className="budget-form">
-        <Controller
-          name="category"
-          control={control}
-          defaultValue=""
-          render={({ field }) => (
-            <TextField 
-              {...field}
-              label="Category"
-              required
-              fullWidth
-            />
-          )}
-        />
-      </div>
+        <div>
+          <Label htmlFor="category">Item Label</Label>
+          <Controller
+            name="category"
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <Input
+                {...field}
+                id="category"
+                placeholder="Enter Label"
+                required
+              />
+            )}
+          />
+        </div>
 
-      <div className="budget-form">
+        <div>
+          <Label htmlFor="transaction_type">Transaction Type</Label>
           <Controller
             name="transaction_type"
             control={control}
             defaultValue=""
             render={({ field }) => (
-              <FormControl fullWidth required>
-                <InputLabel shrink={!!transactionTypeValue}>Transaction Type</InputLabel>
-                <Select
-                  {...field}
-                  displayEmpty
-                  fullWidth
-                  label="Transaction Type"
-                >
-                  <MenuItem value="income">Income</MenuItem>
-                  <MenuItem value="expense">Expense</MenuItem>
-                  <MenuItem value="debt">Debt</MenuItem>
-                </Select>
-              </FormControl>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value || ""}
+              >
+                <SelectTrigger id="transaction_type">
+                  {transactionTypeValue || "Select transaction type"}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="income">Income</SelectItem>
+                  <SelectItem value="expense">Expense</SelectItem>
+                  <SelectItem value="debt">Debt</SelectItem>
+                </SelectContent>
+              </Select>
             )}
           />
         </div>
-      
-      <div className='budget-submit'>
-        <Button type="submit" variant="contained" color="primary">
-          Add Budget Item
-        </Button>
-      </div>
-    </form>
+
+        <Button type="submit" className="mt-4 w-full bg-green-500 text-white">Add Budget Item</Button>
+      </form>
     </div>
   );
 };

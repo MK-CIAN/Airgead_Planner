@@ -2,7 +2,10 @@ import { useState } from "react";
 import { motion } from "framer-motion"; // For animations
 import { Card, CardContent } from "@/components/ui/card"; // Using shadcn card component
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import Axios from "./Axios";
+import { toast } from "@/hooks/use-toast";
+import { set } from "react-hook-form";
 
 const questions = [
   {
@@ -57,6 +60,7 @@ const animationVariants = {
 const UserInterest = () => {
   const [step, setStep] = useState(0);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const navigate = useNavigate();
 
   const toggleOption = (value: string) => {
     setSelectedInterests((prev) =>
@@ -69,7 +73,12 @@ const UserInterest = () => {
     const handleSubmit = () => {
         Axios.post(`data/interests/`, { interests: selectedInterests })
             .then(() => {
-                alert('Your interests have been saved successfully!');
+                toast({
+                    title: "Your Interest Saved Successfully!",
+                  });
+                  setTimeout(() => {
+                    navigate(`/home`);
+                  }, 1000);
             })
             .catch((error) => {
                 console.error('Error saving interests:', error);

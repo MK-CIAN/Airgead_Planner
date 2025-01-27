@@ -7,7 +7,6 @@ import {
   List,
   ListItem,
   ListItemText,
-  Button,
   useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
@@ -16,6 +15,9 @@ import ShowFriends from "../UserServices/ShowFriends";
 import "../../App.css";
 import ChatRoom from "../UserServices/ChatRoom";
 import TestBudgetChart from "../charts/TestBudgetChart";
+import { Table, TableBody, TableCell, TableHead, TableRow } from "../ui/table";
+import { Card } from "../ui/card";
+import { Button } from "../ui/button";
 
 interface BudgetData {
   id: number;
@@ -131,95 +133,82 @@ const CustomBudgetDetails: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: "0 16px" }}>
-      <Typography
-        variant="h4"
-        align="center"
-        style={{ marginBottom: 16, fontSize: isMobile ? "1.5rem" : "2rem" }}
-      >
+    <div className="p-4 max-w-7xl mx-auto">
+      {/* Header */}
+      <Typography variant="h4" align="center" className="mb-4 text-xl md:text-2xl">
         {budgetName}
       </Typography>
 
       {/* Responsive Layout */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          gap: "16px",
-          marginTop: "20px",
-        }}
-      >
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
         {/* Add Items Form */}
-        <div
-          style={{
-            flex: "1",
-            background: "#f5f5f5",
-            padding: "16px",
-            borderRadius: "8px",
-          }}
-        >
-          <Typography variant="h6" style={{ marginBottom: "8px" }}>
+        <Card className="bg-gray-50 p-4 rounded-md">
+          <Typography variant="h6" className="mb-4">
             Add Budget Item
           </Typography>
           <CustomBudgetForm onAddBudgetItem={handleAddBudgetItem} />
-        </div>
+        </Card>
 
         {/* Budget List */}
-        <div
-          style={{
-            flex: "1",
-            overflowY: "auto",
-            maxHeight: "300px",
-            border: "1px solid #ddd",
-            borderRadius: "8px",
-            padding: "8px",
-          }}
-        >
-          <Typography variant="h6" style={{ marginBottom: "8px" }}>
+        <Card className="overflow-y-auto max-h-[350px] border p-4">
+          <Typography variant="h6" className="mb-2">
             Budget Items
           </Typography>
-          <List>
-            {budgetData.map((item) => (
-              <ListItem
-                key={item.id}
-                style={{ display: "flex", justifyContent: "space-between" }}
-              >
-                <ListItemText
-                  primary={`${item.label} - €${item.value.toFixed(2)} (${
-                    item.type
-                  })`}
-                />
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  size="small"
-                  onClick={() => handleRemoveBudgetItem(item.id)}
-                >
-                  Remove
-                </Button>
-              </ListItem>
-            ))}
-          </List>
-        </div>
+          <div className="max-h-[250px]">
+            <Table className="table-auto w-full text-sm">
+              <TableHead>
+                <TableRow>
+                  <TableCell className="text-left px-2 py-1">Category</TableCell>
+                  <TableCell className="text-right px-2 py-1">Amount</TableCell>
+                  <TableCell className="text-left px-2 py-1">Type</TableCell>
+                  <TableCell className="text-center px-2 py-1">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {budgetData.map((item) => (
+                  <TableRow key={item.id} className="hover:bg-gray-100">
+                    <TableCell className="text-left px-2 py-1 truncate max-w-[100px]">
+                      {item.label}
+                    </TableCell>
+                    <TableCell className="text-right px-2 py-1">
+                      €{item.value.toFixed(2)}
+                    </TableCell>
+                    <TableCell
+                      className={`text-left px-2 py-1 capitalize ${
+                        item.type === "income"
+                          ? "text-green-600"
+                          : item.type === "debt"
+                          ? "text-red-600"
+                          : "text-blue-600"
+                      }`}
+                    >
+                      {item.type}
+                    </TableCell>
+                    <TableCell className="text-center px-2 py-1">
+                      <Button
+                        className="bg-red-600 text-white text-xs px-2 py-1"
+                        size="sm"
+                        onClick={() => handleRemoveBudgetItem(item.id)}
+                      >
+                        Remove
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </Card>
       </div>
 
       {/* Contributors Section */}
-      <div style={{ textAlign: "right" }}>
+      <div className="text-right mt-4">
         <ShowFriends
-          entityId={id} // Budget ID
-          entityType="budget" // Context is budget
+          entityId={id}
+          entityType="budget"
           onInvite={handleInviteFriend}
           triggerElement={
-            <Button
-              variant="contained"
-              color="primary"
-              style={{
-                padding: "8px 16px",
-                fontSize: "14px",
-                marginTop: "px",
-              }}
-              className="inviteButton"
-            >
+            <Button className="bg-green-600 text-white px-4 py-2">
               Add Friends
             </Button>
           }
@@ -227,13 +216,15 @@ const CustomBudgetDetails: React.FC = () => {
       </div>
 
       {/* Responsive Budget Chart */}
-      <div
-        style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
-      >
+      <div className="mt-5 flex justify-center">
         <TestBudgetChart data={budgetData} />
       </div>
-      <div style={{ marginTop: "20px" }}>
-        <h3>Chatroom</h3>
+
+      {/* Chatroom Section */}
+      <div className="mt-5">
+        <Typography variant="h6" className="mb-4">
+          Chatroom
+        </Typography>
         <ChatRoom entityId={Number(id)} entityType="budget" />
       </div>
     </div>
