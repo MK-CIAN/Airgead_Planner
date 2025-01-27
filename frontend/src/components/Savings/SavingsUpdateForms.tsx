@@ -59,8 +59,7 @@ const UpdateSavingsForm: React.FC<UpdateSavingsFormProps> = ({
             </div>
             <Button
               type="submit"
-              className="w-full"
-              disabled={contribution <= 0 || contribution > remainingAmount}
+              className="w-full bg-green-500 hover:bg-green-600"
             >
               Add Contribution
             </Button>

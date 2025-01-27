@@ -231,13 +231,17 @@ const SavingsGoalDetails: React.FC = () => {
         </Table>
       </div>
 
-      {/* Invite Friend */}
-      <div className="mt-6">
+      {/* Contributors Section */}
+      <div className="text-right mt-4">
         <ShowFriends
           entityId={id}
-          entityType="savingsGoal"
+          entityType="budget"
           onInvite={handleInviteFriend}
-          triggerElement={<Button className="w-full">Invite Friends</Button>}
+          triggerElement={
+            <Button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2">
+              Add Friends
+            </Button>
+          }
         />
       </div>
 

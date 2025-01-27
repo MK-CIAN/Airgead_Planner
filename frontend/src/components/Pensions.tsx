@@ -38,9 +38,8 @@ const PensionPlanner: React.FC = () => {
     []
   );
   const [isSaving, setIsSaving] = useState(false);
-  const [expandedProjection, setExpandedProjection] = useState<
-    PensionProjection | null
-  >(null);
+  const [expandedProjection, setExpandedProjection] =
+    useState<PensionProjection | null>(null);
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
 
   // Fetch saved projections from the backend
@@ -75,7 +74,8 @@ const PensionPlanner: React.FC = () => {
 
     const years = retirementAge - startingAge;
     const annualContribution =
-      Number(annualSalary) * ((Number(contributionRate) + Number(employerMatch)) / 100);
+      Number(annualSalary) *
+      ((Number(contributionRate) + Number(employerMatch)) / 100);
 
     // Convert ROI to decimal
     const rateOfReturn = Number(roi) / 100;
@@ -121,6 +121,28 @@ const PensionPlanner: React.FC = () => {
     }
   };
 
+  const handleRemovePension = (id: number) => {
+    Axios.delete(`/data/pension-planner/${id}/`)
+      .then(() => {
+        setSavedProjections((prevProjections) =>
+          prevProjections.filter((projection) => projection.id !== id)
+        );
+        // If the removed projection was expanded, clear the expanded state
+        if (expandedProjection?.id === id) {
+          setExpandedProjection(null);
+          setExpandedCardId(null);
+        }
+        toast({ title: "Pension removed successfully!" });
+      })
+      .catch((error) => {
+        console.error("Error removing pension:", error);
+        toast({
+          title: "Failed to remove pension. Please try again.",
+          variant: "destructive",
+        });
+      });
+  };
+
   const saveProjection = () => {
     if (!projection || isSaving) return;
 
@@ -143,7 +165,6 @@ const PensionPlanner: React.FC = () => {
       )
       .finally(() => setIsSaving(false));
   };
-
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -193,14 +214,17 @@ const PensionPlanner: React.FC = () => {
             onChange={(e) => setRoi(Number(e.target.value))}
           />
           <div className="flex space-x-2">
-          <Button
-            onClick={calculateProjection}
-            className="mt-4 bg-green-600 text-white"
-          >
-            Calculate
-          </Button>
+            <Button
+              onClick={calculateProjection}
+              className="mt-4 bg-green-600 text-white"
+            >
+              Calculate
+            </Button>
 
-          <Button onClick={saveProjection} className="mt-4 bg-green-600 text-white">
+            <Button
+              onClick={saveProjection}
+              className="mt-4 bg-green-600 text-white"
+            >
               {isSaving ? "Saving..." : "Save Projection"}
             </Button>
           </div>
@@ -229,6 +253,12 @@ const PensionPlanner: React.FC = () => {
                       onClick={() => toggleCardExpansion(proj.id)}
                     >
                       {expandedCardId === proj.id ? "Collapse" : "Expand"}
+                    </Button>
+                    <Button
+                      className="bg-red-600 text-white"
+                      onClick={() => handleRemovePension(proj.id)}
+                    >
+                      Remove
                     </Button>
                   </div>
                 </div>
@@ -289,7 +319,8 @@ const PensionPlanner: React.FC = () => {
               }
               rateOfReturn={Number(expandedProjection.roi) / 100}
               years={
-                expandedProjection.retirement_age - expandedProjection.starting_age
+                expandedProjection.retirement_age -
+                expandedProjection.starting_age
               }
             />
           </div>

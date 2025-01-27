@@ -5,7 +5,13 @@ import {
   useTransform,
   motion,
 } from "framer-motion";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableRow } from "../ui/table";
 import { IndexFundGrowthChart } from "../charts/IndexFundGrowthChart";
 
@@ -41,178 +47,202 @@ export const IncomeComparison: React.FC<IncomeComparisonProps> = ({ data }) => {
   const yearlyDifference = newIncome.net_salary - baseIncome.net_salary;
   const monthlyDifference = newIncome.net_salary - baseIncome.net_salary;
 
-
   // Generate timeline entries dynamically
   const timeline: TimelineEntry[] = [
     {
-        title: "Let's Get Started with the Basics",
-        content: (
-          <div className="flex flex-col space-y-6">
-            {/* Base Income Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Base Income Details</CardTitle>
-                <CardDescription>Overview of the base income selected</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Type</TableCell>
-                      <TableCell>Amount (€)</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>Gross Salary</TableCell>
-                      <TableCell>{baseIncome.salary.toFixed(2)}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Net Salary</TableCell>
-                      <TableCell>{baseIncome.net_salary.toFixed(2)}</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-    
-            {/* New Income Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle>New Income Details</CardTitle>
-                <CardDescription>Overview of the new income selected</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Type</TableCell>
-                      <TableCell>Amount (€)</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>Gross Salary</TableCell>
-                      <TableCell>{newIncome.salary.toFixed(2)}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Net Salary</TableCell>
-                      <TableCell>{newIncome.net_salary.toFixed(2)}</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-    
-            {/* Differences */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Income Comparison</CardTitle>
-                <CardDescription>Yearly, Monthly, and Weekly differences</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Period</TableCell>
-                      <TableCell>Gross Difference (€)</TableCell>
-                      <TableCell>Net Difference (€)</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>Yearly</TableCell>
-                      <TableCell>{(newIncome.salary - baseIncome.salary).toFixed(2)}</TableCell>
-                      <TableCell>{(yearlyDifference).toFixed(2)}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Monthly</TableCell>
-                      <TableCell>{((newIncome.salary - baseIncome.salary) / 12).toFixed(2)}</TableCell>
-                      <TableCell>{((monthlyDifference) / 12).toFixed(2)}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Weekly</TableCell>
-                      <TableCell>{((newIncome.salary - baseIncome.salary) / 52).toFixed(2)}</TableCell>
-                      <TableCell>{((newIncome.net_salary - baseIncome.net_salary) / 52).toFixed(2)}</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </div>
-        ),
-      },
+      title: "Let's Get Started with the Basics",
+      content: (
+        <div className="flex flex-col space-y-6">
+          {/* Base Income Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Base Income Details</CardTitle>
+              <CardDescription>
+                Overview of the base income selected
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Type</TableCell>
+                    <TableCell>Amount (€)</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>Gross Salary</TableCell>
+                    <TableCell>{baseIncome.salary.toFixed(2)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Net Salary</TableCell>
+                    <TableCell>{baseIncome.net_salary.toFixed(2)}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          {/* New Income Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle>New Income Details</CardTitle>
+              <CardDescription>
+                Overview of the new income selected
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Type</TableCell>
+                    <TableCell>Amount (€)</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>Gross Salary</TableCell>
+                    <TableCell>{newIncome.salary.toFixed(2)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Net Salary</TableCell>
+                    <TableCell>{newIncome.net_salary.toFixed(2)}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          {/* Differences */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Income Comparison</CardTitle>
+              <CardDescription>
+                Yearly, Monthly, and Weekly differences
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Period</TableCell>
+                    <TableCell>Gross Difference (€)</TableCell>
+                    <TableCell>Net Difference (€)</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>Yearly</TableCell>
+                    <TableCell>
+                      {(newIncome.salary - baseIncome.salary).toFixed(2)}
+                    </TableCell>
+                    <TableCell>{yearlyDifference.toFixed(2)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Monthly</TableCell>
+                    <TableCell>
+                      {((newIncome.salary - baseIncome.salary) / 12).toFixed(2)}
+                    </TableCell>
+                    <TableCell>{(monthlyDifference / 12).toFixed(2)}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Weekly</TableCell>
+                    <TableCell>
+                      {((newIncome.salary - baseIncome.salary) / 52).toFixed(2)}
+                    </TableCell>
+                    <TableCell>
+                      {(
+                        (newIncome.net_salary - baseIncome.net_salary) /
+                        52
+                      ).toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
+      ),
+    },
     {
       title: "How Does This Affect You?",
       content: (
         <div className="flex flex-col space-y-6">
-        {/* New Income Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Spending Opportunities</CardTitle>
-            <CardDescription>How you can spend your additional income</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {/* Meals Out */}
-            <Card className="mb-4">
-              <CardHeader>
-                <CardTitle>Meals Out 🍽️</CardTitle>
-                <CardDescription>How many more meals out per month</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>
-                  Based on an average cost of €80 per meal for two people, you could afford{" "}
-                  <strong>
-                    {Math.floor(
-                      (newIncome.net_salary - baseIncome.net_salary) / 12 / 80
-                    )}
-                  </strong>{" "}
-                  additional meals out per month.
-                </p>
-              </CardContent>
-            </Card>
+          {/* New Income Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Spending Opportunities</CardTitle>
+              <CardDescription>
+                How you can spend your additional income
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* Meals Out */}
+              <Card className="mb-4">
+                <CardHeader>
+                  <CardTitle>Meals Out 🍽️</CardTitle>
+                  <CardDescription>
+                    How many more meals out per month
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p>
+                    Based on an average cost of €80 per meal for two people, you
+                    could afford{" "}
+                    <strong>
+                      {Math.floor(
+                        (newIncome.net_salary - baseIncome.net_salary) / 12 / 80
+                      )}
+                    </strong>{" "}
+                    additional meals out per month.
+                  </p>
+                </CardContent>
+              </Card>
 
-            {/* Coffee */}
-            <Card className="mb-4">
-              <CardHeader>
-                <CardTitle>Coffee ☕️</CardTitle>
-                <CardDescription>How many more coffees per week</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>
-                  Based on an average cost of €4 per coffee, you could afford{" "}
-                  <strong>
-                    {Math.floor(
-                      ((newIncome.net_salary - baseIncome.net_salary) / 52) / 4
-                    )}
-                  </strong>{" "}
-                  additional coffees per week.
-                </p>
-              </CardContent>
-            </Card>
+              {/* Coffee */}
+              <Card className="mb-4">
+                <CardHeader>
+                  <CardTitle>Coffee ☕️</CardTitle>
+                  <CardDescription>
+                    How many more coffees per week
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p>
+                    Based on an average cost of €4 per coffee, you could afford{" "}
+                    <strong>
+                      {Math.floor(
+                        (newIncome.net_salary - baseIncome.net_salary) / 52 / 4
+                      )}
+                    </strong>{" "}
+                    additional coffees per week.
+                  </p>
+                </CardContent>
+              </Card>
 
-            {/* Movie Tickets */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Movies 🍿</CardTitle>
-                <CardDescription>
-                  How many movie outings per month
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>
-                  Based on an average cost of €15 per movie outing (ticket + snacks), you could afford{" "}
-                  <strong>
-                    {Math.floor(
-                      (newIncome.net_salary - baseIncome.net_salary) / 12 / 15
-                    )}
-                  </strong>{" "}
-                  additional movie outings per month.
-                </p>
-              </CardContent>
-            </Card>
-          </CardContent>
-        </Card>
+              {/* Movie Tickets */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Movies 🍿</CardTitle>
+                  <CardDescription>
+                    How many movie outings per month
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p>
+                    Based on an average cost of €15 per movie outing (ticket +
+                    snacks), you could afford{" "}
+                    <strong>
+                      {Math.floor(
+                        (newIncome.net_salary - baseIncome.net_salary) / 12 / 15
+                      )}
+                    </strong>{" "}
+                    additional movie outings per month.
+                  </p>
+                </CardContent>
+              </Card>
+            </CardContent>
+          </Card>
         </div>
       ),
     },
@@ -221,62 +251,68 @@ export const IncomeComparison: React.FC<IncomeComparisonProps> = ({ data }) => {
       content: (
         <div>
           {/* Investment Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>S&P 500 Investment Growth</CardTitle>
-            <CardDescription>
-              See how your additional monthly income grows with investment
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {(() => {
-              // Calculate Monthly Investment
-              const monthlyDifference = (newIncome.net_salary - baseIncome.net_salary) / 12;
-              const annualReturnRate = 0.08; // 8% annual return
-              const years = 5; // Duration of investment in years
+          <Card>
+            <CardHeader>
+              <CardTitle>S&P 500 Investment Growth</CardTitle>
+              <CardDescription>
+                See how your additional monthly income grows with investment
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {(() => {
+                // Calculate Monthly Investment
+                const monthlyDifference =
+                  (newIncome.net_salary - baseIncome.net_salary) / 12;
+                const annualReturnRate = 0.08; // 8% annual return
+                const years = 5; // Duration of investment in years
 
-              // Calculate total contributions
-              const totalContributions = monthlyDifference * 12 * years;
+                // Calculate total contributions
+                const totalContributions = monthlyDifference * 12 * years;
 
-              // Calculate future value using compound interest formula
-              const futureValue = Array.from({ length: years }).reduce(
-                (acc: number) => acc * (1 + annualReturnRate) + monthlyDifference * 12,
-                0
-              );
+                // Calculate future value using compound interest formula
+                const futureValue = Array.from({ length: years }).reduce(
+                  (acc: number) =>
+                    acc * (1 + annualReturnRate) + monthlyDifference * 12,
+                  0
+                );
 
-              const interestEarned = futureValue - totalContributions;
+                const interestEarned = futureValue - totalContributions;
 
-              return (
-                <><Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Category</TableCell>
-                      <TableCell>Amount (€)</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>Total Contributions</TableCell>
-                      <TableCell>{totalContributions.toFixed(2)}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Total Future Value</TableCell>
-                      <TableCell>{futureValue.toFixed(2)}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Interest Earned</TableCell>
-                      <TableCell>{interestEarned.toFixed(2)}</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table><div>
-                    <IndexFundGrowthChart
-                      totalContributions={totalContributions}
-                      futureValue={futureValue} />
-                  </div></>
-              );
-            })()}
-          </CardContent>
-        </Card>
+                return (
+                  <>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Category</TableCell>
+                          <TableCell>Amount (€)</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>Total Contributions</TableCell>
+                          <TableCell>{totalContributions.toFixed(2)}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Total Future Value</TableCell>
+                          <TableCell>{futureValue.toFixed(2)}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Interest Earned</TableCell>
+                          <TableCell>{interestEarned.toFixed(2)}</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                    <div>
+                      <IndexFundGrowthChart
+                        totalContributions={totalContributions}
+                        futureValue={futureValue}
+                      />
+                    </div>
+                  </>
+                );
+              })()}
+            </CardContent>
+          </Card>
         </div>
       ),
     },
@@ -306,16 +342,17 @@ export const IncomeComparison: React.FC<IncomeComparisonProps> = ({ data }) => {
       className="w-full bg-white dark:bg-neutral-950 font-sans md:px-10"
       ref={containerRef}
     >
-      <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
-        <h2 className="text-lg md:text-4xl mb-4 text-black dark:text-white max-w-4xl">
+      <div className="max-w-7xl mx-auto py-10">
+        <h2 className="text-lg md:text-4xl mb-4 text-center text-black dark:text-white">
           Income Comparison Timeline Test
         </h2>
+
         <p className="text-neutral-700 dark:text-neutral-300 text-sm md:text-base max-w-sm">
           This timeline shows the comparison between your selected incomes.
         </p>
       </div>
 
-      <div ref={ref} className="relative max-w-7xl mx-auto pb-20">
+      <div ref={ref} className="relative max-w-7xl mx-auto pb-5">
         {timeline.map((item, index) => (
           <div
             key={index}

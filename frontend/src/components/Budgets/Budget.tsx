@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Axios from "../Axios";
 import TestBudgetChart from "../charts/TestBudgetChart";
+import BudgetRadarChart from "./BudgetRadarChart";
 import BudgetForm from "../forms/BudgetForm";
 import { Button } from "@/components/ui/button";
 import { Typography, List, ListItem, Icon } from "@mui/material";
@@ -13,6 +14,13 @@ import {
 } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
 import dayjs, { Dayjs } from "dayjs";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "../ui/carousel";
 
 interface BudgetData {
   id: number;
@@ -195,9 +203,20 @@ const Budget: React.FC = () => {
         </Card>
       </div>
 
-      {/* Budget Chart */}
+      {/* Budget Charts */}
       <div className="mt-5 flex justify-center">
-        <TestBudgetChart data={budgetData} />
+        <Carousel>
+          <CarouselContent>
+            <CarouselItem>
+              <TestBudgetChart data={budgetData} />
+            </CarouselItem>
+            <CarouselItem>
+              <BudgetRadarChart budgetData={budgetData} />
+            </CarouselItem>
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
       </div>
     </div>
   );

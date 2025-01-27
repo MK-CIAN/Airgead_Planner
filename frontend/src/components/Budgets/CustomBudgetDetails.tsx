@@ -18,6 +18,8 @@ import TestBudgetChart from "../charts/TestBudgetChart";
 import { Table, TableBody, TableCell, TableHead, TableRow } from "../ui/table";
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../ui/carousel";
+import BudgetRadarChart from "./BudgetRadarChart";
 
 interface BudgetData {
   id: number;
@@ -215,9 +217,20 @@ const CustomBudgetDetails: React.FC = () => {
         />
       </div>
 
-      {/* Responsive Budget Chart */}
+      {/* Budget Charts */}
       <div className="mt-5 flex justify-center">
-        <TestBudgetChart data={budgetData} />
+        <Carousel>
+          <CarouselContent>
+            <CarouselItem>
+              <TestBudgetChart data={budgetData} />
+            </CarouselItem>
+            <CarouselItem>
+              <BudgetRadarChart budgetData={budgetData} />
+            </CarouselItem>
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
       </div>
 
       {/* Chatroom Section */}

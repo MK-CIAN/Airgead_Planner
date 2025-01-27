@@ -1,10 +1,10 @@
-// SavingsForm.tsx
 import React from "react";
 import { useForm, Controller } from "react-hook-form";
-import { TextField, Button } from "@mui/material";
-import "../../App.css";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
-// Utility function to get today's date in right format
+// Utility function to get today's date in the right format
 const getTodayDate = () => {
   const today = new Date();
   return today.toISOString().split("T")[0];
@@ -27,120 +27,140 @@ interface FormData {
   current_amount: number;
   monthly_contribution: number;
   target_date?: string | null;
-  start_date?: string | null; // New start date field
+  start_date?: string | null;
 }
 
 const SavingsForm: React.FC<SavingsFormProps> = ({ onAddSavingsGoal }) => {
   const { control, handleSubmit, reset } = useForm<FormData>();
 
   const onSubmit = (data: FormData) => {
-    // Set target_date and start_date to null if they are empty strings
     const formData = {
       ...data,
       target_date: data.target_date || null,
       start_date: data.start_date || null,
     };
 
-    onAddSavingsGoal(formData); // Pass the processed form data
-    reset(); // Clearing form fields
+    onAddSavingsGoal(formData);
+    reset();
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <Controller
-        name="name"
-        control={control}
-        defaultValue=""
-        render={({ field }) => (
-          <TextField
-            {...field}
-            label="Goal Name"
-            required
-            fullWidth
-            margin="normal"
-          />
-        )}
-      />
-      <Controller
-        name="target_amount"
-        control={control}
-        defaultValue={0}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            type="number"
-            label="Target Amount"
-            required
-            fullWidth
-            margin="normal"
-          />
-        )}
-      />
-      <Controller
-        name="current_amount"
-        control={control}
-        defaultValue={0}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            type="number"
-            label="Current Amount"
-            required
-            fullWidth
-            margin="normal"
-          />
-        )}
-      />
-      <Controller
-        name="monthly_contribution"
-        control={control}
-        defaultValue={0}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            type="number"
-            label="Monthly Contribution"
-            required
-            fullWidth
-            margin="normal"
-          />
-        )}
-      />
-      <Controller
-        name="start_date"
-        control={control}
-        defaultValue={getTodayDate()}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            type="date"
-            label="Start Date"
-            fullWidth
-            margin="normal"
-            InputLabelProps={{ shrink: true }}
-          />
-        )}
-      />
-      <Controller
-        name="target_date"
-        control={control}
-        defaultValue=""
-        render={({ field }) => (
-          <TextField
-            {...field}
-            type="date"
-            label="Target Date"
-            fullWidth
-            margin="normal"
-            InputLabelProps={{ shrink: true }}
-          />
-        )}
-      />
-      <div className="savings-submit">
-        <Button type="submit" variant="contained" color="primary" fullWidth>
-          Add Savings Goal
-        </Button>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div>
+        <Label htmlFor="name">Goal Name</Label>
+        <Controller
+          name="name"
+          control={control}
+          defaultValue=""
+          render={({ field }) => (
+            <Input
+              {...field}
+              id="name"
+              placeholder="Enter goal name"
+              required
+              className="w-full"
+            />
+          )}
+        />
       </div>
+
+      <div>
+        <Label htmlFor="target_amount">Target Amount</Label>
+        <Controller
+          name="target_amount"
+          control={control}
+          defaultValue={0}
+          render={({ field }) => (
+            <Input
+              {...field}
+              id="target_amount"
+              type="number"
+              placeholder="Enter target amount"
+              required
+              className="w-full"
+            />
+          )}
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="current_amount">Current Amount</Label>
+        <Controller
+          name="current_amount"
+          control={control}
+          defaultValue={0}
+          render={({ field }) => (
+            <Input
+              {...field}
+              id="current_amount"
+              type="number"
+              placeholder="Enter current amount"
+              required
+              className="w-full"
+            />
+          )}
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="monthly_contribution">Monthly Contribution</Label>
+        <Controller
+          name="monthly_contribution"
+          control={control}
+          defaultValue={0}
+          render={({ field }) => (
+            <Input
+              {...field}
+              id="monthly_contribution"
+              type="number"
+              placeholder="Enter monthly contribution"
+              required
+              className="w-full"
+            />
+          )}
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="start_date">Start Date</Label>
+        <Controller
+          name="start_date"
+          control={control}
+          defaultValue={getTodayDate()}
+          render={({ field }) => (
+            <Input
+              {...field}
+              id="start_date"
+              type="date"
+              value={field.value || ""}
+              required
+              className="w-full"
+            />
+          )}
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="target_date">Target Date</Label>
+        <Controller
+          name="target_date"
+          control={control}
+          defaultValue=""
+          render={({ field }) => (
+            <Input
+              {...field}
+              id="target_date"
+              type="date"
+              value={field.value || ""}
+              className="w-full"
+            />
+          )}
+        />
+      </div>
+
+      <Button type="submit" className="w-full bg-green-500 text-white">
+        Add Savings Goal
+      </Button>
     </form>
   );
 };
