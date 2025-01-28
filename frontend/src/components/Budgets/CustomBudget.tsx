@@ -132,7 +132,7 @@ const MainBudgetPage: React.FC = () => {
       {/* Custom Budget Form - Toggle */}
       <div className="text-center">
         <Button
-          className="bg-green-500 text-white"
+          className="bg-green-500 hover:bg-green-600 text-white"
           onClick={() => setShowForm(!showForm)}
         >
           {showForm ? "Hide Form" : "Create New Custom Budget"}
@@ -175,7 +175,7 @@ const MainBudgetPage: React.FC = () => {
               </div>
             </div>
             <Button
-              className="w-full bg-green-500 text-white"
+              className="w-full bg-green-500 hover:bg-green-600 text-white"
               onClick={handleCreateCustomBudget}
             >
               Create Budget
@@ -186,19 +186,19 @@ const MainBudgetPage: React.FC = () => {
 
       {/* Budgets Display - Side by Side Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <h2 className="text-center text-2xl font-bold">Your Monthly Budgets</h2>
-      <h2 className="text-center text-2xl font-bold">Your Custom Budgets</h2>
+        <h2 className="text-center text-2xl font-bold">Your Monthly Budgets</h2>
+        <h2 className="text-center text-2xl font-bold">Your Custom Budgets</h2>
         {/* Monthly Budget Section */}
         <Card
           className="cursor-pointer hover:shadow-md transition-shadow"
           onClick={() => navigate("/monthly-budget")}
         >
           <CardHeader>
-          <CardTitle>{currentMonth.format("MMMM YYYY")} Budget</CardTitle>
-          <CardDescription>test description</CardDescription>
+            <CardTitle>{currentMonth.format("MMMM YYYY")} Budget</CardTitle>
+            <CardDescription>test description</CardDescription>
           </CardHeader>
           <CardContent>
-              <TestBudgetChart
+            <TestBudgetChart
               data={budgetData}
               showTitle={false}
               useCard={false}
@@ -207,45 +207,45 @@ const MainBudgetPage: React.FC = () => {
         </Card>
 
         {/* Custom Budgets - Carousel */}
-            {customBudgets.length > 0 ? (
-
-              <Carousel>
-                <CarouselContent>
-                  {customBudgets.map((budget) => (
-                    <CarouselItem key={budget.id}>
-                      <Card className="cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => navigate(`/custom-budget/${budget.id}`)}>
-                        <CardHeader>
-                          <CardTitle>{budget.name}</CardTitle>
-                          <CardDescription>
-                            {budget.start_date} - {budget.end_date}
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          {budget.items.length > 0 ? (
-                            <TestBudgetChart
-                              data={budget.items}
-                              showTitle={false}
-                              useCard={false}
-                            />
-                          ) : (
-                            <p className="text-center text-gray-500">
-                              No data available
-                            </p>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
-              </Carousel>
-            ) : (
-              <p className="text-center text-gray-500">
-                No custom budgets available
-              </p>
-            )}
+        {customBudgets.length > 0 ? (
+          <Carousel className="cursor-pointer hover:shadow-md transition-shadow relative">
+            <CarouselContent>
+              {customBudgets.map((budget) => (
+                <CarouselItem key={budget.id}>
+                  <Card
+                    onClick={() => navigate(`/custom-budget/${budget.id}`)}
+                  >
+                    <CardHeader>
+                      <CardTitle>{budget.name}</CardTitle>
+                      <CardDescription>
+                        {budget.start_date} - {budget.end_date}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {budget.items.length > 0 ? (
+                        <TestBudgetChart
+                          data={budget.items}
+                          showTitle={false}
+                          useCard={false}
+                        />
+                      ) : (
+                        <p className="text-center text-gray-500">
+                          No data available
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="absolute left-[-1px] top-1/2 transform -translate-y-1/2" />
+            <CarouselNext className="absolute right-[-1px] top-1/2 transform -translate-y-1/2" />
+          </Carousel>
+        ) : (
+          <p className="text-center text-gray-500">
+            No custom budgets available
+          </p>
+        )}
       </div>
     </div>
   );

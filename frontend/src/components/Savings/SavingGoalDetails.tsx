@@ -169,8 +169,8 @@ const SavingsGoalDetails: React.FC = () => {
                   </CarouselItem>
                 )}
               </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
+              <CarouselPrevious className="absolute left-[-25px] top-1/2 transform -translate-y-1/2" />
+              <CarouselNext className="absolute right-[-25px] top-1/2 transform -translate-y-1/2" />
             </Carousel>
           </CardContent>
         </Card>
