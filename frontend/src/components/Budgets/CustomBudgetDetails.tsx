@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Axios from "../Axios";
-import BudgetChart from "../charts/BudgetChart";
 import CustomBudgetForm from "../forms/CustomBudgetForm";
 import {
   Typography,
-  List,
-  ListItem,
-  ListItemText,
   useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
@@ -35,8 +31,6 @@ interface Contributor {
 
 const CustomBudgetDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // Detect mobile view
 
   const [budgetName, setBudgetName] = useState<string | null>(null);
   const [budgetData, setBudgetData] = useState<BudgetData[]>([]);

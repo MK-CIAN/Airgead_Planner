@@ -82,7 +82,7 @@ const BudgetRadarChart: React.FC<BudgetRadarChartProps> = ({ budgetData }) => {
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
-          Expense and debt distribution
+          Expense and Debt Distribution
         </div>
       </CardFooter>
     </Card>

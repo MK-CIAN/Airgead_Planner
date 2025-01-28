@@ -42,8 +42,8 @@ function App() {
             <Routes>
               <Route element={<ProtectedRoute />}>
                 <Route path="/home" element={<Dashboard />} />
-                <Route path="/budget" element={<Budget />} />
-                <Route path="/custom-budget" element={<CustomBudget />} />
+                <Route path="/monthly-budget" element={<Budget />} />
+                <Route path="/budget" element={<CustomBudget />} />
                 <Route path="/custom-budget/:id" element={<CustomBudgetDetails />} />
                 <Route path="/savings" element={<Savings />} />
                 <Route path="/savings/:id" element={<SavingsGoalDetails />} />

@@ -72,6 +72,7 @@ const IncomeBreakdownChart: React.FC<IncomeBreakdownChartProps> = ({
 
   // Calculate tax percentage
   const taxableIncome = grossSalary - pensionContribution;
+  console.log(taxableIncome);
   const taxPercentage = taxableIncome ? (taxesPaid / taxableIncome) * 100 : 0;
 
   // Center label component
@@ -116,7 +117,7 @@ const IncomeBreakdownChart: React.FC<IncomeBreakdownChartProps> = ({
             fontSize: `${fontSize * 0.5}px`, // Smaller font size for the description
           }}
         >
-          Tax on Gross Income
+          Tax Paid
         </tspan>
       </text>
     );
@@ -173,9 +174,9 @@ const IncomeBreakdownChart: React.FC<IncomeBreakdownChartProps> = ({
           </PieChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm">
+      <CardFooter className="flex-col gap-2 text-sm text-center">
         <div className="leading-none text-muted-foreground">
-          Breakdown of your gross salary into net income, taxes, pension.
+          *Percentage of tax paid is based on gross income minus pension contributions.
         </div>
       </CardFooter>
     </Card>

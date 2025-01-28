@@ -4,7 +4,7 @@ import TestBudgetChart from "../charts/TestBudgetChart";
 import BudgetRadarChart from "./BudgetRadarChart";
 import BudgetForm from "../forms/BudgetForm";
 import { Button } from "@/components/ui/button";
-import { Typography, List, ListItem, Icon } from "@mui/material";
+import { Typography, Icon } from "@mui/material";
 import {
   Table,
   TableBody,
@@ -169,7 +169,7 @@ const Budget: React.FC = () => {
               <TableBody>
                 {budgetData.map((item) => (
                   <TableRow key={item.id} className="hover:bg-gray-100">
-                    <TableCell className="text-left px-2 py-1 truncate max-w-[100px]">
+                    <TableCell className="text-left px-2 py-4 truncate max-w-[100px]">
                       {item.label}
                     </TableCell>
                     <TableCell className="text-right px-2 py-1">

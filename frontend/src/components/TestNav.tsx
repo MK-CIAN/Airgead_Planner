@@ -55,8 +55,7 @@ export default function TestNav({ content }: { content: React.ReactNode }) {
 
   const drawerItems = [
     { path: "/home", label: "Home", icon: Home },
-    { path: "/budget", label: "Budget", icon: PieChart },
-    { path: "/custom-budget", label: "Custom Budgets", icon: PieChart },
+    { path: "/budget", label: "Budgets", icon: PieChart },
     { path: "/savings", label: "Savings", icon: Savings },
     { path: "/pensions", label: "Pension Planner", icon: TrendingUp },
     { path: "/stocksim", label: "Stock Market Simulator", icon: SsidChart },
