@@ -5,6 +5,7 @@ import SavingsForm from "../forms/SavingsForms";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import dayjs from "dayjs";
+import { Card, CardContent } from "../ui/card";
 
 interface SavingsGoalData {
   id: string;
@@ -71,20 +72,26 @@ const Savings: React.FC = () => {
       <h1 className="text-2xl font-bold text-center mb-6">Savings Goals</h1>
 
       {/* Toggle Form Button */}
-      <div className="flex justify-end mb-6">
+      <div className="flex justify-center mb-6">
         <Button
           onClick={() => setIsFormVisible(!isFormVisible)}
-          className="bg-green-500 text-white"
+          className="bg-green-500 hover:bg-green-600 text-white"
         >
           {isFormVisible ? "Hide Form" : "Add Savings Goal"}
         </Button>
       </div>
 
       {/* Savings Form */}
-      {isFormVisible && <SavingsForm onAddSavingsGoal={handleAddSavingsGoal} />}
+      {isFormVisible && 
+      <Card className="p-4 mt-4">
+        <CardContent className="space-y-4">
+        <SavingsForm onAddSavingsGoal={handleAddSavingsGoal} />
+        </CardContent>
+      </Card>
+      }
 
       {/* Savings Goals Grid */}
-      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mt-5">
         {savingsData.map((goal) => (
           <div
             key={goal.id}
@@ -104,7 +111,7 @@ const Savings: React.FC = () => {
             {/* Action Buttons */}
             <div className="flex justify-between space-x-4 ">
               <Button
-                className="bg-green-600 text-white flex-1"
+                className="bg-green-500 hover:bg-green-600 text-white flex-1"
                 onClick={() => navigate(`/savings/${goal.id}`)}
               >
                 View Goal

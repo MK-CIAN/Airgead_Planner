@@ -223,8 +223,8 @@ const LoanCalculator: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-semibold mb-6">Loan Repayment Calculator</h1>
+    <div className="max-w-6xl mx-auto p-6">
+      <h1 className="text-2xl font-bold text-center mb-6">Loan Repayment Calculator</h1>
 
       {/* Conditionally render "Add New Loan" button */}
       {!editingLoan && (
@@ -240,9 +240,11 @@ const LoanCalculator: React.FC = () => {
 
       {/* Show Loan Form */}
       {isFormVisible && !editingLoan && (
-        <div className="mb-6">
+        <Card className="p-4 mt-4">
+          <CardContent className="space-y-4">
           <LoanForm onCalculateRepayment={handleCalculateRepayment} />
-        </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Expanded Loan View */}
@@ -304,7 +306,7 @@ const LoanCalculator: React.FC = () => {
       )}
 
       {/* Remaining Loans */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-5">
         {!editingLoan &&
           loans.map((loan) => (
             <Card key={loan.id} className="shadow-lg">

@@ -12,6 +12,7 @@ import {
 import Axios from "./Axios";
 import { toast } from "@/hooks/use-toast";
 import { PensionGrowthChart } from "./charts/PensionGrowthChart";
+import { Card, CardContent } from "./ui/card";
 
 interface PensionProjection {
   id: number;
@@ -170,8 +171,11 @@ const PensionPlanner: React.FC = () => {
     <div className="max-w-7xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6 text-center">Pension Planner</h1>
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+      <h2 className="text-xl text-center font-bold mb-4">Calculate Projection</h2>
+      <h2 className="text-xl text-center font-bold mb-4">Saved Projections</h2>
         {/* Input Section */}
-        <div>
+        <Card>
+          <CardContent>
           <Label>Starting Age</Label>
           <Input
             type="number"
@@ -213,26 +217,26 @@ const PensionPlanner: React.FC = () => {
             value={roi}
             onChange={(e) => setRoi(Number(e.target.value))}
           />
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 justify-center">
             <Button
               onClick={calculateProjection}
-              className="mt-4 bg-green-600 text-white"
+              className="mt-4 bg-green-500 hover:bg-green-600 text-white"
             >
               Calculate
             </Button>
 
             <Button
               onClick={saveProjection}
-              className="mt-4 bg-green-600 text-white"
+              className="mt-4 bg-green-500 hover:bg-green-600 text-white"
             >
               {isSaving ? "Saving..." : "Save Projection"}
             </Button>
           </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Saved Projections Section */}
         <div>
-          <h2 className="text-xl font-bold mb-4">Saved Projections</h2>
           {savedProjections.length > 0 ? (
             <div className="space-y-4">
               {savedProjections.map((proj) => (
@@ -249,7 +253,7 @@ const PensionPlanner: React.FC = () => {
                   </p>
                   <div className="flex space-x-2">
                     <Button
-                      className="bg-green-500 text-white"
+                      className="bg-green-500 hover:bg-green-600 text-white"
                       onClick={() => toggleCardExpansion(proj.id)}
                     >
                       {expandedCardId === proj.id ? "Collapse" : "Expand"}

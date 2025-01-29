@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Axios from './Axios';
 import BudgetChart from './charts/BudgetChart';
-import SavingsChart from './charts/SavingsChart';
+import SavingsChart from './charts/TestSavingsChart';
 import "../App.css";
 import { Box, Grid, LinearProgress, Paper, Typography } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';

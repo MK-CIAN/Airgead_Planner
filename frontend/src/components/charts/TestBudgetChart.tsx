@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useMemo, useEffect, useState } from "react";
 import { PieChart, Pie, Label } from "recharts";
 import {

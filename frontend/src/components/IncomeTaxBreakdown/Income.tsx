@@ -269,7 +269,7 @@ const IncomeTaxCalculator: React.FC = () => {
           </div>
           <Button
             onClick={calculateTaxBreakdown}
-            className="w-full mt-4 bg-green-600 text-white"
+            className="w-full mt-4 bg-green-500 hover:bg-green-600 text-white"
           >
             Calculate
           </Button>
@@ -384,7 +384,7 @@ const IncomeTaxCalculator: React.FC = () => {
                     </div>
                     <div className="flex space-x-2">
                       <Button
-                        className="bg-green-500 text-white"
+                        className="bg-green-500 hover:bg-green-600 text-white"
                         onClick={() => toggleCardExpansion(income.id)}
                       >
                         {expandedCardId === income.id ? "Collapse" : "Expand"}
@@ -519,7 +519,7 @@ const IncomeTaxCalculator: React.FC = () => {
 
           <Button
             onClick={compareIncomes}
-            className="w-full bg-green-600 text-white"
+            className="w-full bg-green-500 hover:bg-green-600 text-white"
           >
             Compare
           </Button>
