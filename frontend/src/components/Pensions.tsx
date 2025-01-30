@@ -174,7 +174,7 @@ const PensionPlanner: React.FC = () => {
       <h2 className="text-xl text-center font-bold mb-4">Calculate Projection</h2>
       <h2 className="text-xl text-center font-bold mb-4">Saved Projections</h2>
         {/* Input Section */}
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardContent>
           <Label>Starting Age</Label>
           <Input
@@ -240,7 +240,7 @@ const PensionPlanner: React.FC = () => {
           {savedProjections.length > 0 ? (
             <div className="space-y-4">
               {savedProjections.map((proj) => (
-                <div key={proj.id} className="border p-4 rounded-md">
+                <div key={proj.id} className="border p-4 rounded-md cursor-pointer hover:shadow-md transition-shadow">
                   <p>
                     <strong>Starting Age:</strong> {proj.starting_age}
                   </p>

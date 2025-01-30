@@ -20,6 +20,7 @@ import CustomBudgetDetails from './components/Budgets/CustomBudgetDetails'
 import SavingsGoalDetails from './components/Savings/SavingGoalDetails'
 import TestNav from './components/TestNav'
 import { Toaster } from './components/ui/toaster';
+import FinancialSuggestions from './components/FinancialSuggestions'
 
 function App() {
   const location = useLocation()
@@ -53,6 +54,7 @@ function App() {
                 <Route path="/news" element={<News />} />
                 <Route path="/income" element={<Income />} />
                 <Route path="/userinterests" element={<UserInterest />} />
+                <Route path="/financial-suggestions" element={<FinancialSuggestions />} />
               </Route>
             </Routes>
           }

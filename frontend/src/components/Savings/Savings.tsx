@@ -95,7 +95,7 @@ const Savings: React.FC = () => {
         {savingsData.map((goal) => (
           <div
             key={goal.id}
-            className="p-6 border rounded-lg shadow-sm bg-white flex flex-col space-y-4"
+            className="p-6 border rounded-lg shadow-sm bg-white flex flex-col space-y-4 cursor-pointer hover:shadow-md transition-shadow"
           >
             {/* Goal Name */}
             <h2 className="text-xl font-bold text-center">{goal.name}</h2>

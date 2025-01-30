@@ -121,3 +121,8 @@ class FinancialArticleSerializer(serializers.ModelSerializer):
         model = FinancialArticle
         fields = [
             "id", "article_id", "title", "link", "description", "source_name", "pub_date", "image_url", "keywords"]
+        
+class FinancialSuggestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FinancialSuggestion
+        fields = ["id", "suggestion_text", "created_at", "status", "user_feedback"]

@@ -476,3 +476,105 @@ class UserInterestsView(APIView):
         if user_interests:
             return Response({"interests": user_interests.interests}, status='200')
         return Response({"interests": []}, status='200')
+    
+class FinancialSuggestionViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = FinancialSuggestion.objects.all()
+    serializer_class = FinancialSuggestionSerializer
+
+    
+    def generate_suggestions(self, user):
+        today = date.today()
+        last_3_months = today - timedelta(days=90)
+        
+        # Calculating Monthly Budget Surplus
+        income_total = MonthlyBudget.objects.filter(
+            user=user, transaction_type="income", month__gte=last_3_months
+        ).aggregate(Sum("amount"))["amount__sum"] or 0
+        
+        expense_total = MonthlyBudget.objects.filter(
+            user=user, transaction_type="expense", month__gte=last_3_months
+        ).aggregate(Sum("amount"))["amount__sum"] or 0
+        
+        debt_total = MonthlyBudget.objects.filter(
+            user=user, transaction_type="debt", month__gte=last_3_months
+        ).aggregate(Sum("amount"))["amount__sum"] or 0
+
+        budget_surplus = income_total - (expense_total + debt_total)
+        
+        # Suggesting Savings Goals Contrib
+        savings_goals = SavingsGoal.objects.filter(user=user)
+        if savings_goals.exists() and budget_surplus > 100:
+            for goal in savings_goals:
+                suggested_contribution = min(budget_surplus * Decimal(0.3), goal.target_amount - goal.current_amount)
+                if suggested_contribution > 0:
+                    FinancialSuggestion.objects.create(
+                        user=user,
+                        suggestion_text=f"Consider allocating €{suggested_contribution:.2f} towards your savings goal '{goal.name}'."
+                    )
+                    
+        # Suggesting Extra Loan Payement
+        loans = Loan.objects.filter(user=user)
+        if loans.exists() and budget_surplus > 100:
+            for loan in loans:
+                extra_payment = min(budget_surplus * Decimal(0.3), loan.balance * Decimal(0.1))
+                if extra_payment > 0:
+                    FinancialSuggestion.objects.create(
+                        user=user,
+                        suggestion_text=f"You have extra funds. Consider making an additional payment of €{extra_payment:.2f} towards your loan '{loan.name}'."
+                    )
+                    
+        # Identifying High Spending Categories
+        high_expense_category = (
+            BudgetItem.objects.filter(budget__user=user, transaction_type="expense", created_at__gte=last_3_months)
+            .values("category")
+            .annotate(total=Sum("amount"))
+            .order_by("-total")
+            .first()
+        )
+        
+        if high_expense_category and high_expense_category["total"] > (expense_total * Decimal(0.3)):
+            FinancialSuggestion.objects.create(
+                user=user,
+                suggestion_text=f"You have high spending in '{high_expense_category['category']}' (€{high_expense_category['total']:.2f} in the last 3 months). Consider adjusting your budget."
+            )
+            
+        # Suggesting Investments
+        portfolio = Portfolio.objects.filter(user=user).first()
+        if portfolio and budget_surplus > 200:
+            FinancialSuggestion.objects.create(
+                user=user,
+                suggestion_text=f"You have an excess of €{budget_surplus:.2f}. Consider investing part of it in your portfolio."
+            )
+
+    @action(detail=False, methods=["GET"])
+    def get_suggestions(self, request):
+        user = request.user
+        suggestions = FinancialSuggestion.objects.filter(user=user, status="NEW").order_by("-created_at")
+        serializer = FinancialSuggestionSerializer(suggestions, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=["GET"])
+    def generate(self, request):
+        """
+        Generate new financial suggestions for the user.
+        """
+        user = request.user
+        self.generate_suggestions(user)
+        return Response({"message": "New financial suggestions have been generated!"})
+    
+    @action(detail=True, methods=["POST"])
+    def accept_suggestion(self, request, pk=None):
+        suggestion = FinancialSuggestion.objects.get(id=pk, user=request.user)
+        suggestion.status = "ACCEPTED"
+        suggestion.user_feedback = True
+        suggestion.save()
+        return Response({"message": "Suggestion accepted successfully."})
+    
+    @action(detail=True, methods=["POST"])
+    def dismiss_suggestion(self, request, pk=None):
+        suggestion = FinancialSuggestion.objects.get(id=pk, user=request.user)
+        suggestion.status = "DISMISSED"
+        suggestion.user_feedback = False
+        suggestion.save()
+        return Response({"message": "Suggestion dismissed successfully."})

@@ -317,3 +317,22 @@ class UserInterest(models.Model):
 
     class Meta:
         db_table = 'user_interest'
+        
+class FinancialSuggestion(models.Model):
+    STATUS_CHOICES = [
+        ("NEW", "New"),
+        ("DISMISSED", "Dismissed"),
+        ("ACCEPTED", "Accepted"),
+    ]
+    
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="financial_suggestions")
+    suggestion_text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="NEW")
+    user_feedback = models.BooleanField(null=True, blank=True)
+    
+    class Meta:
+        db_table = "financial_suggestions"
+        
+    def __str__(self):
+        return f"Suggestion for {self.user.username}: {self.suggestion_text[:50]}..."    

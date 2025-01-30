@@ -309,7 +309,7 @@ const LoanCalculator: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-5">
         {!editingLoan &&
           loans.map((loan) => (
-            <Card key={loan.id} className="shadow-lg">
+            <Card key={loan.id} className="cursor-pointer hover:shadow-md transition-shadow">
               <CardContent>
                 <h2 className="text-xl font-bold text-center mb-4">{loan.name}</h2>
                 <p className="mb-2">Initial Balance: €{loan.balance.toFixed(2)}</p>
