@@ -541,24 +541,28 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
     def generate_suggestions(self, user):
         today = date.today()
         last_3_months = today - timedelta(days=90)
-        
-        # Calculating Monthly Budget Surplus
-        income_total = MonthlyBudget.objects.filter(
-            user=user, transaction_type="income", month__gte=last_3_months
-        ).aggregate(Sum("amount"))["amount__sum"] or 0
-        
-        expense_total = MonthlyBudget.objects.filter(
-            user=user, transaction_type="expense", month__gte=last_3_months
-        ).aggregate(Sum("amount"))["amount__sum"] or 0
-        
-        debt_total = MonthlyBudget.objects.filter(
-            user=user, transaction_type="debt", month__gte=last_3_months
-        ).aggregate(Sum("amount"))["amount__sum"] or 0
+
+        latest_budget = MonthlyBudget.objects.filter(user=user).order_by("-month").first()
+        #if not latest_budget:
+         #   return  # No budget found, skip suggestions
+
+        income_total = MonthlyBudgetItem.objects.filter(
+            budget=latest_budget, transaction_type="income"
+        ).aggregate(Sum("amount"))["amount__sum"] or Decimal("0")
+
+        expense_total = MonthlyBudgetItem.objects.filter(
+            budget=latest_budget, transaction_type="expense"
+        ).aggregate(Sum("amount"))["amount__sum"] or Decimal("0")
+
+        debt_total = MonthlyBudgetItem.objects.filter(
+            budget=latest_budget, transaction_type="debt"
+        ).aggregate(Sum("amount"))["amount__sum"] or Decimal("0")
 
         budget_surplus = income_total - (expense_total + debt_total)
         
         # Suggesting Savings Goals Contrib
-        savings_goals = SavingsGoal.objects.filter(user=user)
+        savings_goals = SavingsGoal.objects.filter(user=user, current_amount__lt=F('target_amount'))  # Exclude completed goals
+
         if savings_goals.exists() and budget_surplus > 100:
             for goal in savings_goals:
                 suggested_contribution = min(budget_surplus * Decimal(0.3), goal.target_amount - goal.current_amount)
@@ -576,12 +580,12 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
                 if extra_payment > 0:
                     FinancialSuggestion.objects.create(
                         user=user,
-                        suggestion_text=f"You have extra funds. Consider making an additional payment of €{extra_payment:.2f} towards your loan '{loan.name}'."
+                        suggestion_text=f"You have extra funds in your montly budget of €{budget_surplus}. Consider making an additional payment of €{extra_payment:.2f} towards your loan '{loan.name}'."
                     )
                     
         # Identifying High Spending Categories
         high_expense_category = (
-            BudgetItem.objects.filter(budget__user=user, transaction_type="expense", created_at__gte=last_3_months)
+            MonthlyBudgetItem.objects.filter(budget__user=user, transaction_type="expense", created_at__gte=last_3_months)
             .values("category")
             .annotate(total=Sum("amount"))
             .order_by("-total")

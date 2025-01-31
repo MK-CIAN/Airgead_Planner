@@ -30,7 +30,9 @@ interface BudgetData {
 }
 
 const Budget: React.FC = () => {
-  const [currentMonth, setCurrentMonth] = useState<Dayjs>(dayjs().startOf("month"));
+  const [currentMonth, setCurrentMonth] = useState<Dayjs>(
+    dayjs().startOf("month")
+  );
   const [budgetId, setBudgetId] = useState<number | null>(null); // Store Monthly Budget ID
   const [budgetData, setBudgetData] = useState<BudgetData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -38,30 +40,37 @@ const Budget: React.FC = () => {
   // Fetch budget data for the selected month
   const fetchBudgetData = async (month: Dayjs) => {
     setLoading(true);
-    try {
-      console.log(`Fetching budget for: ${month.format("YYYY-MM")}`);
-      const response = await Axios.get("data/budget/", { params: { month: month.format("YYYY-MM") } });
+    const formattedMonth = month.format("YYYY-MM-DD"); // Ensure correct format
 
-      if (response.data.length > 0) {
-        const budget = response.data[0]; // Assume only one budget per user per month
-        setBudgetId(budget.id);
-        console.log(`Budget found: ${budget.id}`);
-        const formattedData: BudgetData[] = (budget.items || []).map((item: any) => ({
-          id: item.id,
-          value: parseFloat(item.amount),
-          label: item.category,
-          type: item.transaction_type,
-        }));
-        setBudgetData(formattedData);
-      } else {
-        console.log("No budget found for this month.");
-        setBudgetId(null);
-        setBudgetData([]);
-      }
+    try {
+        console.log(`Fetching budget for: ${formattedMonth}`);
+        const response = await Axios.get("data/budget/", { params: { month: formattedMonth } });
+
+        if (response.data.length > 0) {
+            const budget = response.data[0];
+            setBudgetId(budget.id);
+            console.log(`Budget found: ${budget.id}`);
+
+            const formattedData: BudgetData[] = (budget.items || []).map((item: any) => ({
+                id: item.id,
+                value: parseFloat(item.amount),
+                label: item.category,
+                type: item.transaction_type,
+            }));
+            setBudgetData(formattedData);
+        } else {
+            console.log("No budget found for this month. Creating a new one...");
+            const budgetResponse = await Axios.post("data/budget/", { month: formattedMonth }); // Corrected format
+            const newBudgetId = budgetResponse.data.id;
+            setBudgetId(newBudgetId);
+            console.log(`New budget created: ${newBudgetId}`);
+            
+            setBudgetData([]);
+        }
     } catch (error) {
-      console.error("Error fetching budget data:", error);
+        console.error("Error fetching budget data:");
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
 
@@ -70,38 +79,26 @@ const Budget: React.FC = () => {
   }, [currentMonth]);
 
   // Navigation between months
-  const handlePreviousMonth = () => setCurrentMonth(prev => prev.subtract(1, "month"));
-  const handleNextMonth = () => setCurrentMonth(prev => prev.add(1, "month"));
+  const handlePreviousMonth = () =>
+    setCurrentMonth((prev) => prev.subtract(1, "month"));
+  const handleNextMonth = () => setCurrentMonth((prev) => prev.add(1, "month"));
 
   // Function to add a budget item
-  const handleAddBudgetItem = async (newItem: { amount: string; category: string; transaction_type: string }) => {
-
+  const handleAddBudgetItem = async (newItem: {
+    amount: string;
+    category: string;
+    transaction_type: string;
+  }) => {
     if (!newItem.amount || !newItem.category || !newItem.transaction_type) {
       return;
     }
 
+    if (!budgetId) {
+      console.error("No budget available to add items to.");
+      return;
+    }
+
     try {
-      let currentBudgetId = budgetId;
-
-      // Ensure budget exists
-      if (!budgetId) {
-        const existingBudgetResponse = await Axios.get("data/budget/", { params: { month: currentMonth.format("YYYY-MM") } });
-
-        if (existingBudgetResponse.data.length > 0) {
-          currentBudgetId = existingBudgetResponse.data[0].id;
-          setBudgetId(currentBudgetId);
-        } else {
-          const budgetResponse = await Axios.post("data/budget/", { month: currentMonth.format("YYYY-MM") });
-          currentBudgetId = budgetResponse.data.id;
-          setBudgetId(currentBudgetId);
-        }
-      }
-
-      if (!currentBudgetId) {
-        return;
-      }
-
-      // ✅ Ensure correct API data format
       const itemData = {
         amount: parseFloat(newItem.amount),
         category: newItem.category.trim(),
@@ -109,10 +106,13 @@ const Budget: React.FC = () => {
       };
 
       // Add the item to the budget
-      const itemResponse = await Axios.post(`data/budget/${currentBudgetId}/items/`, itemData);
+      const itemResponse = await Axios.post(
+        `data/budget/${budgetId}/items/`,
+        itemData
+      );
 
       // Update UI
-      setBudgetData(prevData => [
+      setBudgetData((prevData) => [
         ...prevData,
         {
           id: itemResponse.data.id,
@@ -122,10 +122,9 @@ const Budget: React.FC = () => {
         },
       ]);
     } catch (error) {
-      console.error("Error adding budget item:");
+      console.error("Error adding budget item:", error);
     }
   };
-
 
   // Function to remove a budget item
   const handleRemoveBudgetItem = async (itemId: number) => {
@@ -133,7 +132,9 @@ const Budget: React.FC = () => {
     try {
       console.log(`Removing item ${itemId} from budget ${budgetId}`);
       await Axios.delete(`data/budget/${budgetId}/items/${itemId}/`);
-      setBudgetData(prevData => prevData.filter(item => item.id !== itemId));
+      setBudgetData((prevData) =>
+        prevData.filter((item) => item.id !== itemId)
+      );
     } catch (error) {
       console.error("Error removing budget item:", error);
     }
@@ -161,7 +162,9 @@ const Budget: React.FC = () => {
             {"<-"}
           </Icon>
         </Button>
-        <Typography variant="h6">{currentMonth.format("YYYY-MM-DD")}</Typography>
+        <Typography variant="h6">
+          {currentMonth.format("YYYY-MM-DD")}
+        </Typography>
         <Button onClick={handleNextMonth} variant="ghost">
           <Icon component="span" className="material-icons">
             {"->"}
@@ -173,7 +176,7 @@ const Budget: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
         {/* Budget Form */}
         <Card className="bg-gray-50 p-4 rounded-md">
-          <BudgetForm onAddBudget={handleAddBudgetItem}/>
+          <BudgetForm onAddBudget={handleAddBudgetItem} />
         </Card>
 
         {/* Budget List */}

@@ -26,24 +26,41 @@ const Dashboard = () => {
   const [currentMonth] = useState<Dayjs>(dayjs().startOf('month'));
   const [budgetData, setBudgetData] = useState<BudgetData[]>([]);
   const [savingsData, setSavingsData] = useState<SavingsGoalData[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   //Getting budget data from user to display on the dashboard
-  const getBudgetData = (month: Dayjs) => {
-    Axios.get(`data/budget/`, { params: { month: month.format('YYYY-MM') } })
-      .then((response) => {
-        console.log("Fetched budget data:", response.data); // Logging fetched data
-        const formattedData: BudgetData[] = response.data.map((item: { id: number; amount: string; category: string; transaction_type: string }) => ({
-          id: item.id, 
-          value: parseFloat(item.amount),
-          label: item.category,
-          type: item.transaction_type,
-        }));
-        setBudgetData(formattedData);
-      })
-      .catch((error) => {
+  const fetchMonthlyBudget = async (month: Dayjs) => {
+    setLoading(true);
+    try {
+        console.log(`Fetching budget for: ${month.format("YYYY-MM")}`);
+        const response = await Axios.get("data/budget/", { params: { month: month.format("YYYY-MM") } });
+
+        if (response.data.length > 0) {
+            const budget = response.data[0]; // Assume one budget per user per month
+
+            console.log("Budget found:", budget);
+
+            // Ensure items are mapped correctly
+            const formattedData: BudgetData[] = budget.items
+                ? budget.items.map((item: any) => ({
+                    id: item.id,
+                    value: parseFloat(item.amount),
+                    label: item.category || "Unknown",
+                    type: item.transaction_type || "expense",
+                }))
+                : [];
+
+            setBudgetData(formattedData);
+        } else {
+            console.log("No budget found for this month.");
+            setBudgetData([]); // Ensure state is reset if no budget exists
+        }
+    } catch (error) {
         console.error("Error fetching budget data:", error);
-      });
-  };
+    } finally {
+        setLoading(false);
+    }
+};
   
 
   const getSavingsData = () => {
@@ -64,7 +81,7 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    getBudgetData(currentMonth);
+    fetchMonthlyBudget(currentMonth);
     getSavingsData();
   }, [currentMonth]);
 

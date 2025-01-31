@@ -22,12 +22,6 @@ type SavingsChartProps = {
     progress: number; // Percentage progress
   };
 
-const chartConfig = {
-  saved: {
-    label: "Amount Saved",
-  },
-} satisfies ChartConfig
-
 const SavingsChart: React.FC<SavingsChartProps> = ({ progress }) => {
 
     const chartData = [
@@ -38,7 +32,7 @@ const SavingsChart: React.FC<SavingsChartProps> = ({ progress }) => {
     <div className="flex flex-col">
       <div className="flex-1 pb-0">
         <ChartContainer
-          config={chartConfig}
+          config={{}}
           className="mx-auto aspect-square max-h-[250px]"
         >
           <RadialBarChart
