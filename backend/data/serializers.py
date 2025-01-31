@@ -88,7 +88,7 @@ class ActiveLoanSerializer(serializers.ModelSerializer):
     class Meta:
         model = ActiveLoan
         fields = [
-            'id', 'user', 'name', 'balance', 'interest_rate', 'term_length',
+            'id', 'user', 'name', 'original_balance', 'balance', 'interest_rate', 'term_length',
             'monthly_payment', 'total_interest', 'payment_due_date', 'extra_payments',
             'next_payment_date', 'status', 'created_at', 'payments'
         ]

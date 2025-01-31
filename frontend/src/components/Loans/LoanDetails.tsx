@@ -1,0 +1,176 @@
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import Axios from "../Axios";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import LoanChart from "../charts/LoanChart";
+import { parse } from "path";
+
+interface LoanDetailsProps {}
+
+interface ActiveLoanData {
+  id: string;
+  name: string;
+  balance: number;
+  originalBalance: number;
+  interestRate: number;
+  termLength: number;
+  monthlyPayment: number;
+  totalInterest: number;
+  paymentDueDate: string;
+}
+
+interface LoanPayment {
+  id: string;
+  amount: number;
+  payment_date: string;
+}
+
+const generateRepaymentSchedule = (balance: number, rate: number, term: number) => {
+    const monthlyRate = rate / 100 / 12;
+    const schedule = [];
+    let currentBalance = balance;
+  
+    for (let i = 0; i < term; i++) {
+      const interestForMonth = currentBalance * monthlyRate;
+      const principalPayment = (balance / term) + interestForMonth;
+      currentBalance -= (balance / term);
+  
+      schedule.push(currentBalance > 0 ? currentBalance : 0);
+      if (currentBalance <= 0) break;
+    }
+  
+    return schedule;
+  };
+
+const LoanDetails: React.FC<LoanDetailsProps> = () => {
+  const { id } = useParams();
+  const [loan, setLoan] = useState<ActiveLoanData | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentHistory, setPaymentHistory] = useState<LoanPayment[]>([]);
+
+  // Fetch the loan details and its payment history
+  useEffect(() => {
+    Axios.get(`data/active-loan/${id}/`)
+      .then((response) => {
+        setLoan({
+            id: response.data.id,
+            name: response.data.name,
+            balance: parseFloat(response.data.balance) || 0,
+            originalBalance: parseFloat(response.data.balance) || 0,
+            interestRate: parseFloat(response.data.interest_rate) || 0,
+            termLength: parseInt(response.data.term_length, 10) || 0,
+            monthlyPayment: parseFloat(response.data.monthly_payment) || 0,
+            totalInterest: parseFloat(response.data.total_interest) || 0,
+            paymentDueDate: response.data.payment_due_date,
+          });
+      })
+      .catch((error) =>
+        console.error("Error fetching active loan details:", error)
+      );
+
+    Axios.get(`data/active-loan/${id}/payments/`)
+      .then((response) => {
+        setPaymentHistory(response.data);
+      })
+      .catch((error) =>
+        console.error("Error fetching active loan payment history:", error)
+      );
+  }, [id]);
+
+  // Handle making a payment
+  const handlePayment = () => {
+    if (!loan || !paymentAmount) return;
+
+    Axios.post(`data/active-loan/${id}/make_payment/`, {
+      amount: parseFloat(paymentAmount),
+    })
+      .then((response) => {
+        alert("Payment Successful!");
+
+        // Update state with new balance and new payment history
+        setLoan((prevLoan) =>
+          prevLoan
+            ? { ...prevLoan, balance: response.data.remaining_balance }
+            : null
+        );
+        setPaymentHistory([...paymentHistory, response.data.payment]);
+        setPaymentAmount("");
+      })
+      .catch((error) => console.error("Error making payment:", error));
+  };
+
+  return loan ? (
+    <div className="max-w-4xl mx-auto p-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Loan Details: {loan.name}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>
+            <strong>Current Balance:</strong> €{Number(loan.balance || 0).toFixed(2)}
+          </p>
+          <p>
+            <strong>Current Balance:</strong> €{Number(loan.originalBalance || 0).toFixed(2)}
+          </p>
+          <p>
+            <strong>Interest Rate:</strong> {loan.interestRate}%
+          </p>
+          <p>
+            <strong>Monthly Payment:</strong> €{Number(loan.monthlyPayment || 0).toFixed(2)}
+          </p>
+          <p>
+            <strong>Total Interest:</strong> €{Number(loan.totalInterest || 0).toFixed(2)}
+          </p>
+          <p>
+            <strong>Payment Due Date:</strong> {loan.paymentDueDate}
+          </p>
+
+          {/* Loan Chart */}
+          <LoanChart
+            repaymentSchedule={generateRepaymentSchedule(loan.originalBalance, loan.interestRate, loan.termLength)}
+            loanBalance={loan.balance}
+            originalBalance={loan.originalBalance}  // Pass original balance
+            interestRate={loan.interestRate}
+            termLength={loan.termLength}
+            totalInterest={loan.totalInterest}
+            isEditing={false}
+            isActiveLoan={true}
+            />
+
+          {/* Payment Input */}
+          <div className="mt-6">
+            <Input
+              type="number"
+              placeholder="Enter payment amount"
+              value={paymentAmount}
+              onChange={(e) => setPaymentAmount(e.target.value)}
+              className="mb-4"
+            />
+            <Button onClick={handlePayment} className="bg-green-500 text-white">
+              Make Payment
+            </Button>
+          </div>
+
+          {/* Payment History */}
+          <h3 className="text-lg font-semibold mt-6">Payment History</h3>
+          <ul className="mt-2">
+            {paymentHistory.map((payment) => (
+              <li key={payment.id} className="border-b py-2">
+                <span>
+                  €{Number(payment.amount || 0).toFixed(2)} paid on{" "}
+                  {new Date(payment.payment_date).toLocaleDateString()}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
+    </div>
+  ) : (
+    <p>Loading loan details...</p>
+  );
+};
+
+export default LoanDetails;

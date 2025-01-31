@@ -5,6 +5,7 @@
 #   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
+from decimal import Decimal
 from django.db import models
 from django.forms import ValidationError
 from django.utils.timezone import now
@@ -222,6 +223,7 @@ class Loan(models.Model):
 class ActiveLoan(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
+    original_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)  # New column
     balance = models.DecimalField(max_digits=12, decimal_places=2)  
     interest_rate = models.DecimalField(max_digits=5, decimal_places=2)
     term_length = models.IntegerField()  
@@ -235,10 +237,11 @@ class ActiveLoan(models.Model):
 
     def update_remaining_balance(self, payment_amount):
         """Update balance when a user makes a payment"""
+        payment_amount = Decimal(payment_amount) 
         self.balance -= payment_amount
         if self.balance <= 0:
             self.status = 'paid'
-            self.balance = 0  
+            self.balance = Decimal("0.00")
         self.save()
         
     class Meta:
@@ -246,8 +249,6 @@ class ActiveLoan(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.user.username}"
-    
-    
     
 class LoanPayment(models.Model):
     loan = models.ForeignKey(ActiveLoan, on_delete=models.CASCADE, related_name="payments")

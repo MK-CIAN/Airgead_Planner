@@ -247,7 +247,18 @@ class ActiveLoanViewSet(viewsets.ModelViewSet):
         return ActiveLoan.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        loan = serializer.save(user=self.request.user)
+        if loan.original_balance == 0:
+            loan.original_balance = loan.balance  # Set original balance on creation
+            loan.save()
+        
+    @action(detail=True, methods=['GET'])
+    def payments(self, request, pk=None):
+        """Fetch payment history for a specific active loan."""
+        loan = get_object_or_404(ActiveLoan, id=pk, user=request.user)
+        payments = LoanPayment.objects.filter(loan=loan)
+        serializer = LoanPaymentSerializer(payments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['POST'])
     def make_payment(self, request, pk=None):
@@ -257,7 +268,7 @@ class ActiveLoanViewSet(viewsets.ModelViewSet):
         loan = get_object_or_404(ActiveLoan, id=pk, user=request.user)
         
         try:
-            payment_amount = float(request.data.get('amount', 0))
+            payment_amount = Decimal(request.data.get('amount', 0))
             if payment_amount <= 0:
                 return Response({"error": "Payment amount must be greater than zero"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -270,6 +281,7 @@ class ActiveLoanViewSet(viewsets.ModelViewSet):
             return Response({
                 "message": "Payment applied successfully",
                 "remaining_balance": loan.balance,
+                "original_balance": loan.original_balance,
                 "payment": LoanPaymentSerializer(payment).data
             }, status=status.HTTP_200_OK)
 

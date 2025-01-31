@@ -21,6 +21,7 @@ import SavingsGoalDetails from './components/Savings/SavingGoalDetails'
 import TestNav from './components/TestNav'
 import { Toaster } from './components/ui/toaster';
 import FinancialSuggestions from './components/FinancialSuggestions'
+import LoanDetails from './components/Loans/LoanDetails'
 
 function App() {
   const location = useLocation()
@@ -49,6 +50,7 @@ function App() {
                 <Route path="/savings" element={<Savings />} />
                 <Route path="/savings/:id" element={<SavingsGoalDetails />} />
                 <Route path="/loans" element={<Loans />} />
+                <Route path="/loan-details/:id" element={<LoanDetails />} />
                 <Route path="/pensions" element={<Pensions />} />
                 <Route path="/stocksim" element={<StockSim />} />
                 <Route path="/news" element={<News />} />

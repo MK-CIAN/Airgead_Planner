@@ -26,12 +26,31 @@ interface ActiveLoanData {
   id: string;
   name: string;
   balance: number;
+  originalBalance: number;
   interestRate: number;
   termLength: number;
   monthlyPayment: number;
   totalInterest: number;
   paymentDueDate: string;
 }
+
+const generateRepaymentSchedule = (balance: number, rate: number, term: number) => {
+  const monthlyRate = rate / 100 / 12;
+  const schedule = [];
+  let currentBalance = balance;
+
+  for (let i = 0; i < term; i++) {
+    const interestForMonth = currentBalance * monthlyRate;
+    const principalPayment = (balance / term) + interestForMonth;
+    currentBalance -= (balance / term);
+
+    schedule.push(currentBalance > 0 ? currentBalance : 0);
+    if (currentBalance <= 0) break;
+  }
+
+  return schedule;
+};
+
 
 const LoanCalculator: React.FC = () => {
   const [loans, setLoans] = useState<LoanData[]>([]);
@@ -473,15 +492,16 @@ const LoanCalculator: React.FC = () => {
             onClick={() => navigate(`/loan-details/${loan.id}`)}
           >
             <CardContent>
-              <LoanChart
-                key={loan.id}
-                loanBalance={loan.balance}
-                interestRate={loan.interestRate}
-                termLength={loan.termLength}
-                totalInterest={loan.totalInterest}
-                isEditing={false}
-                isActiveLoan={true} // Important for active loans
-              />
+            <LoanChart
+            repaymentSchedule={generateRepaymentSchedule(loan.originalBalance, loan.interestRate, loan.termLength)}
+            loanBalance={loan.balance}
+            originalBalance={loan.originalBalance}  // Pass original balance
+            interestRate={loan.interestRate}
+            termLength={loan.termLength}
+            totalInterest={loan.totalInterest}
+            isEditing={false}
+            isActiveLoan={true}
+            />
               <h2 className="text-xl font-bold">{loan.name}</h2>
               <p>Balance: €{loan.balance.toFixed(2)}</p>
               <p>Interest Rate: {loan.interestRate}%</p>
