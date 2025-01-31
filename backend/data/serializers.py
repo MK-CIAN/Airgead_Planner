@@ -77,6 +77,23 @@ class LoanSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'name', 'balance', 'interest_rate', 'term_length', 'monthly_payment', 'total_interest', 'created_at']
         read_only_fields = ['id', 'created_at', 'user']
         
+class LoanPaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LoanPayment
+        fields = ['id', 'loan', 'amount', 'payment_date']
+
+class ActiveLoanSerializer(serializers.ModelSerializer):
+    payments = LoanPaymentSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = ActiveLoan
+        fields = [
+            'id', 'user', 'name', 'balance', 'interest_rate', 'term_length',
+            'monthly_payment', 'total_interest', 'payment_due_date', 'extra_payments',
+            'next_payment_date', 'status', 'created_at', 'payments'
+        ]
+        read_only_fields = ['id', 'user', 'created_at', 'status', 'payments']
+        
 class IncomeTaxSerializer(serializers.ModelSerializer):
     class Meta:
         model = IncomeTax

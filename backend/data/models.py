@@ -7,7 +7,7 @@
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 from django.forms import ValidationError
-
+from django.utils.timezone import now
 from dashboard import settings
 
 
@@ -218,6 +218,48 @@ class Loan(models.Model):
 
     def __str__(self):
         return self.name
+    
+class ActiveLoan(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    balance = models.DecimalField(max_digits=12, decimal_places=2)  
+    interest_rate = models.DecimalField(max_digits=5, decimal_places=2)
+    term_length = models.IntegerField()  
+    monthly_payment = models.DecimalField(max_digits=12, decimal_places=2)
+    total_interest = models.DecimalField(max_digits=12, decimal_places=2)
+    payment_due_date = models.DateField()  
+    extra_payments = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)  
+    created_at = models.DateTimeField(auto_now_add=True)
+    next_payment_date = models.DateField(null=True, blank=True)  
+    status = models.CharField(max_length=20, choices=[('active', 'Active'), ('paid', 'Paid')], default='active')
+
+    def update_remaining_balance(self, payment_amount):
+        """Update balance when a user makes a payment"""
+        self.balance -= payment_amount
+        if self.balance <= 0:
+            self.status = 'paid'
+            self.balance = 0  
+        self.save()
+        
+    class Meta:
+        db_table = 'active_loan'
+
+    def __str__(self):
+        return f"{self.name} - {self.user.username}"
+    
+    
+    
+class LoanPayment(models.Model):
+    loan = models.ForeignKey(ActiveLoan, on_delete=models.CASCADE, related_name="payments")
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    payment_date = models.DateTimeField(default=now)
+
+    class Meta:
+        db_table = 'loan_payement'
+        
+    def __str__(self):
+        return f"€{self.amount} on {self.payment_date.strftime('%Y-%m-%d')} for {self.loan.name}"
+
     
 class IncomeTax(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

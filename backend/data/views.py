@@ -239,6 +239,44 @@ class LoanViewSet(viewsets.ModelViewSet):
         # Automatically associate the loan with the authenticated user
         serializer.save(user=self.request.user)
         
+class ActiveLoanViewSet(viewsets.ModelViewSet):
+    serializer_class = ActiveLoanSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return ActiveLoan.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=['POST'])
+    def make_payment(self, request, pk=None):
+        """
+        Handles making a payment towards an active loan
+        """
+        loan = get_object_or_404(ActiveLoan, id=pk, user=request.user)
+        
+        try:
+            payment_amount = float(request.data.get('amount', 0))
+            if payment_amount <= 0:
+                return Response({"error": "Payment amount must be greater than zero"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Create a payment entry
+            payment = LoanPayment.objects.create(loan=loan, amount=payment_amount)
+
+            # Update the loan balance
+            loan.update_remaining_balance(payment_amount)
+
+            return Response({
+                "message": "Payment applied successfully",
+                "remaining_balance": loan.balance,
+                "payment": LoanPaymentSerializer(payment).data
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 class IncomeTaxViewSet(viewsets.ModelViewSet):
     serializer_class = IncomeTaxSerializer

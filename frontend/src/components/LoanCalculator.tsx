@@ -6,6 +6,8 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card, CardContent } from "./ui/card";
 import dayjs from "dayjs";
+import ActiveLoanForm from "./forms/ActiveLoanForm";
+import { useNavigate } from "react-router-dom";
 
 interface LoanData {
   id: string;
@@ -20,9 +22,22 @@ interface LoanData {
   saved: boolean;
 }
 
+interface ActiveLoanData {
+  id: string;
+  name: string;
+  balance: number;
+  interestRate: number;
+  termLength: number;
+  monthlyPayment: number;
+  totalInterest: number;
+  paymentDueDate: string;
+}
+
 const LoanCalculator: React.FC = () => {
   const [loans, setLoans] = useState<LoanData[]>([]);
+  const [activeLoans, setActiveLoans] = useState<ActiveLoanData[]>([]);
   const [isFormVisible, setIsFormVisible] = useState(false);
+  const [showActiveLoanForm, setShowActiveLoanForm] = useState(false);
   const [editingLoan, setEditingLoan] = useState<string | null>(null);
   const [customMonthlyPayment, setCustomMonthlyPayment] = useState<
     number | null
@@ -30,6 +45,7 @@ const LoanCalculator: React.FC = () => {
   const [customRepaymentSchedule, setCustomRepaymentSchedule] = useState<
     number[]
   >([]);
+  const navigate = useNavigate();
 
   // Function to calculate repayment schedule
   const calculateRepaymentSchedule = (
@@ -90,6 +106,25 @@ const LoanCalculator: React.FC = () => {
       .catch((error) => {
         console.error("Error fetching loans:", error);
       });
+
+    Axios.get(`data/active-loan/`)
+      .then((response) => {
+        const fetchedActiveLoans = response.data.map((loan: any) => ({
+          id: loan.id,
+          name: loan.name,
+          balance: parseFloat(loan.balance) || 0,
+          interestRate: parseFloat(loan.interest_rate) || 0,
+          termLength: parseInt(loan.term_length, 10) || 0,
+          monthlyPayment: parseFloat(loan.monthly_payment) || 0,
+          totalInterest: parseFloat(loan.total_interest) || 0,
+          paymentDueDate: loan.payment_due_date,
+        }));
+
+        setActiveLoans(fetchedActiveLoans);
+      })
+      .catch((error) => {
+        console.error("Error fetching active loans:", error);
+      });
   }, []);
 
   // Function to calculate repayment
@@ -149,6 +184,43 @@ const LoanCalculator: React.FC = () => {
       });
   };
 
+  const handleSaveActiveLoan = (data: {
+    name: string;
+    balance: number;
+    interestRate: number;
+    termLength: number;
+    paymentDueDate: string;
+  }) => {
+    // Calculate monthly payment
+    const monthlyRate = data.interestRate / 100 / 12;
+    const monthlyPayment =
+      (data.balance *
+        monthlyRate *
+        Math.pow(1 + monthlyRate, data.termLength)) /
+      (Math.pow(1 + monthlyRate, data.termLength) - 1);
+
+    const totalInterest = monthlyPayment * data.termLength - data.balance;
+
+    // Convert to snake_case for API compatibility
+    const formattedLoan = {
+      name: data.name,
+      balance: data.balance,
+      interest_rate: data.interestRate,
+      term_length: data.termLength,
+      monthly_payment: parseFloat(monthlyPayment.toFixed(2)),
+      total_interest: parseFloat(totalInterest.toFixed(2)),
+      payment_due_date: data.paymentDueDate,
+    };
+
+    // Send request to backend
+    Axios.post("data/active-loan/", formattedLoan)
+      .then((response) => {
+        setActiveLoans([...activeLoans, response.data]);
+        setShowActiveLoanForm(false);
+      })
+      .catch((error) => console.error("Error saving loan:", error));
+  };
+
   // Function to remove loan
   const handleRemoveLoan = (id: string) => {
     Axios.delete(`data/loans/${id}/`)
@@ -204,7 +276,7 @@ const LoanCalculator: React.FC = () => {
             )
           );
           setEditingLoan(null);
-          setCustomMonthlyPayment(null); 
+          setCustomMonthlyPayment(null);
           console.log("Loan updated with custom monthly payment.");
         })
         .catch((error) => {
@@ -224,7 +296,9 @@ const LoanCalculator: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <h1 className="text-2xl font-bold text-center mb-6">Loan Repayment Calculator</h1>
+      <h1 className="text-2xl font-bold text-center mb-6">
+        Loan Repayment Calculator
+      </h1>
 
       {/* Conditionally render "Add New Loan" button */}
       {!editingLoan && (
@@ -235,6 +309,9 @@ const LoanCalculator: React.FC = () => {
           >
             {isFormVisible ? "Hide Form" : "Add New Loan"}
           </Button>
+          <Button onClick={() => setShowActiveLoanForm(!showActiveLoanForm)}>
+            Track a Loan
+          </Button>
         </div>
       )}
 
@@ -242,7 +319,15 @@ const LoanCalculator: React.FC = () => {
       {isFormVisible && !editingLoan && (
         <Card className="p-4 mt-4">
           <CardContent className="space-y-4">
-          <LoanForm onCalculateRepayment={handleCalculateRepayment} />
+            <LoanForm onCalculateRepayment={handleCalculateRepayment} />
+          </CardContent>
+        </Card>
+      )}
+
+      {showActiveLoanForm && !editingLoan && (
+        <Card className="p-4 mt-4">
+          <CardContent className="space-y-4">
+            <ActiveLoanForm onSaveLoan={handleSaveActiveLoan} />
           </CardContent>
         </Card>
       )}
@@ -258,12 +343,16 @@ const LoanCalculator: React.FC = () => {
                   <h2 className="text-xl font-bold text-center mb-4">
                     {loan.name}
                   </h2>
-                  <p className="mb-2">Initial Balance: €{loan.balance.toFixed(2)}</p>
+                  <p className="mb-2">
+                    Initial Balance: €{loan.balance.toFixed(2)}
+                  </p>
                   <p className="mb-2">Interest Rate: {loan.interestRate}%</p>
                   <p className="mb-2">
                     Monthly Payment: €{loan.monthlyPayment.toFixed(2)}
                   </p>
-                  <p className="mb-2">Total Interest: €{loan.totalInterest.toFixed(2)}</p>
+                  <p className="mb-2">
+                    Total Interest: €{loan.totalInterest.toFixed(2)}
+                  </p>
                   <p className="mb-4">Term Length: {loan.termLength} months</p>
 
                   <Input
@@ -281,7 +370,10 @@ const LoanCalculator: React.FC = () => {
                     }
                     totalInterest={loan.totalInterest}
                     loanBalance={loan.balance}
+                    termLength={loan.termLength}
+                    interestRate={loan.interestRate}
                     isEditing={editingLoan === loan.id}
+                    isActiveLoan={false}
                   />
 
                   {/* Centered Buttons */}
@@ -309,22 +401,34 @@ const LoanCalculator: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-5">
         {!editingLoan &&
           loans.map((loan) => (
-            <Card key={loan.id} className="cursor-pointer hover:shadow-md transition-shadow">
+            <Card
+              key={loan.id}
+              className="cursor-pointer hover:shadow-md transition-shadow"
+            >
               <CardContent>
-                <h2 className="text-xl font-bold text-center mb-4">{loan.name}</h2>
-                <p className="mb-2">Initial Balance: €{loan.balance.toFixed(2)}</p>
+                <h2 className="text-xl font-bold text-center mb-4">
+                  {loan.name}
+                </h2>
+                <p className="mb-2">
+                  Initial Balance: €{loan.balance.toFixed(2)}
+                </p>
                 <p className="mb-2">Interest Rate: {loan.interestRate}%</p>
                 <p className="mb-2">
                   Monthly Payment: €{loan.monthlyPayment.toFixed(2)}
                 </p>
-                <p className="mb-2">Total Interest: €{loan.totalInterest.toFixed(2)}</p>
+                <p className="mb-2">
+                  Total Interest: €{loan.totalInterest.toFixed(2)}
+                </p>
                 <p className="mb-4">Term Length: {loan.termLength} months</p>
 
                 <LoanChart
                   repaymentSchedule={loan.repaymentSchedule}
                   totalInterest={loan.totalInterest}
                   loanBalance={loan.balance}
-                  isEditing={false}
+                  termLength={loan.termLength}
+                  interestRate={loan.interestRate}
+                  isEditing={editingLoan === loan.id}
+                  isActiveLoan={false}
                 />
 
                 {/* Centered Buttons */}
@@ -358,8 +462,37 @@ const LoanCalculator: React.FC = () => {
             </Card>
           ))}
       </div>
+
+      {/* Display Active Loans */}
+      <h2 className="text-xl font-semibold mt-6">Active Loans</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {activeLoans.map((loan) => (
+          <Card
+            key={loan.id}
+            className="cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => navigate(`/loan-details/${loan.id}`)}
+          >
+            <CardContent>
+              <LoanChart
+                key={loan.id}
+                loanBalance={loan.balance}
+                interestRate={loan.interestRate}
+                termLength={loan.termLength}
+                totalInterest={loan.totalInterest}
+                isEditing={false}
+                isActiveLoan={true} // Important for active loans
+              />
+              <h2 className="text-xl font-bold">{loan.name}</h2>
+              <p>Balance: €{loan.balance.toFixed(2)}</p>
+              <p>Interest Rate: {loan.interestRate}%</p>
+              <p>Monthly Payment: €{loan.monthlyPayment.toFixed(2)}</p>
+              <p>Payment Due Date: {loan.paymentDueDate}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
-  );    
+  );
 };
 
 export default LoanCalculator;

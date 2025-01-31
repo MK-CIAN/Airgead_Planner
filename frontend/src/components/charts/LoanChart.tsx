@@ -23,13 +23,16 @@ import {
 } from "@/components/ui/carousel";
 
 interface LoanChartProps {
-  repaymentSchedule: number[];
-  customRepaymentSchedule?: number[];
+  repaymentSchedule?: number[];
   totalInterest: number;
   loanBalance: number;
+  termLength: number;
+  interestRate: number;
   isEditing: boolean;
+  customRepaymentSchedule?: number[];
   customLoanBalance?: number;
   customTotalInterest?: number;
+  isActiveLoan?: boolean; // Flag to determine if it's an active loan
 }
 
 const chartConfig = {
@@ -45,15 +48,37 @@ const chartConfig = {
 
 const LoanChart: React.FC<LoanChartProps> = ({
   repaymentSchedule,
-  customRepaymentSchedule,
   totalInterest,
   loanBalance,
+  termLength,
+  interestRate,
   isEditing,
-  customLoanBalance,
-  customTotalInterest,
+  customRepaymentSchedule,
+  isActiveLoan = false, // Default to false for regular loans
 }) => {
-  // Convert repayment schedule into chart-compatible data
-  const chartData = repaymentSchedule.map((balance, index) => ({
+  // Function to generate a repayment schedule if it's an active loan
+  const generateRepaymentSchedule = (balance: number, rate: number, term: number) => {
+    const monthlyRate = rate / 100 / 12;
+    const schedule = [];
+    let currentBalance = balance;
+
+    for (let i = 0; i < term; i++) {
+      const interestForMonth = currentBalance * monthlyRate;
+      const principalPayment = (balance / term) + interestForMonth;
+      currentBalance -= (balance / term);
+
+      schedule.push(currentBalance > 0 ? currentBalance : 0);
+      if (currentBalance <= 0) break;
+    }
+
+    return schedule;
+  };
+
+  // If it's an active loan, generate the repayment schedule
+  const chartData = (isActiveLoan
+    ? generateRepaymentSchedule(loanBalance, interestRate, termLength)
+    : repaymentSchedule || []
+  ).map((balance, index) => ({
     month: `Month ${index + 1}`,
     originalRepayment: balance,
     customRepayment: customRepaymentSchedule?.[index] || null,

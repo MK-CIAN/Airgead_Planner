@@ -13,6 +13,7 @@ router.register('income-tax', IncomeTaxViewSet, basename='income')
 router.register('pension-planner', PensionProjectionViewSet, basename='pension-planner')
 router.register('stocks', StockDataViewSet, basename='stocks')
 router.register('portfolio', PortfolioViewSet, basename='portfolio')
+router.register('active-loan', ActiveLoanViewSet, basename='active-loan')
 
 
 urlpatterns = router.urls + [
