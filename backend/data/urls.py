@@ -23,5 +23,7 @@ urlpatterns = router.urls + [
     path("financial-suggestions/generate/", FinancialSuggestionViewSet.as_view({'get': 'generate'}), name="generate-suggestions"),
     path('financial-suggestions/<int:pk>/accept/', FinancialSuggestionViewSet.as_view({'post': 'accept_suggestion'}), name="accept-suggestion"),
     path('financial-suggestions/<int:pk>/dismiss/', FinancialSuggestionViewSet.as_view({'post': 'dismiss_suggestion'}), name="dismiss-suggestion"),
+    path('data/budget/<int:pk>/items/', MonthlyBudgetViewSet.as_view({'post': 'add_item'}), name="monthly-budget-add-item"),
+    path('data/budget/<int:pk>/items/<int:item_id>/', MonthlyBudgetViewSet.as_view({'delete': 'delete_item'}), name="monthly-budget-delete-item"),
 ]
 

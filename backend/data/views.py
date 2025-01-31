@@ -1,5 +1,5 @@
 from decimal import Decimal
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from rest_framework import viewsets, permissions, status
 from .serializers import *
 from .models import *
@@ -20,16 +20,71 @@ CustomUser = get_user_model()  # Retrieve the custom user model
 class MonthlyBudgetViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = MonthlyBudgetSerializer
+    lookup_field = "pk"
 
     def get_queryset(self):
+        """
+        Fetch budgets only belonging to the logged-in user
+        """
         month = self.request.query_params.get('month')
         queryset = MonthlyBudget.objects.filter(user=self.request.user)
         if month:
             queryset = queryset.filter(month__startswith=month)
         return queryset
-    
+
     def perform_create(self, serializer):
+        """
+        Ensure only one budget exists per user per month.
+        """
+        month = serializer.validated_data.get('month')
+
+        # Check if a budget already exists for this user and month
+        existing_budget = MonthlyBudget.objects.filter(user=self.request.user, month=month).first()
+
+        if existing_budget:
+            print(f"Existing budget found: {existing_budget.id}")
+            serializer.instance = existing_budget  # Prevent duplicate creation
+            return Response(MonthlyBudgetSerializer(existing_budget).data, status=status.HTTP_200_OK)
+        
+        # If no budget exists, create a new one
         serializer.save(user=self.request.user)
+
+
+    @action(detail=True, methods=['post'], url_path='items')
+    def add_item(self, request, pk=None):
+        """
+        Add an item to a specific monthly budget
+        """
+        budget = get_object_or_404(MonthlyBudget, id=pk, user=request.user)
+
+        print("Received data for new item:", request.data)  # DEBUG LOG
+
+        serializer = MonthlyBudgetItemSerializer(data=request.data)
+        if serializer.is_valid():
+            saved_item = serializer.save(budget=budget)  # Link item to budget
+            print(f"Item successfully added to budget {pk}: {saved_item.id}")
+            return Response(MonthlyBudgetItemSerializer(saved_item).data, status=status.HTTP_201_CREATED)
+
+        print("Validation Errors:", serializer.errors)  # DEBUG LOG
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+    @action(detail=True, methods=['delete'], url_path='items/(?P<item_id>[^/.]+)')
+    def delete_item(self, request, pk=None, item_id=None):
+        """
+        Delete an item from a specific budget.
+        """
+        budget = get_object_or_404(MonthlyBudget, id=pk, user=request.user)
+
+        try:
+            item = budget.items.get(id=item_id)
+            item.delete()
+            return Response({"message": "Item deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+        except MonthlyBudgetItem.DoesNotExist:
+            return Response({"error": "Item not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
         
 class CustomBudgetViewSet(viewsets.ModelViewSet):
     queryset = CustomBudget.objects.all()

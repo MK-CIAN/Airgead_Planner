@@ -30,89 +30,118 @@ interface BudgetData {
 }
 
 const Budget: React.FC = () => {
-  const [currentMonth, setCurrentMonth] = useState<Dayjs>(
-    dayjs().startOf("month")
-  );
+  const [currentMonth, setCurrentMonth] = useState<Dayjs>(dayjs().startOf("month"));
+  const [budgetId, setBudgetId] = useState<number | null>(null); // Store Monthly Budget ID
   const [budgetData, setBudgetData] = useState<BudgetData[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // Function to get budget data
-  const getBudgetData = (month: Dayjs) => {
-    Axios.get(`data/budget/`, { params: { month: month.format("YYYY-MM") } })
-      .then((response) => {
-        const formattedData: BudgetData[] = response.data.map(
-          (item: {
-            id: number;
-            amount: string;
-            category: string;
-            transaction_type: string;
-          }) => ({
-            id: item.id,
-            value: parseFloat(item.amount),
-            label: item.category,
-            type: item.transaction_type,
-          })
-        );
+  // Fetch budget data for the selected month
+  const fetchBudgetData = async (month: Dayjs) => {
+    setLoading(true);
+    try {
+      console.log(`Fetching budget for: ${month.format("YYYY-MM")}`);
+      const response = await Axios.get("data/budget/", { params: { month: month.format("YYYY-MM") } });
+
+      if (response.data.length > 0) {
+        const budget = response.data[0]; // Assume only one budget per user per month
+        setBudgetId(budget.id);
+        console.log(`Budget found: ${budget.id}`);
+        const formattedData: BudgetData[] = (budget.items || []).map((item: any) => ({
+          id: item.id,
+          value: parseFloat(item.amount),
+          label: item.category,
+          type: item.transaction_type,
+        }));
         setBudgetData(formattedData);
-      })
-      .catch((error) => {
-        console.error("Error fetching budget data:", error);
-      });
+      } else {
+        console.log("No budget found for this month.");
+        setBudgetId(null);
+        setBudgetData([]);
+      }
+    } catch (error) {
+      console.error("Error fetching budget data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Fetch budget data when the component loads
   useEffect(() => {
-    getBudgetData(currentMonth);
+    fetchBudgetData(currentMonth);
   }, [currentMonth]);
 
-  // Monthly navigation functions
-  const handlePreviousMonth = () => {
-    setCurrentMonth((prev) => prev.subtract(1, "month"));
+  // Navigation between months
+  const handlePreviousMonth = () => setCurrentMonth(prev => prev.subtract(1, "month"));
+  const handleNextMonth = () => setCurrentMonth(prev => prev.add(1, "month"));
+
+  // Function to add a budget item
+  const handleAddBudgetItem = async (newItem: { amount: string; category: string; transaction_type: string }) => {
+
+    if (!newItem.amount || !newItem.category || !newItem.transaction_type) {
+      return;
+    }
+
+    try {
+      let currentBudgetId = budgetId;
+
+      // Ensure budget exists
+      if (!budgetId) {
+        const existingBudgetResponse = await Axios.get("data/budget/", { params: { month: currentMonth.format("YYYY-MM") } });
+
+        if (existingBudgetResponse.data.length > 0) {
+          currentBudgetId = existingBudgetResponse.data[0].id;
+          setBudgetId(currentBudgetId);
+        } else {
+          const budgetResponse = await Axios.post("data/budget/", { month: currentMonth.format("YYYY-MM") });
+          currentBudgetId = budgetResponse.data.id;
+          setBudgetId(currentBudgetId);
+        }
+      }
+
+      if (!currentBudgetId) {
+        return;
+      }
+
+      // ✅ Ensure correct API data format
+      const itemData = {
+        amount: parseFloat(newItem.amount),
+        category: newItem.category.trim(),
+        transaction_type: newItem.transaction_type.trim(),
+      };
+
+      // Add the item to the budget
+      const itemResponse = await Axios.post(`data/budget/${currentBudgetId}/items/`, itemData);
+
+      // Update UI
+      setBudgetData(prevData => [
+        ...prevData,
+        {
+          id: itemResponse.data.id,
+          value: parseFloat(itemResponse.data.amount),
+          label: itemResponse.data.category,
+          type: itemResponse.data.transaction_type,
+        },
+      ]);
+    } catch (error) {
+      console.error("Error adding budget item:");
+    }
   };
 
-  const handleNextMonth = () => {
-    setCurrentMonth((prev) => prev.add(1, "month"));
+
+  // Function to remove a budget item
+  const handleRemoveBudgetItem = async (itemId: number) => {
+    if (!budgetId) return;
+    try {
+      console.log(`Removing item ${itemId} from budget ${budgetId}`);
+      await Axios.delete(`data/budget/${budgetId}/items/${itemId}/`);
+      setBudgetData(prevData => prevData.filter(item => item.id !== itemId));
+    } catch (error) {
+      console.error("Error removing budget item:", error);
+    }
   };
 
-  // Function to add an item
-  const handleAddBudget = (newItem: {
-    amount: string;
-    category: string;
-    transaction_type: string;
-  }) => {
-    const budgetItem = {
-      amount: newItem.amount,
-      category: newItem.category,
-      transaction_type: newItem.transaction_type,
-    };
-
-    Axios.post("data/budget/", budgetItem)
-      .then((response) => {
-        const savedItem = response.data;
-        setBudgetData((prevData) => [
-          ...prevData,
-          {
-            id: savedItem.id,
-            value: parseFloat(savedItem.amount),
-            label: savedItem.category,
-            type: savedItem.transaction_type,
-          },
-        ]);
-      })
-      .catch((error) => {
-        console.error("Error adding budget item:", error);
-      });
-  };
-
-  // Function to remove an item
-  const handleRemoveBudget = (id: number) => {
-    Axios.delete(`data/budget/${id}/`)
-      .then(() => {
-        setBudgetData((prevData) => prevData.filter((item) => item.id !== id));
-      })
-      .catch((error) => {
-        console.error("Error removing budget item:", error);
-      });
-  };
+  if (loading) {
+    return <Typography align="center">Loading...</Typography>;
+  }
 
   return (
     <div className="p-4 max-w-7xl mx-auto">
@@ -132,7 +161,7 @@ const Budget: React.FC = () => {
             {"<-"}
           </Icon>
         </Button>
-        <Typography variant="h6">{currentMonth.format("MMMM YYYY")}</Typography>
+        <Typography variant="h6">{currentMonth.format("YYYY-MM-DD")}</Typography>
         <Button onClick={handleNextMonth} variant="ghost">
           <Icon component="span" className="material-icons">
             {"->"}
@@ -144,7 +173,7 @@ const Budget: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
         {/* Budget Form */}
         <Card className="bg-gray-50 p-4 rounded-md">
-          <BudgetForm onAddBudget={handleAddBudget} month={currentMonth} />
+          <BudgetForm onAddBudget={handleAddBudgetItem}/>
         </Card>
 
         {/* Budget List */}
@@ -190,7 +219,7 @@ const Budget: React.FC = () => {
                       <Button
                         className="bg-red-600 text-white text-xs px-2 py-1"
                         size="sm"
-                        onClick={() => handleRemoveBudget(item.id)}
+                        onClick={() => handleRemoveBudgetItem(item.id)}
                       >
                         Remove
                       </Button>

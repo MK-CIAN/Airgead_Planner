@@ -46,30 +46,42 @@ const MainBudgetPage: React.FC = () => {
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
-  const fetchMonthlyBudget = (month: Dayjs) => {
-    Axios.get(`data/budget/`, { params: { month: month.format("YYYY-MM") } })
-      .then((response) => {
-        console.log("Fetched budget data:", response.data); // Debugging API response
-        if (response.data.length === 0) {
-          console.warn("No budget data available");
+  const fetchMonthlyBudget = async (month: Dayjs) => {
+    setLoading(true);
+    try {
+        console.log(`Fetching budget for: ${month.format("YYYY-MM")}`);
+        const response = await Axios.get("data/budget/", { params: { month: month.format("YYYY-MM") } });
+
+        if (response.data.length > 0) {
+            const budget = response.data[0]; // Assume one budget per user per month
+
+            console.log("Budget found:", budget);
+
+            // Ensure items are mapped correctly
+            const formattedData: BudgetData[] = budget.items
+                ? budget.items.map((item: any) => ({
+                    id: item.id,
+                    value: parseFloat(item.amount),
+                    label: item.category || "Unknown",
+                    type: item.transaction_type || "expense",
+                }))
+                : [];
+
+            setBudgetData(formattedData);
+        } else {
+            console.log("No budget found for this month.");
+            setBudgetData([]); // Ensure state is reset if no budget exists
         }
-
-        const formattedData: BudgetData[] = response.data.map((item: any) => ({
-          id: item.id,
-          value: parseFloat(item.amount) || 0,
-          label: item.category || "Unknown",
-          type: item.transaction_type || "expense",
-        }));
-
-        setBudgetData(formattedData);
-        console.log("Processed budgetData:", formattedData);
-      })
-      .catch((error) => {
+    } catch (error) {
         console.error("Error fetching budget data:", error);
-      });
-  };
+    } finally {
+        setLoading(false);
+    }
+};
+
 
   const fetchCustomBudgets = () => {
     Axios.get("data/custom-budget/")
@@ -124,6 +136,10 @@ const MainBudgetPage: React.FC = () => {
       })
       .catch((error) => console.error("Error creating budget:", error));
   };
+
+  if (loading) {
+    return <h1 className="center">Loading...</h1>;
+  }
 
   return (
     <div className="p-4 max-w-7xl mx-auto space-y-6">
@@ -252,3 +268,4 @@ const MainBudgetPage: React.FC = () => {
 };
 
 export default MainBudgetPage;
+

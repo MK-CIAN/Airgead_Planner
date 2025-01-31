@@ -12,9 +12,7 @@ interface BudgetFormProps {
     amount: string;
     category: string;
     transaction_type: string;
-    month: string;
   }) => void;
-  month: Dayjs;
 }
 
 interface FormData {
@@ -23,23 +21,22 @@ interface FormData {
   transaction_type: string;
 }
 
-const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget, month }) => {
+const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget }) => {
   const { control, handleSubmit, reset, watch } = useForm<FormData>();
 
   const onSubmit = (data: FormData) => {
     const formData = {
-      ...data,
-      month: month.format("YYYY-MM-DD"),
+      amount: data.amount,
+      category: data.category,
+      transaction_type: data.transaction_type,
     };
 
-    Axios.post("data/budget/", formData)
-      .then((response) => {
-        onAddBudget(response.data);
-        reset();
-      })
-      .catch((error) => {
-        console.error("Error adding budget:", error);
-      });
+    console.log("Submitting form data:", formData);
+
+    // ✅ Directly pass data to onAddBudget instead of making an API call here
+    onAddBudget(formData);
+
+    reset();
   };
 
   const transactionTypeValue = watch("transaction_type");

@@ -126,19 +126,31 @@ class DjangoSession(models.Model):
 
 # Monthly Budget
 class MonthlyBudget(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    month = models.DateField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'monthly_budget'
+        unique_together = ('user', 'month')  # Prevents duplicate entries
+        
+class MonthlyBudgetItem(models.Model):
     CATEGORY_CHOICES = [
         ('income', 'Income'),
         ('expense', 'Expense'),
         ('debt', 'Debt'),
     ]
-    category = models.CharField(max_length=50, blank=True, null=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    month = models.DateField(blank=True, null=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,null=True, blank=True)
-    transaction_type = models.CharField(max_length=7, choices=CATEGORY_CHOICES, blank=True, null=True)
+    budget = models.ForeignKey(
+        'MonthlyBudget',
+        on_delete=models.CASCADE,
+        related_name='items'  # Enables reverse lookup (budget.items)
+    )
+    category = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    transaction_type = models.CharField(max_length=7, choices=CATEGORY_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'monthly_budget'
+        db_table = 'monthly_budget_item'
         
 # Custom Budget
 class CustomBudget(models.Model):

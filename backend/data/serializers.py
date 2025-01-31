@@ -2,11 +2,19 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import *
 
+class MonthlyBudgetItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MonthlyBudgetItem
+        fields = ['id', 'category', 'amount', 'transaction_type', 'created_at']
+
 class MonthlyBudgetSerializer(serializers.ModelSerializer):
+    items = MonthlyBudgetItemSerializer(many=True, read_only=True)  # Include items in response
+
     class Meta:
         model = MonthlyBudget
-        fields = ['id', 'category', 'amount', 'month', 'user', 'transaction_type']
+        fields = ['id', 'month', 'user', 'items']
         read_only_fields = ['user']
+
         
 class BudgetItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,8 +35,6 @@ class CustomBudgetSerializer(serializers.ModelSerializer):
             'id', 'name', 'start_date', 'end_date', 'user', 'contributors', 'items'
         ]
         read_only_fields = ['user']
-        
-from rest_framework import serializers
 
 class SavingsGoalSerializer(serializers.ModelSerializer):
     contributors = serializers.PrimaryKeyRelatedField(
