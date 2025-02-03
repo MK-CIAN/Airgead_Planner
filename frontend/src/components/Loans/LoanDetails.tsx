@@ -4,7 +4,7 @@ import Axios from "../Axios";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import LoanChart from "../charts/LoanChart";
+import ActiveLoanChart from "./ActiveLoanChart";
 import { parse } from "path";
 
 interface LoanDetailsProps {}
@@ -19,6 +19,7 @@ interface ActiveLoanData {
   monthlyPayment: number;
   totalInterest: number;
   paymentDueDate: string;
+  createdAt: string;
 }
 
 interface LoanPayment {
@@ -27,22 +28,26 @@ interface LoanPayment {
   payment_date: string;
 }
 
-const generateRepaymentSchedule = (balance: number, rate: number, term: number) => {
-    const monthlyRate = rate / 100 / 12;
-    const schedule = [];
-    let currentBalance = balance;
-  
-    for (let i = 0; i < term; i++) {
-      const interestForMonth = currentBalance * monthlyRate;
-      const principalPayment = (balance / term) + interestForMonth;
-      currentBalance -= (balance / term);
-  
-      schedule.push(currentBalance > 0 ? currentBalance : 0);
-      if (currentBalance <= 0) break;
-    }
-  
-    return schedule;
-  };
+const generateRepaymentSchedule = (
+  balance: number,
+  rate: number,
+  term: number
+) => {
+  const monthlyRate = rate / 100 / 12;
+  const schedule = [];
+  let currentBalance = balance;
+
+  for (let i = 0; i < term; i++) {
+    const interestForMonth = currentBalance * monthlyRate;
+    const principalPayment = balance / term + interestForMonth;
+    currentBalance -= balance / term;
+
+    schedule.push(currentBalance > 0 ? currentBalance : 0);
+    if (currentBalance <= 0) break;
+  }
+
+  return schedule;
+};
 
 const LoanDetails: React.FC<LoanDetailsProps> = () => {
   const { id } = useParams();
@@ -55,16 +60,17 @@ const LoanDetails: React.FC<LoanDetailsProps> = () => {
     Axios.get(`data/active-loan/${id}/`)
       .then((response) => {
         setLoan({
-            id: response.data.id,
-            name: response.data.name,
-            balance: parseFloat(response.data.balance) || 0,
-            originalBalance: parseFloat(response.data.balance) || 0,
-            interestRate: parseFloat(response.data.interest_rate) || 0,
-            termLength: parseInt(response.data.term_length, 10) || 0,
-            monthlyPayment: parseFloat(response.data.monthly_payment) || 0,
-            totalInterest: parseFloat(response.data.total_interest) || 0,
-            paymentDueDate: response.data.payment_due_date,
-          });
+          id: response.data.id,
+          name: response.data.name,
+          balance: parseFloat(response.data.balance) || 0,
+          originalBalance: parseFloat(response.data.original_balance) || 0,
+          interestRate: parseFloat(response.data.interest_rate) || 0,
+          termLength: parseInt(response.data.term_length, 10) || 0,
+          monthlyPayment: parseFloat(response.data.monthly_payment) || 0,
+          totalInterest: parseFloat(response.data.total_interest) || 0,
+          paymentDueDate: response.data.payment_due_date,
+          createdAt: response.data.created_at,
+        });
       })
       .catch((error) =>
         console.error("Error fetching active loan details:", error)
@@ -101,6 +107,24 @@ const LoanDetails: React.FC<LoanDetailsProps> = () => {
       .catch((error) => console.error("Error making payment:", error));
   };
 
+  const formattedPayments = loan
+  ? paymentHistory.reduce<{ date: string; balance: number }[]>((acc, payment, index) => {
+      const previousBalance = index === 0 ? loan.originalBalance : acc[index - 1].balance;
+      const newBalance = previousBalance - payment.amount;
+
+      acc.push({
+        date: payment.payment_date, // Adjust as needed
+        balance: newBalance >= 0 ? newBalance : 0, // Avoid negative balances
+      });
+
+      return acc;
+    }, [])
+  : [];
+
+// Debugging: Check the formatted payments
+console.log("Formatted Payments:", formattedPayments);
+
+
   return loan ? (
     <div className="max-w-4xl mx-auto p-6">
       <Card>
@@ -109,35 +133,48 @@ const LoanDetails: React.FC<LoanDetailsProps> = () => {
         </CardHeader>
         <CardContent>
           <p>
-            <strong>Current Balance:</strong> €{Number(loan.balance || 0).toFixed(2)}
+            <strong>Current Balance:</strong> €
+            {Number(loan.balance || 0).toFixed(2)}
           </p>
           <p>
-            <strong>Current Balance:</strong> €{Number(loan.originalBalance || 0).toFixed(2)}
+            <strong>Original Balance:</strong> €
+            {Number(loan.originalBalance || 0).toFixed(2)}
           </p>
           <p>
             <strong>Interest Rate:</strong> {loan.interestRate}%
           </p>
           <p>
-            <strong>Monthly Payment:</strong> €{Number(loan.monthlyPayment || 0).toFixed(2)}
+            <strong>Monthly Payment:</strong> €
+            {Number(loan.monthlyPayment || 0).toFixed(2)}
           </p>
           <p>
-            <strong>Total Interest:</strong> €{Number(loan.totalInterest || 0).toFixed(2)}
+            <strong>Total Interest:</strong> €
+            {Number(loan.totalInterest || 0).toFixed(2)}
           </p>
           <p>
             <strong>Payment Due Date:</strong> {loan.paymentDueDate}
           </p>
 
+          
+
           {/* Loan Chart */}
-          <LoanChart
-            repaymentSchedule={generateRepaymentSchedule(loan.originalBalance, loan.interestRate, loan.termLength)}
+          <ActiveLoanChart
+            repaymentSchedule={generateRepaymentSchedule(
+              loan.originalBalance,
+              loan.interestRate,
+              loan.termLength
+            )}
             loanBalance={loan.balance}
-            originalBalance={loan.originalBalance}  // Pass original balance
+            originalBalance={loan.originalBalance}
             interestRate={loan.interestRate}
             termLength={loan.termLength}
             totalInterest={loan.totalInterest}
             isEditing={false}
             isActiveLoan={true}
-            />
+            actualPayments={formattedPayments}
+            createdAt={loan.createdAt} // Ensure this matches your API response field
+          />
+
 
           {/* Payment Input */}
           <div className="mt-6">

@@ -132,12 +132,15 @@ const LoanCalculator: React.FC = () => {
           id: loan.id,
           name: loan.name,
           balance: parseFloat(loan.balance) || 0,
+          originalBalance: parseFloat(loan.original_balance) || 0,
           interestRate: parseFloat(loan.interest_rate) || 0,
           termLength: parseInt(loan.term_length, 10) || 0,
           monthlyPayment: parseFloat(loan.monthly_payment) || 0,
           totalInterest: parseFloat(loan.total_interest) || 0,
           paymentDueDate: loan.payment_due_date,
         }));
+
+        console.log("Original Balance: ", fetchedActiveLoans.originalBalance);
 
         setActiveLoans(fetchedActiveLoans);
       })
