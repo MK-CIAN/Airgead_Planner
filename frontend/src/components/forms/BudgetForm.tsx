@@ -3,9 +3,12 @@ import { useForm, Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Select, SelectItem, SelectTrigger, SelectContent } from "@/components/ui/select";
-import Axios from "../Axios";
-import { Dayjs } from "dayjs";
+import {
+  Select,
+  SelectItem,
+  SelectTrigger,
+  SelectContent,
+} from "@/components/ui/select";
 
 interface BudgetFormProps {
   onAddBudget: (newItem: {
@@ -32,11 +35,9 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget }) => {
     };
 
     console.log("Submitting form data:", formData);
-
-    // ✅ Directly pass data to onAddBudget instead of making an API call here
     onAddBudget(formData);
 
-    reset();
+    reset({ transaction_type: "" }); 
   };
 
   const transactionTypeValue = watch("transaction_type");
@@ -87,11 +88,11 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget }) => {
             defaultValue=""
             render={({ field }) => (
               <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value || ""}
+                value={field.value} // This binds the current value properly
+                onValueChange={(value) => field.onChange(value)} // Ensure updates happen correctly
               >
-                <SelectTrigger id="transaction_type">
-                  {transactionTypeValue || "Select transaction type"}
+                <SelectTrigger id="transaction_type" className={!field.value ? "text-muted-foreground" : ""}>
+                  {field.value || "Select transaction type"}
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="income">Income</SelectItem>
@@ -103,7 +104,9 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget }) => {
           />
         </div>
 
-        <Button type="submit" className="mt-4 w-full bg-green-500 text-white">Add Budget Item</Button>
+        <Button type="submit" className="mt-4 w-full bg-green-500 text-white">
+          Add Budget Item
+        </Button>
       </form>
     </div>
   );

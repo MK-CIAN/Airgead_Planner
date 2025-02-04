@@ -592,9 +592,15 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
         today = date.today()
         last_3_months = today - timedelta(days=90)
 
-        latest_budget = MonthlyBudget.objects.filter(user=user).order_by("-month").first()
-        #if not latest_budget:
-         #   return  # No budget found, skip suggestions
+        current_month = datetime.now().strftime('%Y-%m-01')
+        latest_budget = MonthlyBudget.objects.filter(user=user, month=current_month).first()
+        
+        if not latest_budget:
+            latest_budget = MonthlyBudget.objects.filter(user=user).order_by("-month").first()
+            
+        if not latest_budget:
+            print("No budget data")
+            return  # No budget found, skip suggestions
 
         income_total = MonthlyBudgetItem.objects.filter(
             budget=latest_budget, transaction_type="income"
@@ -609,6 +615,7 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
         ).aggregate(Sum("amount"))["amount__sum"] or Decimal("0")
 
         budget_surplus = income_total - (expense_total + debt_total)
+        print("TESTING", budget_surplus)
         
         # Suggesting Savings Goals Contrib
         savings_goals = SavingsGoal.objects.filter(user=user, current_amount__lt=F('target_amount'))  # Exclude completed goals
@@ -623,7 +630,7 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
                     )
                     
         # Suggesting Extra Loan Payement
-        loans = Loan.objects.filter(user=user)
+        loans = ActiveLoan.objects.filter(user=user)
         if loans.exists() and budget_surplus > 100:
             for loan in loans:
                 extra_payment = min(budget_surplus * Decimal(0.3), loan.balance * Decimal(0.1))

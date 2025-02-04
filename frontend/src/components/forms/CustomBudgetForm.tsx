@@ -3,7 +3,12 @@ import { useForm, Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Select, SelectItem, SelectTrigger, SelectContent } from "@/components/ui/select";
+import {
+  Select,
+  SelectItem,
+  SelectTrigger,
+  SelectContent,
+} from "@/components/ui/select";
 
 interface CustomBudgetFormProps {
   onAddBudgetItem: (newItem: {
@@ -19,12 +24,14 @@ interface FormData {
   transaction_type: string;
 }
 
-const CustomBudgetForm: React.FC<CustomBudgetFormProps> = ({ onAddBudgetItem }) => {
+const CustomBudgetForm: React.FC<CustomBudgetFormProps> = ({
+  onAddBudgetItem,
+}) => {
   const { control, handleSubmit, reset, watch } = useForm<FormData>();
 
   const onSubmit = (data: FormData) => {
     onAddBudgetItem(data);
-    reset();
+    reset({ transaction_type: "" }); 
   };
 
   const transactionTypeValue = watch("transaction_type");
@@ -78,11 +85,11 @@ const CustomBudgetForm: React.FC<CustomBudgetFormProps> = ({ onAddBudgetItem }) 
             defaultValue=""
             render={({ field }) => (
               <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value || ""}
+                value={field.value} // This binds the current value properly
+                onValueChange={(value) => field.onChange(value)} // Ensure updates happen correctly
               >
-                <SelectTrigger id="transaction_type">
-                  {transactionTypeValue || "Select transaction type"}
+                <SelectTrigger id="transaction_type" className={!field.value ? "text-muted-foreground" : ""}>
+                  {field.value || "Select transaction type"}
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="income">Income</SelectItem>
@@ -95,7 +102,9 @@ const CustomBudgetForm: React.FC<CustomBudgetFormProps> = ({ onAddBudgetItem }) 
         </div>
 
         {/* Submit Button */}
-        <Button type="submit" className="mt-4 w-full bg-green-500 text-white">Add Budget Item</Button>
+        <Button type="submit" className="mt-4 w-full bg-green-500 text-white">
+          Add Budget Item
+        </Button>
       </form>
     </div>
   );
