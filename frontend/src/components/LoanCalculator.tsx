@@ -34,15 +34,19 @@ interface ActiveLoanData {
   paymentDueDate: string;
 }
 
-const generateRepaymentSchedule = (balance: number, rate: number, term: number) => {
+const generateRepaymentSchedule = (
+  balance: number,
+  rate: number,
+  term: number
+) => {
   const monthlyRate = rate / 100 / 12;
   const schedule = [];
   let currentBalance = balance;
 
   for (let i = 0; i < term; i++) {
     const interestForMonth = currentBalance * monthlyRate;
-    const principalPayment = (balance / term) + interestForMonth;
-    currentBalance -= (balance / term);
+    const principalPayment = balance / term + interestForMonth;
+    currentBalance -= balance / term;
 
     schedule.push(currentBalance > 0 ? currentBalance : 0);
     if (currentBalance <= 0) break;
@@ -50,7 +54,6 @@ const generateRepaymentSchedule = (balance: number, rate: number, term: number) 
 
   return schedule;
 };
-
 
 const LoanCalculator: React.FC = () => {
   const [loans, setLoans] = useState<LoanData[]>([]);
@@ -254,6 +257,19 @@ const LoanCalculator: React.FC = () => {
       });
   };
 
+  const handleRemoveActiveLoan = (id: string) => {
+    Axios.delete(`data/active-loan/${id}/delete_loan/`)
+      .then(() => {
+        setActiveLoans((prevLoans) =>
+          prevLoans.filter((loan) => loan.id !== id)
+        );
+        console.log("Active loan and payments deleted successfully.");
+      })
+      .catch((error) => {
+        console.error("Error removing active loan:", error);
+      });
+  };
+
   // Function to edit loan
   const handleEditLoan = (loan: LoanData) => {
     setEditingLoan(loan.id);
@@ -324,15 +340,18 @@ const LoanCalculator: React.FC = () => {
 
       {/* Conditionally render "Add New Loan" button */}
       {!editingLoan && (
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center space-x-4 mt-4">
           <Button
             onClick={toggleFormVisibility}
             className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
           >
-            {isFormVisible ? "Hide Form" : "Add New Loan"}
+            {isFormVisible ? "Hide Form" : "Calculate New Loan"}
           </Button>
-          <Button onClick={() => setShowActiveLoanForm(!showActiveLoanForm)}>
-            Track a Loan
+          <Button
+            onClick={() => setShowActiveLoanForm(!showActiveLoanForm)}
+            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+          >
+            Add a Loan
           </Button>
         </div>
       )}
@@ -492,24 +511,43 @@ const LoanCalculator: React.FC = () => {
           <Card
             key={loan.id}
             className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => navigate(`/loan-details/${loan.id}`)}
           >
             <CardContent>
-            <LoanChart
-            repaymentSchedule={generateRepaymentSchedule(loan.originalBalance, loan.interestRate, loan.termLength)}
-            loanBalance={loan.balance}
-            originalBalance={loan.originalBalance}  // Pass original balance
-            interestRate={loan.interestRate}
-            termLength={loan.termLength}
-            totalInterest={loan.totalInterest}
-            isEditing={false}
-            isActiveLoan={true}
-            />
               <h2 className="text-xl font-bold">{loan.name}</h2>
               <p>Balance: €{loan.balance.toFixed(2)}</p>
               <p>Interest Rate: {loan.interestRate}%</p>
               <p>Monthly Payment: €{loan.monthlyPayment.toFixed(2)}</p>
               <p>Payment Due Date: {loan.paymentDueDate}</p>
+              <LoanChart
+                repaymentSchedule={generateRepaymentSchedule(
+                  loan.originalBalance,
+                  loan.interestRate,
+                  loan.termLength
+                )}
+                loanBalance={loan.balance}
+                originalBalance={loan.originalBalance} // Pass original balance
+                interestRate={loan.interestRate}
+                termLength={loan.termLength}
+                totalInterest={loan.totalInterest}
+                isEditing={false}
+                isActiveLoan={true}
+              />
+              <div className="flex justify-center space-x-4 mt-4">
+                <Button
+                  onClick={() => {
+                    navigate(`/loan-details/${loan.id}`);
+                  }}
+                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                >
+                  Expand
+                </Button>
+                <Button
+                  onClick={() => handleRemoveActiveLoan(loan.id)}
+                  className="bg-red-600 text-white px-4 py-2 rounded"
+                >
+                  Remove
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ))}

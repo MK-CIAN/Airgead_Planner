@@ -148,4 +148,4 @@ class FinancialArticleSerializer(serializers.ModelSerializer):
 class FinancialSuggestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = FinancialSuggestion
-        fields = ["id", "suggestion_text", "created_at", "status", "user_feedback"]
+        fields = ["id", "suggestion_text", "created_at", "status", "user_feedback", "suggestion_category"]

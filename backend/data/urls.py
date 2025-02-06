@@ -20,10 +20,12 @@ urlpatterns = router.urls + [
     path('reccomended-articles/', RecommendedArticlesView.as_view(), name='reccomended-articles'),
     path('portfolio/history/', PortfolioHistoryView.as_view(), name='portfolio-history'),
     path('interests/', UserInterestsView.as_view(), name='user-interests'),
-    path('financial-suggestions/', FinancialSuggestionViewSet.as_view({'get': 'get_suggestions'}), name="financial-suggestions"),
+    path('financial-suggestions/get-suggestions', FinancialSuggestionViewSet.as_view({'get': 'get_suggestions'}), name="financial-suggestions"),
+    path('financial-suggestions/get-analyzation', FinancialSuggestionViewSet.as_view({'get': 'get_analyzation'}), name="financial-analyzation"),
     path("financial-suggestions/generate/", FinancialSuggestionViewSet.as_view({'get': 'generate'}), name="generate-suggestions"),
     path('financial-suggestions/<int:pk>/accept/', FinancialSuggestionViewSet.as_view({'post': 'accept_suggestion'}), name="accept-suggestion"),
     path('financial-suggestions/<int:pk>/dismiss/', FinancialSuggestionViewSet.as_view({'post': 'dismiss_suggestion'}), name="dismiss-suggestion"),
+    path('financial-suggestions/analyze/', FinancialSuggestionViewSet.as_view({'get': 'analyze_spending'}), name="analyze-spending"),
     path('data/budget/<int:pk>/items/', MonthlyBudgetViewSet.as_view({'post': 'add_item'}), name="monthly-budget-add-item"),
     path('data/budget/<int:pk>/items/<int:item_id>/', MonthlyBudgetViewSet.as_view({'delete': 'delete_item'}), name="monthly-budget-delete-item"),
 ]

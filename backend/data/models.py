@@ -380,11 +380,17 @@ class FinancialSuggestion(models.Model):
         ("ACCEPTED", "Accepted"),
     ]
     
+    CATEGORY_CHOICES = [
+        ("SUGGESTION", "Suggestion"),
+        ("ANALYZATION", "Analyzation"),
+    ]
+    
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="financial_suggestions")
     suggestion_text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="NEW")
+    status = models.CharField(max_length=12, choices=STATUS_CHOICES, default="NEW")
     user_feedback = models.BooleanField(null=True, blank=True)
+    suggestion_category = models.CharField(max_length=12, choices=CATEGORY_CHOICES, default="SUGGESTION")
     
     class Meta:
         db_table = "financial_suggestions"

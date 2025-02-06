@@ -21,6 +21,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "../ui/carousel";
+import FinancialSuggestions from "../FinancialSuggestions"
 
 interface BudgetData {
   id: number;
@@ -145,7 +146,7 @@ const Budget: React.FC = () => {
   }
 
   return (
-    <div className="p-4 max-w-7xl mx-auto">
+    <div className="p-4 max-w-8xl mx-auto">
       {/* Header */}
       <Typography
         variant="h4"
@@ -170,6 +171,10 @@ const Budget: React.FC = () => {
             {"->"}
           </Icon>
         </Button>
+      </div>
+      
+      <div className="justify-center">
+        <FinancialSuggestions/>
       </div>
 
       {/* Responsive Layout */}

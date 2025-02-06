@@ -287,6 +287,18 @@ class ActiveLoanViewSet(viewsets.ModelViewSet):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    @action(detail=True, methods=['delete'])
+    def delete_loan(self, request, pk=None):
+        loan = get_object_or_404(ActiveLoan, id=pk, user=request.user)
+        
+        # First, delete all associated payments
+        LoanPayment.objects.filter(loan=loan).delete()
+
+        # Then, delete the loan itself
+        loan.delete()
+
+        return Response({"message": "Loan and associated payments deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 
 
 
@@ -587,8 +599,16 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
     queryset = FinancialSuggestion.objects.all()
     serializer_class = FinancialSuggestionSerializer
 
+    NEEDS_KEYWORDS = ["rent", "bills", "utilities", "groceries", "insurance", "phone", "food", "transport", "petrol", "diesel", "gas"]
+    WANTS_KEYWORDS = ["gym", "entertainment", "spotify", "netflix", "dining", "shopping", "vacation", "subscriptions", "movies"]
+    SAVINGS_DEBT_KEYWORDS = ["savings", "investment", "loan", "debt", "emergency fund"]
+    
+    # Function to get rid of old suggestions to improve effiecentcy
+    def delete_redundant_suggestions(self, user, suggestion_category):
+        FinancialSuggestion.objects.filter(user=user, status="NEW", user_feedback__isnull=True, suggestion_category=suggestion_category).delete()
     
     def generate_suggestions(self, user):
+        self.delete_redundant_suggestions(user, suggestion_category="Suggestion")
         today = date.today()
         last_3_months = today - timedelta(days=90)
 
@@ -626,7 +646,8 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
                 if suggested_contribution > 0:
                     FinancialSuggestion.objects.create(
                         user=user,
-                        suggestion_text=f"Consider allocating €{suggested_contribution:.2f} towards your savings goal '{goal.name}'."
+                        suggestion_text=f"Consider allocating €{suggested_contribution:.2f} towards your savings goal '{goal.name}'.",
+                        suggestion_category="Suggestion"
                     )
                     
         # Suggesting Extra Loan Payement
@@ -634,10 +655,12 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
         if loans.exists() and budget_surplus > 100:
             for loan in loans:
                 extra_payment = min(budget_surplus * Decimal(0.3), loan.balance * Decimal(0.1))
+                newbalance = (loan.balance - extra_payment)
                 if extra_payment > 0:
                     FinancialSuggestion.objects.create(
                         user=user,
-                        suggestion_text=f"You have extra funds in your montly budget of €{budget_surplus}. Consider making an additional payment of €{extra_payment:.2f} towards your loan '{loan.name}'."
+                        suggestion_text=f"You have extra funds in your montly budget of €{budget_surplus}. Consider making an additional payment of €{extra_payment:.2f} towards your loan '{loan.name}'. This would bring the loan balance down to €{newbalance:.2f}.",
+                        suggestion_category="Suggestion"
                     )
                     
         # Identifying High Spending Categories
@@ -652,7 +675,8 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
         if high_expense_category and high_expense_category["total"] > (expense_total * Decimal(0.3)):
             FinancialSuggestion.objects.create(
                 user=user,
-                suggestion_text=f"You have high spending in '{high_expense_category['category']}' (€{high_expense_category['total']:.2f} in the last 3 months). Consider adjusting your budget."
+                suggestion_text=f"You have a combined high spending in '{high_expense_category['category']}' (€{high_expense_category['total']:.2f} in the last 3 months). Consider adjusting your budget.",
+                suggestion_category="Suggestion"
             )
             
         # Suggesting Investments
@@ -660,13 +684,87 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
         if portfolio and budget_surplus > 200:
             FinancialSuggestion.objects.create(
                 user=user,
-                suggestion_text=f"You have an excess of €{budget_surplus:.2f}. Consider investing part of it in your portfolio."
+                suggestion_text=f"You have an excess of €{budget_surplus:.2f}. Consider investing part of it in your portfolio.",
+                suggestion_category="Suggestion"
             )
+    
+    def categorize_item(self, category_label):
+        label = category_label.lower()
+        if any(keyword in label for keyword in self.NEEDS_KEYWORDS):
+            return "needs"
+        elif any(keyword in label for keyword in self.WANTS_KEYWORDS):
+            return "wants"
+        elif any(keyword in label for keyword in self.SAVINGS_DEBT_KEYWORDS):
+            return "savings_debt"
+        else:
+            return "uncategorized"
+        
+    @action(detail=False, methods=["GET"])
+    def analyze_spending(self, request):
+        user = request.user
+        self.delete_redundant_suggestions(user, suggestion_category="Analyzation")
+        current_month = datetime.now().strftime('%Y-%m-01')
+        latest_budget = MonthlyBudget.objects.filter(user=user, month=current_month).first()
+
+        if not latest_budget:
+            latest_budget = MonthlyBudget.objects.filter(user=user).order_by("-month").first()
+
+        if not latest_budget:
+            return Response({"error": "No budget data found."}, status=400)
+
+        items = MonthlyBudgetItem.objects.filter(budget=latest_budget)
+        income_total = items.filter(transaction_type="income").aggregate(Sum("amount"))["amount__sum"] or Decimal("0")
+
+        # Categorization and Summing Totals
+        needs_total = sum(item.amount for item in items if self.categorize_item(item.category) == "needs")
+        wants_total = sum(item.amount for item in items if self.categorize_item(item.category) == "wants")
+        savings_debt_total = sum(item.amount for item in items if self.categorize_item(item.category) == "savings_debt")
+
+        # Calculating Percentages
+        needs_pct = (needs_total / income_total * 100) if income_total else 0
+        wants_pct = (wants_total / income_total * 100) if income_total else 0
+        savings_pct = (savings_debt_total / income_total * 100) if income_total else 0
+
+        # Generating Suggestions
+        suggestions = []
+        if needs_pct > 50:
+            suggestions.append(f"You're spending {needs_pct:.1f}% on essential needs, exceeding the recommended 50%. Consider reducing costs on rent, utilities, or groceries.")
+        else:
+            suggestions.append(f"You're spending {needs_pct:.1f}% on essential needs, which is within the recommended 50%. Keep it up!")
+            
+        if wants_pct > 30:
+            suggestions.append(f"You're spending {wants_pct:.1f}% on wants, exceeding the 30% guideline. Consider cutting back on entertainment or dining out.")
+        else:
+            suggestions.append(f"You're spending {wants_pct:.1f}% on wants, this is within the 30% guideline. Well Done!")
+        if savings_pct < 20:
+            suggestions.append(f"You're saving only {savings_pct:.1f}% of your income. Aim to save at least 20% to improve your financial health.")
+
+        # Suggest Categorization for Unclassified Items
+        uncategorized_items = [item.category for item in items if self.categorize_item(item.category) == "uncategorized"]
+        if uncategorized_items:
+            suggestions.append(f"Consider categorizing these items for better analysis: {', '.join(uncategorized_items)}.")
+
+        # Storing Suggestions in Database
+        for suggestion_text in suggestions:
+            FinancialSuggestion.objects.create(
+                user=user,
+                suggestion_text=suggestion_text,
+                suggestion_category="Analyzation"
+            )
+
+        return Response({"message": "Spending analysis complete!", "suggestions": suggestions})
 
     @action(detail=False, methods=["GET"])
     def get_suggestions(self, request):
         user = request.user
-        suggestions = FinancialSuggestion.objects.filter(user=user, status="NEW").order_by("-created_at")
+        suggestions = FinancialSuggestion.objects.filter(user=user, status="NEW", suggestion_category="Suggestion").order_by("-created_at")
+        serializer = FinancialSuggestionSerializer(suggestions, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=["GET"])
+    def get_analyzation(self, request):
+        user = request.user
+        suggestions = FinancialSuggestion.objects.filter(user=user, status="NEW", suggestion_category="Analyzation").order_by("-created_at")
         serializer = FinancialSuggestionSerializer(suggestions, many=True)
         return Response(serializer.data)
     
