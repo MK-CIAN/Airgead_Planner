@@ -1,5 +1,4 @@
 import React, { useMemo } from "react";
-import { CardFooter } from "../ui/card";
 
 interface ProgressiveImageRevealProps {
   imageUrl: string;

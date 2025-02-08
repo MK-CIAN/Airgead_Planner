@@ -1,5 +1,5 @@
 import { PieChart } from '@mui/x-charts/PieChart';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box } from '@mui/material';
 
 interface BranchData {

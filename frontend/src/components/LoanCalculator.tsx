@@ -36,16 +36,13 @@ interface ActiveLoanData {
 
 const generateRepaymentSchedule = (
   balance: number,
-  rate: number,
+  _rate: number,
   term: number
 ) => {
-  const monthlyRate = rate / 100 / 12;
   const schedule = [];
   let currentBalance = balance;
 
   for (let i = 0; i < term; i++) {
-    const interestForMonth = currentBalance * monthlyRate;
-    const principalPayment = balance / term + interestForMonth;
     currentBalance -= balance / term;
 
     schedule.push(currentBalance > 0 ? currentBalance : 0);

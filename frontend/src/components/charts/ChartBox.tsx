@@ -1,4 +1,4 @@
-import {Grid2, Box } from '@mui/material'
+import {Grid2 } from '@mui/material'
 
 export default function MyChartBox() {
   return (

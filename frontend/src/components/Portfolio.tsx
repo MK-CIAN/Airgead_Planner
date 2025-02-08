@@ -49,12 +49,6 @@ const Portfolio: React.FC<PortfolioProps> = ({ stocks }) => {
 
     try {
       setLoading(true);
-      const response = await Axios.post(`data/portfolio/`, {
-        ticker,
-        transaction_type: transactionType,
-        quantity,
-        price_per_share: stocks[ticker]?.close_price || 0,
-      });
       alert("Transaction successful!");
       fetchPortfolio();
     } catch (error) {
@@ -72,13 +66,20 @@ const Portfolio: React.FC<PortfolioProps> = ({ stocks }) => {
   return (
     <Box>
       {/* Headings Section */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
         <Typography variant="h4">Your Portfolio</Typography>
         <Box className="chart-header-container">
-          <Typography variant="h4" className="chart-header">Portfolio Growth</Typography>
+          <Typography variant="h4" className="chart-header">
+            Portfolio Growth
+          </Typography>
         </Box>
       </Box>
-  
+
       {/* Main Content: Holdings and Chart */}
       <Box display="flex" className="main-content">
         {/* Holdings Section */}
@@ -101,13 +102,15 @@ const Portfolio: React.FC<PortfolioProps> = ({ stocks }) => {
                   portfolio.holdings.map((holding) => {
                     const stockPrice = stocks[holding.ticker]?.close_price || 0;
                     const holdingValue = stockPrice * holding.quantity;
-  
+
                     return (
                       <Card key={holding.ticker} className="holding-card">
                         <CardContent>
                           <Typography>Ticker: {holding.ticker}</Typography>
                           <Typography>Quantity: {holding.quantity}</Typography>
-                          <Typography>Value: ${holdingValue.toFixed(2)}</Typography>
+                          <Typography>
+                            Value: ${holdingValue.toFixed(2)}
+                          </Typography>
                         </CardContent>
                       </Card>
                     );
@@ -134,35 +137,35 @@ const Portfolio: React.FC<PortfolioProps> = ({ stocks }) => {
               onChange={(e) => setQuantity(Number(e.target.value))}
             />
             <div className="portfolio-buttons">
-          <Button
-            onClick={() => setTransactionType("BUY")}
-            variant="contained"
-            className={`portfolio-button ${
-              transactionType === "BUY" ? "selected" : ""
-            }`}
-          >
-            Buy
-          </Button>
-          <Button
-            onClick={() => setTransactionType("SELL")}
-            variant="contained"
-            className={`portfolio-button ${
-              transactionType === "SELL" ? "selected" : ""
-            }`}
-          >
-            Sell
-          </Button>
-          <Button
-            onClick={handleTransaction}
-            variant="contained"
-            color="primary"
-          >
-            Submit
-          </Button>
-        </div>
+              <Button
+                onClick={() => setTransactionType("BUY")}
+                variant="contained"
+                className={`portfolio-button ${
+                  transactionType === "BUY" ? "selected" : ""
+                }`}
+              >
+                Buy
+              </Button>
+              <Button
+                onClick={() => setTransactionType("SELL")}
+                variant="contained"
+                className={`portfolio-button ${
+                  transactionType === "SELL" ? "selected" : ""
+                }`}
+              >
+                Sell
+              </Button>
+              <Button
+                onClick={handleTransaction}
+                variant="contained"
+                color="primary"
+              >
+                Submit
+              </Button>
+            </div>
           </Box>
         </Box>
-  
+
         {/* Chart Section */}
         <Box className="chart-section">
           <PortfolioGrowthChart />

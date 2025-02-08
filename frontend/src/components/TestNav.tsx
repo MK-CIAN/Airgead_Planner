@@ -7,7 +7,6 @@ import {
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
@@ -16,7 +15,6 @@ import { useEffect, useState } from "react";
 import Notification from "./Notifications"; // Assume a replacement exists
 import Axios from "./Axios";
 import Search from "./UserServices/Search";
-import "../Styles/NavBar.css";
 
 import {
   Home,
@@ -28,7 +26,6 @@ import {
   TrendingDown,
   Logout,
 } from "@mui/icons-material";
-import { colors } from "@mui/material";
 import { green } from "@mui/material/colors";
 
 export default function TestNav({ content }: { content: React.ReactNode }) {

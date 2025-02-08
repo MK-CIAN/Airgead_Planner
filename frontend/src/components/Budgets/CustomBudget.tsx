@@ -37,7 +37,7 @@ interface BudgetData {
 }
 
 const MainBudgetPage: React.FC = () => {
-  const [currentMonth, setCurrentMonth] = useState<Dayjs>(
+  const [currentMonth] = useState<Dayjs>(
     dayjs().startOf("month")
   );
   const [budgetData, setBudgetData] = useState<BudgetData[]>([]);

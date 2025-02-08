@@ -3,7 +3,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -51,11 +50,8 @@ const LoanChart: React.FC<LoanChartProps> = ({
   repaymentSchedule,
   totalInterest,
   loanBalance,
-  termLength,
-  interestRate,
   isEditing,
   customRepaymentSchedule,
-  isActiveLoan = false,
 }) => {
   // Chart Data Formatting
   const chartData = (repaymentSchedule ?? []).map((balance, index) => ({

@@ -3,9 +3,7 @@ import Axios from "../Axios";
 import CustomBudgetForm from "../forms/CustomBudgetForm";
 import {
   Typography,
-  useMediaQuery,
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
 import ShowFriends from "../UserServices/ShowFriends";
 import "../../App.css";
@@ -34,7 +32,7 @@ const CustomBudgetDetails: React.FC = () => {
 
   const [budgetName, setBudgetName] = useState<string | null>(null);
   const [budgetData, setBudgetData] = useState<BudgetData[]>([]);
-  const [contributors, setContributors] = useState<Contributor[]>([]);
+  const [, setContributors] = useState<Contributor[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 

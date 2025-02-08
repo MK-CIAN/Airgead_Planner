@@ -1,15 +1,13 @@
 import '../App.css';
 import { Box } from '@mui/system';
-import MyTextField from './forms/MyTextField';
 import MyPassField from './forms/MyPassField';
 import MyButton from './forms/MyButton';
 import { useParams } from 'react-router-dom';
-import { useForm, SubmitHandler, set } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import Axios from './Axios';
 import { useNavigate } from 'react-router-dom';
 import MyMessage from './Message';
 import { useState } from 'react';
-import { Token } from '@mui/icons-material';
 
 interface IFormInput {
     email: string;
@@ -28,7 +26,7 @@ const PasswordReset = () => {
             password: data.password,
             token: token,
 
-        }).then((response) => {
+        }).then(() => {
             setShowMessage(true);
             setTimeout(() => {
                 navigate(`/`);

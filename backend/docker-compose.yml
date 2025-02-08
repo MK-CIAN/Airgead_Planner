@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:latest
+    platform: linux/amd64
+    ports:
+      - 84:80
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - frontend
+      - airgeadplanner
+
+  pgadmin4:
+    image: dpage/pgadmin4
+    platform: linux/amd64
+    ports:
+      - 20080:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: cian.mck01@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: mypassword
+    depends_on:
+      - postgis
+
+  postgis:
+    image: kartoza/postgis:latest
+    platform: linux/amd64
+    ports:
+      - 25432:5432
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./postgres/create_schema.sql:/docker-entrypoint-initdb.d/create_schema.sql
+
+  airgeadplanner:
+    build:
+      context: .  # This ensures Docker builds from the backend directory
+      dockerfile: Dockerfile
+    image: airgeadplanner_image
+    platform: linux/amd64
+    environment:
+      - DJANGO_SECRET_KEY=${SECRET_KEY}
+    ports:
+      - 8001:8001
+    volumes:
+      - .:/app
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8001"]
+    depends_on:
+      - postgis
+
+  frontend:
+    image: cianmk/frontend_image:latest
+    build:
+      context: ../frontend  # Build the React app
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    stdin_open: true
+    tty: true
+    depends_on:
+      - airgeadplanner

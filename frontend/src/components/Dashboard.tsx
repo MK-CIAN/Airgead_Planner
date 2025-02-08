@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import Axios from './Axios';
-import BudgetChart from './charts/BudgetChart';
-import SavingsChart from './charts/TestSavingsChart';
+import { useState, useEffect } from "react";
+import Axios from "./Axios";
+import SavingsChart from "./charts/TestSavingsChart";
 import "../App.css";
-import { Box, Grid, LinearProgress, Paper, Typography } from '@mui/material';
-import dayjs, { Dayjs } from 'dayjs';
-import TestBudgetChart from './charts/TestBudgetChart';
+import { Box, Grid, Paper, Typography } from "@mui/material";
+import dayjs, { Dayjs } from "dayjs";
+import TestBudgetChart from "./charts/TestBudgetChart";
 
 interface BudgetData {
   id: number;
@@ -23,45 +22,46 @@ interface SavingsGoalData {
 }
 
 const Dashboard = () => {
-  const [currentMonth] = useState<Dayjs>(dayjs().startOf('month'));
+  const [currentMonth] = useState<Dayjs>(dayjs().startOf("month"));
   const [budgetData, setBudgetData] = useState<BudgetData[]>([]);
   const [savingsData, setSavingsData] = useState<SavingsGoalData[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [, setLoading] = useState<boolean>(true);
 
   //Getting budget data from user to display on the dashboard
   const fetchMonthlyBudget = async (month: Dayjs) => {
     setLoading(true);
     try {
-        console.log(`Fetching budget for: ${month.format("YYYY-MM")}`);
-        const response = await Axios.get("data/budget/", { params: { month: month.format("YYYY-MM") } });
+      console.log(`Fetching budget for: ${month.format("YYYY-MM")}`);
+      const response = await Axios.get("data/budget/", {
+        params: { month: month.format("YYYY-MM") },
+      });
 
-        if (response.data.length > 0) {
-            const budget = response.data[0]; // Assume one budget per user per month
+      if (response.data.length > 0) {
+        const budget = response.data[0]; // Assume one budget per user per month
 
-            console.log("Budget found:", budget);
+        console.log("Budget found:", budget);
 
-            // Ensure items are mapped correctly
-            const formattedData: BudgetData[] = budget.items
-                ? budget.items.map((item: any) => ({
-                    id: item.id,
-                    value: parseFloat(item.amount),
-                    label: item.category || "Unknown",
-                    type: item.transaction_type || "expense",
-                }))
-                : [];
+        // Ensure items are mapped correctly
+        const formattedData: BudgetData[] = budget.items
+          ? budget.items.map((item: any) => ({
+              id: item.id,
+              value: parseFloat(item.amount),
+              label: item.category || "Unknown",
+              type: item.transaction_type || "expense",
+            }))
+          : [];
 
-            setBudgetData(formattedData);
-        } else {
-            console.log("No budget found for this month.");
-            setBudgetData([]); // Ensure state is reset if no budget exists
-        }
+        setBudgetData(formattedData);
+      } else {
+        console.log("No budget found for this month.");
+        setBudgetData([]); // Ensure state is reset if no budget exists
+      }
     } catch (error) {
-        console.error("Error fetching budget data:", error);
+      console.error("Error fetching budget data:", error);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-};
-  
+  };
 
   const getSavingsData = () => {
     Axios.get(`data/savings`)
@@ -93,11 +93,16 @@ const Dashboard = () => {
       <Typography variant="h4" gutterBottom>
         Your Financial Dashboard
       </Typography>
-      
+
       <Grid container spacing={3}>
         {/* Budget Chart Widget */}
-        <Grid item xs={12} md={6} onClick={() => window.location.href = '/budget'}>
-          <Paper elevation={3} style={{ padding: '16px', height: '100%' }}>
+        <Grid
+          item
+          xs={12}
+          md={6}
+          onClick={() => (window.location.href = "/budget")}
+        >
+          <Paper elevation={3} style={{ padding: "16px", height: "100%" }}>
             <Typography variant="h6" gutterBottom>
               Monthly Budget
             </Typography>
@@ -106,8 +111,13 @@ const Dashboard = () => {
         </Grid>
 
         {/* Savings Goal Widget */}
-        <Grid item xs={12} md={6} onClick={() => window.location.href = '/savings'}>
-          <Paper elevation={3} style={{ padding: '16px', height: '100%' }}>
+        <Grid
+          item
+          xs={12}
+          md={6}
+          onClick={() => (window.location.href = "/savings")}
+        >
+          <Paper elevation={3} style={{ padding: "16px", height: "100%" }}>
             <Typography variant="h6" gutterBottom>
               Savings Goal
             </Typography>
@@ -117,7 +127,8 @@ const Dashboard = () => {
                   {firstSavingsGoal.name}
                 </Typography>
                 <Typography variant="body2" align="center" gutterBottom>
-                  €{firstSavingsGoal.current_amount.toFixed(2)} / €{firstSavingsGoal.target_amount.toFixed(2)}
+                  €{firstSavingsGoal.current_amount.toFixed(2)} / €
+                  {firstSavingsGoal.target_amount.toFixed(2)}
                 </Typography>
                 <SavingsChart progress={firstSavingsGoal.progress} />
               </Box>

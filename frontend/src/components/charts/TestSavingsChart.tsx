@@ -9,14 +9,9 @@ import {
 } from "recharts"
 
 import {
-  Card,
-  CardContent,
-  CardDescription,
   CardFooter,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card"
-import { ChartConfig, ChartContainer } from "@/components/ui/chart"
+import { ChartContainer } from "@/components/ui/chart"
 
 type SavingsChartProps = {
     progress: number; // Percentage progress

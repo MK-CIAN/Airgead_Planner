@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Axios from "../Axios";
-import { Box, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,7 +43,7 @@ interface SavingsGoal {
 const SavingsGoalDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [savingsGoal, setSavingsGoal] = useState<SavingsGoal | null>(null);
-  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [, setAlertMessage] = useState<string | null>(null);
   const [image, setImage] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 

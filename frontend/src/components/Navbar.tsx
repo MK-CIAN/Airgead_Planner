@@ -4,7 +4,6 @@ import Drawer from "@mui/material/Drawer";
 import AppBar from "@mui/material/AppBar";
 import CssBaseline from "@mui/material/CssBaseline";
 import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -24,7 +23,6 @@ import Axios from "./Axios";
 import { useNavigate } from "react-router-dom";
 import { IconButton, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import SearchIcon from "@mui/icons-material/Search";
 import Search from "./UserServices/Search";
 import Notifications from "./Notifications";
 import "../Styles/NavBar.css";
@@ -45,7 +43,6 @@ export default function NavBar({ content }: NavBarProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md")); // Detect screen size
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false)
 
   // Fetch the user's username
   useEffect(() => {
@@ -281,7 +278,7 @@ export default function NavBar({ content }: NavBarProps) {
           <div className="navbar-user">Hello, {username || "User"}</div>
         </Toolbar>
       </AppBar>
-  
+
       {/* Permanent Drawer for Desktop */}
       {!isMobile && (
         <Drawer
@@ -299,7 +296,7 @@ export default function NavBar({ content }: NavBarProps) {
           {drawerContent}
         </Drawer>
       )}
-  
+
       {/* Temporary Drawer for Mobile */}
       {isMobile && (
         <Drawer
@@ -322,13 +319,11 @@ export default function NavBar({ content }: NavBarProps) {
           <Box sx={{ overflow: "auto" }}>{drawerContent}</Box>
         </Drawer>
       )}
-  
+
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
         {content}
       </Box>
-  
     </Box>
   );
-  
 }

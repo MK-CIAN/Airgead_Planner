@@ -3,7 +3,6 @@ import {
   Popover,
   List,
   ListItem,
-  ListItemText,
   Button,
   Box,
   Typography,
@@ -50,31 +49,30 @@ const Notifications: React.FC = () => {
   const handleAccept = async (notification: Notification) => {
     try {
       const payload: any = { notification_id: notification.id };
-  
+
       if (notification.type === "budget_invite" && notification.budget_id) {
         payload.budget_id = notification.budget_id; // Include budget_id for budget invites
       }
-  
+
       await Axios.post(`notifications/accept`, payload, {
         headers: { Authorization: `Bearer ${localStorage.getItem("Token")}` },
       });
-  
+
       // Remove the notification from the list
       setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
     } catch (error) {
       console.error("Error accepting notification:", error);
     }
   };
-  
-  
-  
 
   const handleDeny = async (id: number) => {
     try {
       await Axios.post(
         `notifications/deny`,
         { notification_id: id },
-        { headers: { Authorization: `Bearer ${localStorage.getItem("Token")}` } }
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("Token")}` },
+        }
       );
       setNotifications((prev) => prev.filter((n) => n.id !== id));
     } catch (error) {
@@ -138,8 +136,9 @@ const Notifications: React.FC = () => {
                       {notification.sender || "Unknown sender"}
                     </Typography>
                   </Box>
-                  {((notification.type === "friend_request" ||
-                    notification.type === "budget_invite") || notification.type === "savings_invite") && (
+                  {(notification.type === "friend_request" ||
+                    notification.type === "budget_invite" ||
+                    notification.type === "savings_invite") && (
                     <Box sx={{ display: "flex", gap: 1 }}>
                       <Button
                         onClick={() => handleAccept(notification)}

@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import Axios from "./Axios";
 import { toast } from "@/hooks/use-toast";
-import { set } from "react-hook-form";
 
 const questions = [
   {
@@ -50,12 +49,6 @@ const questions = [
     ],
   },
 ];
-
-const animationVariants = {
-  hidden: { opacity: 0, x: 50 },
-  visible: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -50 },
-};
 
 const UserInterest = () => {
   const [step, setStep] = useState(0);

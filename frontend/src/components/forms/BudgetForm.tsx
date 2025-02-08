@@ -25,7 +25,7 @@ interface FormData {
 }
 
 const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget }) => {
-  const { control, handleSubmit, reset, watch } = useForm<FormData>();
+  const { control, handleSubmit, reset } = useForm<FormData>();
 
   const onSubmit = (data: FormData) => {
     const formData = {
@@ -39,8 +39,6 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget }) => {
 
     reset({ transaction_type: "" }); 
   };
-
-  const transactionTypeValue = watch("transaction_type");
 
   return (
     <div className="space-y-6">

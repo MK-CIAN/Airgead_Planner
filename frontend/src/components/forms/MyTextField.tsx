@@ -12,7 +12,6 @@ const {label, name, control} = props
       render = {({
         field:{onChange, value},
         fieldState: {error},
-        formState,
       }) => (
           <TextField  
           id="outlined-basic" 

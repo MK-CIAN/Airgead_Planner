@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ActiveLoanChart from "./ActiveLoanChart";
-import { parse } from "path";
 
 interface LoanDetailsProps {}
 
@@ -30,16 +29,13 @@ interface LoanPayment {
 
 const generateRepaymentSchedule = (
   balance: number,
-  rate: number,
+  _rate: number,
   term: number
 ) => {
-  const monthlyRate = rate / 100 / 12;
   const schedule = [];
   let currentBalance = balance;
 
   for (let i = 0; i < term; i++) {
-    const interestForMonth = currentBalance * monthlyRate;
-    const principalPayment = balance / term + interestForMonth;
     currentBalance -= balance / term;
 
     schedule.push(currentBalance > 0 ? currentBalance : 0);
