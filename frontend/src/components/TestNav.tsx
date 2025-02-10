@@ -72,7 +72,7 @@ export default function TestNav({ content }: { content: React.ReactNode }) {
         {/* Sidebar Header with Logo and Title */}
         <div className="flex items-center space-x-4 p-4 bg-green-600 text-white">
           <img
-            src="/src/assets/harpIcon.png"
+            src="/static/harpIcon.png"
             alt="Logo"
             className="w-8 h-8"
           />

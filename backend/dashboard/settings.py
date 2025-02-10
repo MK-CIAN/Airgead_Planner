@@ -41,7 +41,7 @@ DATABASES = {
         'NAME': config("POSTGRES_DB"),
         'USER': config("POSTGRES_USER"),
         'PASSWORD': config("POSTGRES_PASSWORD"),
-        'HOST': "localhost" if IS_LOCAL else "postgis",  # Use 'postgis' as host in Docker
+        'HOST': "localhost" if IS_LOCAL else "postgres",  # Use 'postgis' as host in Docker
         'PORT': POSTGRES_PORT if IS_LOCAL else "5432",
         'OPTIONS': {
             'options': '-c search_path=airgead_planner'
@@ -71,6 +71,12 @@ if DEPLOY_SECURE:
     ALLOWED_HOSTS = ['airgeadplanner.com', 'www.airgeadplanner.com']
     CSRF_TRUSTED_ORIGINS = ['https://airgeadplanner.com']
     CORS_ALLOWED_ORIGINS = ['https://airgeadplanner.com']
+    
+    STATIC_URL = '/static/'
+    STATIC_ROOT = '/usr/share/nginx/html/static'
+
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = '/app/media'
 else:
     DEBUG = True
     TEMPLATES = [{
@@ -89,6 +95,12 @@ else:
     }]
     ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0", "airgeadplanner"]
     CORS_ALLOW_ALL_ORIGINS = True  # Allow all CORS during development
+    
+    STATIC_URL = '/static/'
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 # =======================
@@ -135,14 +147,6 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 ROOT_URLCONF = 'dashboard.urls'
-
-# =======================
-# 🔹 STATIC & MEDIA FILES
-# =======================
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') if not DEBUG else None
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 WSGI_APPLICATION = 'dashboard.wsgi.application'
 REST_FRAMEWORK = { 'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',) }
