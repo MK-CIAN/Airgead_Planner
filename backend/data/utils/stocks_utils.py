@@ -16,6 +16,7 @@ API_KEY = config("STOCK_API_KEY")
 
 # Expanded stock list (FAANG + Tesla, Microsoft, Nvidia)
 STOCK_TICKERS = ['META', 'AMZN', 'AAPL', 'NFLX', 'GOOGL', 'TSLA', 'MSFT', 'NVDA']
+CRYPTO_TICKERS = ['BTC-USD', 'ETH-USD', 'DOGE-USD']
 
 # Define the cutoff date (last 5 years from today)
 CUTOFF_DATE = make_aware(datetime.now() - timedelta(days=5 * 365))
@@ -67,13 +68,14 @@ def fetch_historical_stock_data():
 
 def fetch_realtime_stock_data():
     """
-    Fetch and store the most recent stock price using yfinance.
+    Fetch and store the most recent stock & crypto prices using yfinance.
     Runs every 30 minutes and uses system time for timestamps.
     """
-    logger.info("Fetching latest stock prices...")
+    logger.info("Fetching latest stock & crypto prices...")
 
     now = make_aware(datetime.now())  # Use system time for timestamp
 
+    # Fetch stock prices
     for ticker in STOCK_TICKERS:
         stock = yf.Ticker(ticker)
         current_price = stock.info.get("currentPrice", None)
@@ -82,12 +84,11 @@ def fetch_realtime_stock_data():
             logger.warning(f"No current price data for {ticker}. Market may be closed.")
             continue
 
-        # ✅ Store the latest price with system time
         StockRealTimeData.objects.update_or_create(
             ticker=ticker,
             timestamp=now,  # Use real system time
             defaults={
-                'open_price': current_price,  # Store the same price in open, high, low, close
+                'open_price': current_price,
                 'high_price': current_price,
                 'low_price': current_price,
                 'close_price': current_price,
@@ -95,7 +96,32 @@ def fetch_realtime_stock_data():
             }
         )
 
-        logger.info(f"Saved real-time data for {ticker} at {now} - Price: {current_price}")
+        logger.info(f"Saved real-time stock data for {ticker} at {now} - Price: {current_price}")
 
-    logger.info("Real-time stock data update complete.")
+    # Fetch cryptocurrency prices
+    for ticker in CRYPTO_TICKERS:
+        crypto = yf.Ticker(ticker)
+        data = crypto.history(period="1d", interval="1m")  # Get last 1-minute price
+
+        if data.empty:
+            logger.warning(f"No recent price data for {ticker}.")
+            continue
+
+        latest = data.iloc[-1]  # Get last available price
+
+        StockRealTimeData.objects.update_or_create(
+            ticker=ticker,
+            timestamp=now,
+            defaults={
+                'open_price': latest["Open"],
+                'high_price': latest["High"],
+                'low_price': latest["Low"],
+                'close_price': latest["Close"],
+                'volume': latest["Volume"],
+            }
+        )
+
+        logger.info(f"Saved real-time crypto data for {ticker} at {now} - Price: {current_price}")
+
+    logger.info("Real-time stock & crypto data update complete.")
 
