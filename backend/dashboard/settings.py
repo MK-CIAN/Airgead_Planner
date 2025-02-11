@@ -35,12 +35,21 @@ else:
 # =======================
 # DATABASE CONFIGURATION
 # =======================
+#LOCAL VARS
+#NAME: postgres
+#USER: admin
+#PASSWORD: password123
+
+#DOCKER VARS
+#'NAME': config("POSTGRES_DB"),
+#'USER': config("POSTGRES_USER"),
+#'PASSWORD': config("POSTGRES_PASSWORD"),
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config("POSTGRES_DB"),
-        'USER': config("POSTGRES_USER"),
-        'PASSWORD': config("POSTGRES_PASSWORD"),
+        'NAME': 'postgres',
+        'USER': 'admin',
+        'PASSWORD': 'password123',
         'HOST': "localhost" if IS_LOCAL else "postgres",  # Use 'postgis' as host in Docker
         'PORT': POSTGRES_PORT if IS_LOCAL else "5432",
         'OPTIONS': {
@@ -120,6 +129,7 @@ INSTALLED_APPS = [
     'knox',
     'django_rest_passwordreset',
     'chat',
+    'django_q',
 ]
 
 MIDDLEWARE = [
@@ -194,6 +204,19 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = 'Airgead Planner'
+
+
+# Auto Updates for Stock Data
+Q_CLUSTER = {
+    'name': 'DjangoQ',
+    'workers': 4,  # Number of worker processes
+    'timeout': 90,
+    'retry': 120,
+    'queue_limit': 500,
+    'bulk': 10,
+    'orm': 'default'  # Use Django ORM for queue storage
+}
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

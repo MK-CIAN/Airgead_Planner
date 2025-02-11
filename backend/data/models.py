@@ -304,7 +304,7 @@ class StockData(models.Model):
     high_price = models.DecimalField(max_digits=10, decimal_places=2)
     low_price = models.DecimalField(max_digits=10, decimal_places=2)
     close_price = models.DecimalField(max_digits=10, decimal_places=2)
-    adj_close_price = models.DecimalField(max_digits=10, decimal_places=2)
+    adj_close_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     volume = models.BigIntegerField()
 
     class Meta:
@@ -312,6 +312,22 @@ class StockData(models.Model):
 
     def __str__(self):
         return f"{self.ticker} on {self.date}"
+    
+class StockRealTimeData(models.Model):
+    """Stores real-time 30-minute stock updates."""
+    ticker = models.CharField(max_length=10)
+    timestamp = models.DateTimeField()  # ✅ Uses full date-time
+    open_price = models.DecimalField(max_digits=10, decimal_places=2)
+    high_price = models.DecimalField(max_digits=10, decimal_places=2)
+    low_price = models.DecimalField(max_digits=10, decimal_places=2)
+    close_price = models.DecimalField(max_digits=10, decimal_places=2)
+    volume = models.BigIntegerField()
+
+    class Meta:
+        unique_together = ('ticker', 'timestamp')
+
+    def __str__(self):
+        return f"{self.ticker} at {self.timestamp}"
     
         
 # Portfolio 
