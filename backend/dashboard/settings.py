@@ -44,6 +44,7 @@ else:
 #'NAME': config("POSTGRES_DB"),
 #'USER': config("POSTGRES_USER"),
 #'PASSWORD': config("POSTGRES_PASSWORD"),
+IS_LOCAL = True
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',

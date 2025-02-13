@@ -1,8 +1,8 @@
 import requests
 import time
 import logging
-from datetime import datetime, timedelta
-from django.utils.timezone import make_aware
+from datetime import datetime, timedelta, timezone
+from django.utils.timezone import make_aware, is_aware
 from decouple import config
 from ..models import StockData, StockRealTimeData
 from django_q.tasks import async_task, schedule
@@ -19,51 +19,49 @@ STOCK_TICKERS = ['META', 'AMZN', 'AAPL', 'NFLX', 'GOOGL', 'TSLA', 'MSFT', 'NVDA'
 CRYPTO_TICKERS = ['BTC-USD', 'ETH-USD', 'DOGE-USD']
 
 # Define the cutoff date (last 5 years from today)
-CUTOFF_DATE = make_aware(datetime.now() - timedelta(days=5 * 365))
+#CUTOFF_DATE = make_aware(datetime.now() - timedelta(days=5 * 365))
 
 def fetch_historical_stock_data():
     """
-    Fetch and store the last 5 years of historical stock data using Alpha Vantage.
+    Fetch and store the last 5 years of historical stock & cryptocurrency data using yfinance.
     """
-    logger.info("Fetching historical stock data...")
+    logger.info("Fetching historical stock & crypto data...")
 
-    for ticker in STOCK_TICKERS:
-        url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={ticker}&outputsize=full&apikey={API_KEY}"
-        response = requests.get(url)
+    all_tickers = STOCK_TICKERS + CRYPTO_TICKERS  # ✅ Combine stock and crypto tickers
 
-        if response.status_code != 200:
-            logger.error(f"API request failed for {ticker}: {response.status_code}")
+    for ticker in all_tickers:
+        stock = yf.Ticker(ticker)
+
+        # ✅ Fetch last 5 years of daily historical data
+        data = stock.history(period="5y", interval="1d")
+
+        if data.empty:
+            logger.warning(f"No historical data available for {ticker}.")
             continue
 
-        data = response.json()
+        # ✅ Process and store each day's stock/crypto data
+        for date, row in data.iterrows():
+            stock_date = date.to_pydatetime()
 
-        if "Time Series (Daily)" not in data:
-            logger.error(f"No data available for {ticker}.")
-            continue
+            if is_aware(stock_date):
+                stock_date = stock_date.astimezone(timezone.utc).replace(tzinfo=None)
+                
+            StockData.objects.update_or_create(
+                ticker=ticker,
+                date=stock_date,
+                defaults={                        
+                    'open_price': float(row['Open']),
+                    'high_price': float(row['High']),
+                    'low_price': float(row['Low']),
+                    'close_price': float(row['Close']),
+                    'adj_close_price': float(row.get('Adj Close', row['Close'])),  # Use Adj Close if available
+                    'volume': int(row['Volume']),
+                }
+            )
 
-        time_series = data["Time Series (Daily)"]
-        for date, values in time_series.items():
-            stock_date = make_aware(datetime.strptime(date, "%Y-%m-%d"))
-
-            # ✅ Only store stock data from the last 5 years
-            if stock_date >= CUTOFF_DATE:
-                StockData.objects.update_or_create(
-                    ticker=ticker,
-                    date=stock_date,
-                    defaults={
-                        'open_price': float(values['1. open']),
-                        'high_price': float(values['2. high']),
-                        'low_price': float(values['3. low']),
-                        'close_price': float(values['4. close']),
-                        'adj_close_price': None,  # Handle missing field
-                        'volume': int(values['5. volume']),
-                    }
-                )
-        
         logger.info(f"Historical data fetched for {ticker}")
-        time.sleep(12)  # Avoid hitting rate limits
 
-    logger.info("Historical stock data update complete.")
+    logger.info("Historical stock & crypto data update complete.")
 
 
 def fetch_realtime_stock_data():

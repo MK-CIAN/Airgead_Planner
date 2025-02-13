@@ -600,7 +600,7 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
     serializer_class = FinancialSuggestionSerializer
 
     NEEDS_KEYWORDS = ["rent", "bills", "utilities", "groceries", "insurance", "phone", "food", "transport", "petrol", "diesel", "gas"]
-    WANTS_KEYWORDS = ["gym", "entertainment", "spotify", "netflix", "dining", "shopping", "vacation", "subscriptions", "movies"]
+    WANTS_KEYWORDS = ["gym", "entertainment", "spotify", "netflix", "dining", "shopping", "vacation", "subscriptions", "movies", "clothes"]
     SAVINGS_DEBT_KEYWORDS = ["savings", "investment", "loan", "debt", "emergency fund"]
     
     # Function to get rid of old suggestions to improve effiecentcy
