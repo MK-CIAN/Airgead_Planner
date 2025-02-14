@@ -346,31 +346,47 @@ class StockDataViewSet(viewsets.ViewSet):
 
         serializer = StockDataSerializer(stock_data, many=True)
         return Response(serializer.data)
+    
+class StockRealTimeDataViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def list(self, request):
+        ticker = request.query_params.get('ticker')
+        if not ticker:
+            return Response({'error': 'Please provide a ticker'}, status=400)
+
+        latest_data = StockRealTimeData.objects.filter(ticker=ticker).order_by('-timestamp').first()
+
+        if not latest_data:
+            return Response({'error': 'No real-time data available for this ticker'}, status=404)
+
+        serializer = StockRealTimeDataSerializer(latest_data)
+        return Response(serializer.data)
 
 # Portfolio Viewset
 class PortfolioViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def _get_stock_price(self, ticker):
-        """
-        Retrieve the latest stock price for the given ticker.
-        """
-        latest_stock = StockData.objects.filter(ticker=ticker).order_by('-date').first()
-        if latest_stock:
-            return latest_stock.close_price
-        return 0  # Return 0 if no stock data is available
+        latest_stock = StockRealTimeData.objects.filter(ticker=ticker).order_by('-timestamp').first()
+        return latest_stock.close_price if latest_stock else 0
 
     def list(self, request):
         portfolio, created = Portfolio.objects.get_or_create(user=request.user)
+        
+        self.update_total_balance(portfolio)
+        
         holdings = StockHolding.objects.filter(portfolio=portfolio)
 
         response_data = {
             "balance": str(portfolio.balance),
+            "totalbalance": round(portfolio.totalbalance, 2),
             "holdings": [
                 {
                     "ticker": h.ticker,
                     "quantity": h.quantity,
-                    "current_price": self._get_stock_price(h.ticker),  # Include current stock price
+                    "current_price": self._get_stock_price(h.ticker),
+                    "total_value": round(float(h.quantity) * float(self._get_stock_price(h.ticker)), 2),
                 }
                 for h in holdings
             ],
@@ -394,6 +410,18 @@ class PortfolioViewSet(viewsets.ViewSet):
         else:
             return Response({"error": "Invalid transaction type"}, status=400)
 
+
+    def update_total_balance(self, portfolio):
+        """
+        Calculate total portfolio value (cash balance + total value of holdings)
+        """
+        holdings = StockHolding.objects.filter(portfolio=portfolio)
+        total_holdings_value = sum(
+            Decimal(holding.quantity) * Decimal(holding.get_latest_price()) for holding in holdings
+        )
+        portfolio.totalbalance = portfolio.balance + total_holdings_value
+        portfolio.save()  # ✅ Ensure the updated total_balance is saved to the database
+    
     def _buy_stock(self, portfolio, ticker, quantity, price_per_share):
         total_cost = Decimal(quantity) * Decimal(price_per_share)
 
@@ -455,11 +483,7 @@ class PortfolioViewSet(viewsets.ViewSet):
         return Response(TransactionSerializer(transaction).data)
 
     def _update_portfolio_history(self, portfolio, transaction_type=None, ticker=None, quantity=None):
-        holdings = StockHolding.objects.filter(portfolio=portfolio)
-        total_holdings_value = sum(
-            holding.quantity * self._get_stock_price(holding.ticker) for holding in holdings
-        )
-        total_value = portfolio.balance + total_holdings_value
+        self.update_total_balance(portfolio)
 
         transaction_label = None
         if transaction_type and ticker and quantity:
@@ -468,8 +492,8 @@ class PortfolioViewSet(viewsets.ViewSet):
 
         PortfolioHistory.objects.create(
             user=portfolio.user,
-            total_value=total_value,
-            cash_balance=portfolio.balance,
+            total_value=portfolio.totalbalance,  # ✅ Store updated total balance
+            cash_balance=portfolio.balance,  # ✅ Store updated cash balance
             transaction_label=transaction_label,
             timestamp=datetime.now(),
         )
@@ -482,7 +506,7 @@ class PortfolioHistoryView(APIView):
         """
         Retrieve the latest stock price for the given ticker.
         """
-        latest_stock = StockData.objects.filter(ticker=ticker).order_by('-date').first()
+        latest_stock = StockRealTimeData.objects.filter(ticker=ticker).order_by('-timestamp').first()
         if latest_stock:
             return latest_stock.close_price
         return 0  # Return 0 if no stock data is available
@@ -506,9 +530,7 @@ class PortfolioHistoryView(APIView):
         current_value = self._calculate_portfolio_value(portfolio)
 
         # Add current portfolio value to the response if it's different from the latest entry
-        if history.exists():
-            latest_history = history.last()
-            if latest_history.total_value != current_value:
+        if not history.exists() or history.last().total_value != current_value:
                 PortfolioHistory.objects.create(
                     user=user,
                     total_value=current_value,
@@ -523,24 +545,17 @@ class PortfolioHistoryView(APIView):
         date_range = self._generate_date_range(start_date, end_date)  # Ensure this returns a list
 
         # Fill gaps in the portfolio history
-        filled_history = []
-        for date in date_range:  # Iterate over the date range
-            entry = history.filter(timestamp__date=date).first()
-            if entry:
-                filled_history.append(entry)
-            else:
-                filled_history.append(
-                    PortfolioHistory(
-                        user=user,
-                        total_value=current_value,
-                        cash_balance=portfolio.balance,
-                        transaction_label=None,
-                        timestamp=datetime.combine(date, datetime.min.time()),
-                    )
-                )
+        seen_dates = set()
+        cleaned_history = []
+        for entry in history:
+            date_key = entry.timestamp.date()  # Convert to date to ensure unique daily entries
+            if date_key not in seen_dates:
+                cleaned_history.append(entry)
+                seen_dates.add(date_key)
 
+        cleaned_history.sort(key=lambda x: x.timestamp)
         # Serialize and return
-        serializer = PortfolioHistorySerializer(filled_history, many=True)
+        serializer = PortfolioHistorySerializer(cleaned_history, many=True)
         return Response(serializer.data)
 
 

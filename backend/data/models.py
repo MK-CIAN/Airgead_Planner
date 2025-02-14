@@ -334,12 +334,18 @@ class StockRealTimeData(models.Model):
 class Portfolio(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     balance = models.DecimalField(max_digits=12, decimal_places=2, default=10000.00)
+    totalbalance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
 # Stock Holdings
 class StockHolding(models.Model):
     portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE)
     ticker = models.CharField(max_length=10)
     quantity = models.IntegerField()
+    
+    def get_latest_price(self):
+        """Fetch the latest price for this stock"""
+        latest_stock = StockRealTimeData.objects.filter(ticker=self.ticker).order_by('-timestamp').first()
+        return latest_stock.close_price if latest_stock else Decimal(0)
 
 # Transactions
 class Transaction(models.Model):

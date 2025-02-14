@@ -117,6 +117,12 @@ class StockDataSerializer(serializers.ModelSerializer):
         model = StockData
         fields = ['ticker', 'date', 'open_price', 'high_price', 'low_price', 'close_price', 'adj_close_price', 'volume']
 
+class StockRealTimeDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StockRealTimeData
+        fields = ['ticker', 'timestamp', 'open_price', 'high_price', 'low_price', 'close_price', 'volume']
+
+
 class StockHoldingSerializer(serializers.ModelSerializer):
     class Meta:
         model = StockHolding
@@ -127,7 +133,7 @@ class PortfolioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Portfolio
-        fields = ['balance', 'holdings']
+        fields = ['balance', 'totalbalance', 'holdings']
 
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
