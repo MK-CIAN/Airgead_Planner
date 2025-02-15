@@ -214,7 +214,7 @@ const StockSim: React.FC = () => {
                         Daily Change: {change?.toFixed(2)}%{" "}
                         {change && (change >= 0 ? <TrendingUp /> : <TrendingDown />)}
                       </p>
-                      <Button className="mt-4 w-full" onClick={() => handleViewMore(ticker)}>
+                      <Button className="mt-4 w-full rounded border-2 transition-all border-green-600 bg-white text-black hover:bg-green-600 hover:text-white" onClick={() => handleViewMore(ticker)}>
                         View More
                       </Button>
                     </CardContent>

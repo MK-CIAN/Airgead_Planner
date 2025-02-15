@@ -462,7 +462,7 @@ class PortfolioViewSet(viewsets.ViewSet):
         portfolio.balance += total_earnings
         holding.quantity -= quantity
 
-        if holding.quantity == 0:
+        if holding.quantity < Decimal('0.0001'):
             holding.delete()
         else:
             holding.save()
