@@ -6,8 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import dayjs from "dayjs";
 import Portfolio from "./Portfolio";
+import { TrendingDown, TrendingUp } from "lucide-react";
 
 interface StockData {
+  previous_close: any;
   ticker: string;
   date: string;
   close_price: number;
@@ -18,7 +20,11 @@ interface StockData {
   volume: number;
 }
 
-const FAANG_TICKERS = ['META', 'AMZN', 'AAPL', 'NFLX', 'GOOGL', 'TSLA', 'MSFT', 'NVDA', 'BTC-USD', 'ETH-USD', 'DOGE-USD'];
+const STOCK_CATEGORIES = {
+  FAANG: ["META", "AMZN", "AAPL", "NFLX", "GOOGL"],
+  Crypto: ["BTC-USD", "ETH-USD", "DOGE-USD"],
+  Tech: ["TSLA", "MSFT", "NVDA"],
+};
 
 const StockSim: React.FC = () => {
   const [stocks, setStocks] = useState<Record<string, StockData | null>>({});
@@ -28,9 +34,10 @@ const StockSim: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [expandedStock, setExpandedStock] = useState<string | null>(null);
   const today = dayjs().format("YYYY-MM-DD");
+  const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
 
   const fetchCurrentDayData = async (ticker: string) => {
-    try {
+    try { 
       const response = await Axios.get(`data/stock-realtime`, {
         params: { ticker },
       });
@@ -53,11 +60,33 @@ const StockSim: React.FC = () => {
     }
   };
 
+  const fetchPreviousDayData = async (ticker: string) => {
+    try {
+      const response = await Axios.get(`data/stocks/`, {
+        params: { ticker, start_date: yesterday, end_date: yesterday },
+      });
+      if (response.data.length > 0) {
+        return Number(response.data[0].close_price);
+      }
+      return null;
+    } catch (error) {
+      console.error(`Error fetching previous day's data for ${ticker}:`, error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     const loadInitialData = async () => {
       setLoading(true);
       try {
-        const stockDataPromises = FAANG_TICKERS.map((ticker) => fetchCurrentDayData(ticker));
+        const stockTickers = [...STOCK_CATEGORIES.FAANG, ...STOCK_CATEGORIES.Crypto, ...STOCK_CATEGORIES.Tech];
+
+        const stockDataPromises = stockTickers.map(async (ticker) => {
+          const currentData = await fetchCurrentDayData(ticker);
+          const previousClose = await fetchPreviousDayData(ticker);
+
+          return currentData ? { ...currentData, previous_close: previousClose } : null;
+        });
         const results = await Promise.all(stockDataPromises);
         const initialStocks = results.reduce((acc, data) => {
           if (data) acc[data.ticker] = data;
@@ -111,23 +140,29 @@ const StockSim: React.FC = () => {
       setExpandedLoading(false);
     }
   };
-
+  
   return (
     <div className="p-6">
-      <h1 className="text-center text-3xl font-bold">
-        Stock Market Simulator
-      </h1>
+      <h1 className="text-center text-3xl font-bold">Stock Market Simulator</h1>
       <Portfolio stocks={stocks} />
+  
       {expandedStock ? (
         <div className="flex flex-col items-center p-4">
-          <Card className="w-full max-w-xl">
+          <Card className="w-full max-w-3xl lg:w-3/4 xl:w-2/3 max-w-screen-lg">
             <CardContent>
               {expandedStockData ? (
                 <>
-                  <h2 className="text-center">{expandedStock}</h2>
+                  <h2 className="text-center text-2xl font-semibold">{expandedStock}</h2>
+                  <div className="flex justify-center">
+                    <img
+                      src={`/static/${expandedStock}.png`}
+                      alt={expandedStock}
+                      className="w-32 h-32 object-contain"
+                    />
+                  </div>
                   {expandedStockData.length > 0 && (
                     <>
-                      <h4> Close: ${expandedStockData.at(-1)?.close_price.toFixed(2)}</h4>
+                      <h4>Close: ${expandedStockData.at(-1)?.close_price.toFixed(2)}</h4>
                       <h4>Open: ${expandedStockData.at(-1)?.open_price.toFixed(2)}</h4>
                       <h4>High: ${expandedStockData.at(-1)?.high_price.toFixed(2)}</h4>
                       <h4>Low: ${expandedStockData.at(-1)?.low_price.toFixed(2)}</h4>
@@ -135,13 +170,15 @@ const StockSim: React.FC = () => {
                       {expandedLoading ? (
                         <Skeleton className="h-40 w-full mt-4" />
                       ) : (
-                        <div className="mt-4">
-                          <StockChart data={expandedStockData} ticker={expandedStock} />
-                        </div>
+                        <StockChart data={expandedStockData} ticker={expandedStock} />
                       )}
                     </>
                   )}
-                  <Button variant="destructive" className="mt-4 w-full" onClick={() => handleViewMore(expandedStock)}>
+                  <Button
+                    variant="destructive"
+                    className="mt-4 w-full"
+                    onClick={() => handleViewMore(expandedStock)}
+                  >
                     Close
                   </Button>
                 </>
@@ -152,28 +189,45 @@ const StockSim: React.FC = () => {
           </Card>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Object.values(stocks).map((stockData) => (
-            stockData && (
-              <Card key={stockData.ticker}>
-                <CardContent>
-                  <h4 className="text-center">{stockData.ticker}</h4>
-                  <h4>Close: ${stockData.close_price.toFixed(2)}</h4>
-                  <h4>Open: ${stockData.open_price.toFixed(2)}</h4>
-                  <h4>High: ${stockData.high_price.toFixed(2)}</h4>
-                  <h4>Low: ${stockData.low_price.toFixed(2)}</h4>
-                  <h4>Volume: {stockData.volume.toLocaleString()}</h4>
-                  <Button className="mt-4 w-full" onClick={() => handleViewMore(stockData.ticker)}>
-                    View More
-                  </Button>
-                </CardContent>
-              </Card>
-            )
-          ))}
-        </div>
+        Object.entries(STOCK_CATEGORIES).map(([category, tickers]) => (
+          <div key={category}>
+            <h2 className="text-xl font-semibold mt-6">{category} Stocks</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {tickers.map((ticker) => {
+                const stock = stocks[ticker];
+                if (!stock) return null;
+                const change = stock.previous_close
+                  ? ((stock.close_price - stock.previous_close) / stock.previous_close) * 100
+                  : null;
+  
+                return (
+                  <Card key={ticker}>
+                    <CardContent>
+                      <img
+                        src={`/static/${ticker}.png`}
+                        alt={ticker}
+                        className="w-20 h-20 object-contain mx-auto"
+                      />
+                      <h4 className="text-center">{ticker}</h4>
+                      <h4>Current Price: ${stock.close_price.toFixed(2)}</h4>
+                      <p className={change && change >= 0 ? "text-green-600" : "text-red-600"}>
+                        Daily Change: {change?.toFixed(2)}%{" "}
+                        {change && (change >= 0 ? <TrendingUp /> : <TrendingDown />)}
+                      </p>
+                      <Button className="mt-4 w-full" onClick={() => handleViewMore(ticker)}>
+                        View More
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        ))
       )}
     </div>
   );
+  
 };
 
 export default StockSim;

@@ -340,7 +340,7 @@ class Portfolio(models.Model):
 class StockHolding(models.Model):
     portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE)
     ticker = models.CharField(max_length=10)
-    quantity = models.IntegerField()
+    quantity = models.DecimalField(max_digits=12, decimal_places=4, default=0)
     
     def get_latest_price(self):
         """Fetch the latest price for this stock"""
@@ -352,7 +352,7 @@ class Transaction(models.Model):
     portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE)
     ticker = models.CharField(max_length=10)
     transaction_type = models.CharField(max_length=10)
-    quantity = models.IntegerField()
+    quantity = models.DecimalField(max_digits=12, decimal_places=6)
     price_per_share = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField(auto_now_add=True)
 

@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import OrderedDict
 from django.shortcuts import get_object_or_404, render
 from rest_framework import viewsets, permissions, status
 from .serializers import *
@@ -397,8 +398,8 @@ class PortfolioViewSet(viewsets.ViewSet):
         portfolio = Portfolio.objects.get(user=request.user)
         ticker = request.data.get("ticker")
         transaction_type = request.data.get("transaction_type")
-        quantity = int(request.data.get("quantity", 0))
-        price_per_share = float(request.data.get("price_per_share", 0))
+        quantity = Decimal(request.data.get("quantity", "0"))
+        price_per_share = Decimal(request.data.get("price_per_share", "0"))
 
         if not ticker or quantity <= 0 or price_per_share <= 0:
             return Response({"error": "Invalid transaction data"}, status=400)
@@ -432,29 +433,27 @@ class PortfolioViewSet(viewsets.ViewSet):
         portfolio.save()
 
         holding, created = StockHolding.objects.get_or_create(
-            portfolio=portfolio, ticker=ticker, defaults={"quantity": 0}
+            portfolio=portfolio, ticker=ticker, defaults={"quantity": Decimal(0)}
         )
-        holding.quantity += quantity
+        holding.quantity += Decimal(quantity)  # ✅ Supports fractional shares
         holding.save()
 
         transaction = Transaction.objects.create(
             portfolio=portfolio,
             ticker=ticker,
             transaction_type="BUY",
-            quantity=quantity,
+            quantity=Decimal(quantity),  # ✅ Supports fractional shares
             price_per_share=Decimal(price_per_share),
         )
 
-        self._update_portfolio_history(
-            portfolio=portfolio, transaction_type="BUY", ticker=ticker, quantity=quantity
-        )
+        self._update_portfolio_history(portfolio, "BUY", ticker, quantity)
 
         return Response(TransactionSerializer(transaction).data)
 
     def _sell_stock(self, portfolio, ticker, quantity, price_per_share):
-        quantity = int(quantity)
+        quantity = Decimal(quantity)  # ✅ Keep as Decimal
         price_per_share = Decimal(price_per_share)
-        total_earnings = Decimal(quantity) * price_per_share
+        total_earnings = quantity * price_per_share
 
         holding = StockHolding.objects.filter(portfolio=portfolio, ticker=ticker).first()
         if not holding or holding.quantity < quantity:
@@ -462,10 +461,12 @@ class PortfolioViewSet(viewsets.ViewSet):
 
         portfolio.balance += total_earnings
         holding.quantity -= quantity
+
         if holding.quantity == 0:
             holding.delete()
         else:
             holding.save()
+
         portfolio.save()
 
         transaction = Transaction.objects.create(
@@ -476,9 +477,7 @@ class PortfolioViewSet(viewsets.ViewSet):
             price_per_share=price_per_share,
         )
 
-        self._update_portfolio_history(
-            portfolio=portfolio, transaction_type="SELL", ticker=ticker, quantity=quantity
-        )
+        self._update_portfolio_history(portfolio, "SELL", ticker, quantity)
 
         return Response(TransactionSerializer(transaction).data)
 
@@ -507,9 +506,7 @@ class PortfolioHistoryView(APIView):
         Retrieve the latest stock price for the given ticker.
         """
         latest_stock = StockRealTimeData.objects.filter(ticker=ticker).order_by('-timestamp').first()
-        if latest_stock:
-            return latest_stock.close_price
-        return 0  # Return 0 if no stock data is available
+        return latest_stock.close_price if latest_stock else 0  # Return 0 if no stock data is available
 
     def _calculate_portfolio_value(self, portfolio):
         """
@@ -524,39 +521,45 @@ class PortfolioHistoryView(APIView):
     def get(self, request):
         user = request.user
         portfolio = Portfolio.objects.get(user=user)
-        history = PortfolioHistory.objects.filter(user=user).order_by('timestamp')
+        today = datetime.now().date()
 
+        # Get today's portfolio history entry (if exists)
+        today_entry = PortfolioHistory.objects.filter(user=user, timestamp__date=today).order_by('-timestamp').first()
+        
         # Calculate current portfolio value
         current_value = self._calculate_portfolio_value(portfolio)
 
-        # Add current portfolio value to the response if it's different from the latest entry
-        if not history.exists() or history.last().total_value != current_value:
-                PortfolioHistory.objects.create(
-                    user=user,
-                    total_value=current_value,
-                    cash_balance=portfolio.balance,
-                    transaction_label="Portfolio Updated with Current Prices",
-                    timestamp=datetime.now(),
-                )
+        # If an entry for today exists, update it instead of creating a new one
+        if today_entry:
+            today_entry.total_value = current_value
+            today_entry.cash_balance = portfolio.balance
+            today_entry.transaction_label = "Portfolio Updated with Current Prices"
+            today_entry.timestamp = datetime.now()  # Update timestamp to latest
+            today_entry.save()
+        else:
+            # Create a new entry if one does not exist for today
+            PortfolioHistory.objects.create(
+                user=user,
+                total_value=current_value,
+                cash_balance=portfolio.balance,
+                transaction_label="Portfolio Updated with Current Prices",
+                timestamp=datetime.now(),
+            )
 
-        # Dynamically create history data points (e.g., daily, weekly, monthly)
-        start_date = history.first().timestamp.date() if history.exists() else datetime.now().date()
-        end_date = datetime.now().date()
-        date_range = self._generate_date_range(start_date, end_date)  # Ensure this returns a list
+        # Fetch all history and group by day, keeping only the latest entry for each day
+        history = PortfolioHistory.objects.filter(user=user).order_by("-timestamp")
 
-        # Fill gaps in the portfolio history
-        seen_dates = set()
-        cleaned_history = []
+        latest_per_day = OrderedDict()
         for entry in history:
-            date_key = entry.timestamp.date()  # Convert to date to ensure unique daily entries
-            if date_key not in seen_dates:
-                cleaned_history.append(entry)
-                seen_dates.add(date_key)
+            entry_date = entry.timestamp.date()
+            if entry_date not in latest_per_day:
+                latest_per_day[entry_date] = entry  # Keep only the latest entry per day
 
-        cleaned_history.sort(key=lambda x: x.timestamp)
-        # Serialize and return
-        serializer = PortfolioHistorySerializer(cleaned_history, many=True)
+        # Serialize and return only the latest entry per day
+        serializer = PortfolioHistorySerializer(list(latest_per_day.values()), many=True)
         return Response(serializer.data)
+
+
 
 
     def _generate_date_range(self, start_date, end_date):
