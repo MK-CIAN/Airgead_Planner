@@ -10,7 +10,7 @@ interface ChatMessage {
 
 interface ChatRoomProps {
   entityId: number; // ID of the budget or savings goal
-  entityType: "budget" | "savingsGoal"; // Type of entity (budget or savings goal)
+  entityType: "budget" | "savingsGoal" | "stockLeague"; // Type of entity (budget or savings goal)
 }
 
 const ChatRoom: React.FC<ChatRoomProps> = ({ entityId, entityType }) => {
@@ -23,23 +23,34 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ entityId, entityType }) => {
       const params =
         entityType === "budget"
           ? { budget_id: entityId }
-          : { savings_goal_id: entityId };
+          : entityType === "savingsGoal"
+          ? { savings_goal_id: entityId }
+          : entityType === "stockLeague" // ✅ FIX: Fetch messages using stock_league_id
+          ? { stock_league_id: entityId }
+          : {};
+  
       const response = await Axios.get("/chat/messages/", { params });
       setMessages(response.data);
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
   };
+  
 
   // Send a new message
   const sendMessage = async () => {
     if (!newMessage.trim()) return; // Prevent sending empty messages
-
+  
     try {
       const data =
         entityType === "budget"
           ? { budget_id: entityId, content: newMessage }
-          : { savings_goal_id: entityId, content: newMessage };
+          : entityType === "savingsGoal"
+          ? { savings_goal_id: entityId, content: newMessage }
+          : entityType === "stockLeague"
+          ? { stock_league_id: entityId, content: newMessage }
+          : {};
+  
       await Axios.post("/chat/messages/", data);
       setNewMessage(""); // Clear the input after sending
       fetchMessages(); // Refresh messages
@@ -47,6 +58,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ entityId, entityType }) => {
       console.error("Error sending message:", error);
     }
   };
+  
 
   useEffect(() => {
     fetchMessages(); // Initial fetch

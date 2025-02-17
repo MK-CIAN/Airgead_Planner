@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Axios from "./Axios";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ const Portfolio: React.FC<PortfolioProps> = ({ portfolioType, leagueId, stocks }
   const [transactionType, setTransactionType] = useState<string>("BUY");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const fetchCalled = useRef(false);
 
   const fetchPortfolio = async () => {
     try {
@@ -98,8 +99,11 @@ const Portfolio: React.FC<PortfolioProps> = ({ portfolioType, leagueId, stocks }
   };
 
   useEffect(() => {
-    fetchPortfolio();
-  }, [portfolioType, leagueId]);
+    if (!fetchCalled.current) {
+      fetchCalled.current = true;
+      fetchPortfolio();
+    }
+  }, []);
 
   return (
     <div className="p-6">

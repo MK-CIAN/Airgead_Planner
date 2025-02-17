@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets, permissions
 
-from data.models import CustomBudget
+from data.models import CustomBudget, Portfolio
 from .serializers import *
 from .models import *
 from rest_framework.response import Response
@@ -149,8 +149,11 @@ class NotificationListView(APIView):
                 notification_data["budget_id"] = n.budget.id if n.budget else None
             if n.type == "savings_invite":
                 notification_data["savings_goal_id"] = n.savings_goal.id if n.savings_goal else None
+            if n.type == "stock_league_invite":
+                notification_data["stock_league_id"] = n.stock_league.id if n.stock_league else None
             data.append(notification_data)
         return Response(data)
+
 
 class AcceptNotificationView(APIView):
     permission_classes = [IsAuthenticated]
@@ -183,6 +186,21 @@ class AcceptNotificationView(APIView):
                 savings_goal = notification.savings_goal
                 savings_goal.contributors.add(request.user)
                 savings_goal.save()
+                
+            elif notification.type == "stock_league_invite" and notification.stock_league:
+                # Process stock league invite
+                stock_league = notification.stock_league
+                stock_league.members.add(request.user)
+                stock_league.save()
+                
+                portfolio, created = Portfolio.objects.get_or_create(
+                    user=request.user,
+                    league=stock_league,
+                    portfolio_type=Portfolio.LEAGUE,
+                    defaults={"balance": 10000.00, "totalbalance": 10000.00},  # Default starting balance
+                )
+                if created:
+                    print(f"Portfolio created for user {request.user.username} in league {stock_league.name}")
 
             # Mark the notification as read
             notification.is_read = True
@@ -196,9 +214,6 @@ class AcceptNotificationView(APIView):
             return Response({"error": "Friend request not found."}, status=404)
         except Exception as e:
             return Response({"error": str(e)}, status=400)
-
-
-
         
 class DenyNotificationView(APIView):
     permission_classes = [IsAuthenticated]

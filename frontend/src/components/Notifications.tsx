@@ -18,6 +18,7 @@ interface Notification {
   message: string;
   sender: string | null;
   budget_id?: number; // Optional, included for budget invites
+  stock_league_id?: number;
 }
 
 const Notifications: React.FC = () => {
@@ -49,21 +50,24 @@ const Notifications: React.FC = () => {
   const handleAccept = async (notification: Notification) => {
     try {
       const payload: any = { notification_id: notification.id };
-
+  
       if (notification.type === "budget_invite" && notification.budget_id) {
-        payload.budget_id = notification.budget_id; // Include budget_id for budget invites
+        payload.budget_id = notification.budget_id;
+      } else if (notification.type === "stock_league_invite" && notification.stock_league_id) {
+        payload.stock_league_id = notification.stock_league_id;
       }
-
+  
       await Axios.post(`notifications/accept`, payload, {
         headers: { Authorization: `Bearer ${localStorage.getItem("Token")}` },
       });
-
-      // Remove the notification from the list
+  
       setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
     } catch (error) {
       console.error("Error accepting notification:", error);
     }
   };
+  
+
 
   const handleDeny = async (id: number) => {
     try {
@@ -138,7 +142,8 @@ const Notifications: React.FC = () => {
                   </Box>
                   {(notification.type === "friend_request" ||
                     notification.type === "budget_invite" ||
-                    notification.type === "savings_invite") && (
+                    notification.type === "savings_invite" ||
+                    notification.type === "stock_league_invite") && (
                     <Box sx={{ display: "flex", gap: 1 }}>
                       <Button
                         onClick={() => handleAccept(notification)}

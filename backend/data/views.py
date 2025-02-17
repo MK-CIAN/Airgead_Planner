@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 from django.db.models import F, Sum
+from django.db import transaction
 from datetime import date, datetime, timedelta
 from data.utils.news_utils import recommend_articles
 from django.contrib.auth import get_user_model
@@ -373,18 +374,29 @@ class PortfolioViewSet(viewsets.ViewSet):
         return latest_stock.close_price if latest_stock else 0
 
     def list(self, request):
+        print(f"Fetching Portfolio... User: {request.user.id}, Time: {datetime.now()}")
         portfolio_type = request.query_params.get('portfolio_type', 'personal')
         league_id = request.query_params.get('league_id')
 
         if portfolio_type == 'league' and league_id:
-            portfolio = Portfolio.objects.filter(user=request.user, league_id=league_id).first()
+            portfolio, created = Portfolio.objects.get_or_create(
+                user=request.user, league_id=league_id, portfolio_type=Portfolio.LEAGUE,
+                defaults={"balance": 10000.00, "totalbalance": 10000.00},  # Default starting balance
+            )
+            if created:
+                print(f"Portfolio created for user {request.user.username} in league {league_id}")
         else:
-            portfolio = Portfolio.objects.filter(user=request.user, portfolio_type=Portfolio.PERSONAL).first()
+            portfolio, created = Portfolio.objects.get_or_create(
+                user=request.user, portfolio_type=Portfolio.PERSONAL,
+                defaults={"balance": 10000.00, "totalbalance": 10000.00},  # Default starting balance
+            )
+            if created:
+                print(f"Personal portfolio created for user {request.user.username}")
 
         if not portfolio:
             return Response({"error": "Portfolio not found"}, status=404)
 
-        self.update_total_balance(portfolio)
+        print("Updating Portfolio History...")
         self._update_portfolio_history(portfolio)
         holdings = StockHolding.objects.filter(portfolio=portfolio)
 
@@ -404,6 +416,7 @@ class PortfolioViewSet(viewsets.ViewSet):
             ],
         }
         return Response(response_data)
+
 
     def create(self, request):
         portfolio_type = request.data.get("portfolio_type", "personal")
@@ -434,15 +447,14 @@ class PortfolioViewSet(viewsets.ViewSet):
 
 
     def update_total_balance(self, portfolio):
-        """
-        Calculate total portfolio value (cash balance + total value of holdings)
-        """
         holdings = StockHolding.objects.filter(portfolio=portfolio)
         total_holdings_value = sum(
             Decimal(holding.quantity) * Decimal(holding.get_latest_price()) for holding in holdings
         )
-        portfolio.totalbalance = portfolio.balance + total_holdings_value
-        portfolio.save()  # ✅ Ensure the updated total_balance is saved to the database
+        
+        portfolio.totalbalance = Decimal(str(portfolio.balance)) + total_holdings_value
+        portfolio.save()
+
     
     def _buy_stock(self, portfolio, ticker, quantity, price_per_share):
         total_cost = Decimal(quantity) * Decimal(price_per_share)
@@ -450,7 +462,7 @@ class PortfolioViewSet(viewsets.ViewSet):
         if portfolio.balance < total_cost:
             return Response({"error": "Insufficient balance"}, status=400)
 
-        portfolio.balance -= total_cost
+        portfolio.balance -= Decimal(total_cost)
         portfolio.save()
 
         holding, created = StockHolding.objects.get_or_create(
@@ -513,27 +525,29 @@ class PortfolioViewSet(viewsets.ViewSet):
         today = now().date()
 
         # ✅ Find today's existing entry for the portfolio
-        history_entry, created = PortfolioHistory.objects.get_or_create(
-            portfolio=portfolio,
-            timestamp__date=today,  # Ensures the date matches, avoiding duplicates
-            defaults={  # ✅ Only set default values if a new entry is created
-                "user": portfolio.user,
-                "total_value": portfolio.totalbalance,
-                "cash_balance": portfolio.balance,
-                "transaction_label": transaction_label or "Portfolio Updated with Current Prices",
-                "timestamp": now(),
-            }
-        )
-        
-        if not created:
-            # ✅ If an entry exists, update it instead of making a new one
+        history_entry = PortfolioHistory.objects.filter(
+            portfolio=portfolio, timestamp__date=today, league=portfolio.league
+        ).order_by('-timestamp').first()
+
+        if history_entry:
             history_entry.total_value = portfolio.totalbalance
             history_entry.cash_balance = portfolio.balance
             history_entry.transaction_label = transaction_label or history_entry.transaction_label
-            history_entry.timestamp = now()  # ✅ Refresh timestamp
+            history_entry.timestamp = now()
             history_entry.save()
+        else:
+            # ✅ Ensure no duplicates before creating a new entry
+            if not PortfolioHistory.objects.filter(portfolio=portfolio, timestamp__date=today, league=portfolio.league).exists():
+                PortfolioHistory.objects.create(
+                    user=portfolio.user,
+                    portfolio=portfolio,
+                    league=portfolio.league,
+                    total_value=portfolio.totalbalance,
+                    cash_balance=portfolio.balance,
+                    transaction_label=transaction_label or "Portfolio Updated with Current Prices",
+                    timestamp=now(),
+                )
 
-        
 
 class PortfolioHistoryView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -590,7 +604,7 @@ class PortfolioHistoryView(APIView):
         if today_entry:
             today_entry.total_value = current_value
             today_entry.cash_balance = portfolio.balance  # ✅ Ensure single portfolio
-            today_entry.transaction_label = "Portfolio Updated with Current Prices"
+            today_entry.transaction_label = "Portfolio Updated with Current PricesTEST"
             today_entry.timestamp = datetime.now()  # Update timestamp to latest
             today_entry.save()
         
@@ -628,18 +642,58 @@ class StockLeagueViewSet(viewsets.ModelViewSet):
         Fetch all leagues where the user is a member.
         """
         return StockLeague.objects.filter(members=self.request.user)
+    
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Fetch a stock league with members as contributors (for frontend consistency).
+        """
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        
+        members = instance.members.values_list('id', flat=True)  # Returns a list of user IDs
+        
+        data = serializer.data
+        data["contributors"] = list(members)
+        return Response(data)
+
 
     def perform_create(self, serializer):
-        """
-        Create a new league, add the creator as a member, and create their league portfolio.
-        """
         league = serializer.save(created_by=self.request.user)
-        league.members.add(self.request.user)  # ✅ Auto-add the creator
+        league.members.add(self.request.user)
 
-        # ✅ Create a portfolio for the creator in this league
-        Portfolio.objects.create(user=self.request.user, league=league, portfolio_type=Portfolio.LEAGUE)
+        Portfolio.objects.get_or_create(
+            user=self.request.user, league=league, portfolio_type=Portfolio.LEAGUE,
+            defaults={"balance": 10000.00, "totalbalance": 10000.00},  # Default starting balance
+        )
 
+        ChatRoom.objects.get_or_create(stock_league=league)
+        
         return Response({"message": "League created successfully", "league_id": league.id}, status=201)
+
+    
+    @action(detail=True, methods=['post'], url_path='invite-friend')
+    def invite_friend(self, request, pk=None):
+        league = self.get_object()
+        friend_id = request.data.get('friend_id')
+
+        if not friend_id:
+            return Response({"error": "Friend ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            friend = CustomUser.objects.get(id=friend_id)
+
+            # ✅ Create a notification for the friend
+            Notification.objects.create(
+                user=friend,
+                sender=request.user,
+                type="stock_league_invite",
+                message=f"{request.user.username} has invited you to join the stock league '{league.name}'.",
+                stock_league=league
+            )
+
+            return Response({"message": "Invitation sent successfully."}, status=status.HTTP_200_OK)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "Friend not found."}, status=status.HTTP_404_NOT_FOUND)
 
     
 # Financial Articles View

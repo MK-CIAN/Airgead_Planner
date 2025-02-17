@@ -8,6 +8,9 @@ import { useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 import Portfolio from "./Portfolio";
 import { TrendingDown, TrendingUp } from "lucide-react";
+import ShowFriends from "./UserServices/ShowFriends";
+import { toast } from "@/hooks/use-toast";
+import ChatRoom from "./UserServices/ChatRoom";
 
 interface StockData {
   previous_close: any;
@@ -93,6 +96,8 @@ const StockSim: React.FC = () => {
     if (!previousClose) {
       console.warn(`⚠️ No previous close found for ${ticker} in the last 7 days!`);
     }
+
+    console.log(`Previous Close: ${previousClose} for ${ticker}`);
   
     return previousClose; // ✅ Ensure the function returns previousClose
   };
@@ -177,6 +182,15 @@ const StockSim: React.FC = () => {
     }
   };
 
+  const handleInvite = async (friendId: number) => {
+    try {
+      await Axios.post(`/data/leagues/${leagueId}/invite-friend/`, { friend_id: friendId });
+      toast({ title: "Invitation Sent", description: "Your friend has been invited." });
+    } catch (error) {
+      console.error("Error inviting friend:", error);
+    }
+  };
+
   return (
     <div className="p-6">
       <h1 className="text-center text-3xl font-bold">Stock Market Simulator</h1>
@@ -194,6 +208,17 @@ const StockSim: React.FC = () => {
         leagueId={leagueId}
         stocks={stocks}
       />
+
+      {portfolioType === "league" && leagueId && (
+        <div className="flex justify-center my-4">
+          <ShowFriends
+            onInvite={handleInvite}
+            triggerElement={<Button>Invite Friends</Button>}
+            entityId={leagueId}
+            entityType="stockLeague"
+          />
+        </div>
+      )}
 
       {expandedStock ? (
         <div className="flex flex-col items-center p-4">
@@ -303,6 +328,13 @@ const StockSim: React.FC = () => {
           </div>
         ))
       )}
+      {portfolioType === "league" && leagueId && (
+        <div className="my-6">
+          <h3 className="text-center text-lg font-semibold">League Chatroom</h3>
+          <ChatRoom entityId={Number(leagueId)} entityType="stockLeague" />
+        </div>
+      )}
+
     </div>
   );
 };

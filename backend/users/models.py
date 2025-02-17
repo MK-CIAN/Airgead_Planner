@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
-from data.models import CustomBudget, SavingsGoal
+from data.models import CustomBudget, SavingsGoal, StockLeague
 
 # Create your models here.
 # Custom User Manager
@@ -102,12 +102,16 @@ class Notification(models.Model):
         ("friend_request", "Friend Request"),
         ("budget_invite", "Budget Invite"),
         ("savings_invite", "Savings Invite"),
+        ("stock_league_invite", "Stock League Invite"),  # ✅ New type for stock leagues
     ])
     message = models.TextField()
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    budget = models.ForeignKey(CustomBudget, on_delete=models.CASCADE, null=True, blank=True)  # New field for budget invites
-    savings_goal = models.ForeignKey(SavingsGoal, on_delete=models.CASCADE, null=True, blank=True)  # New field for savings invites
+    
+    budget = models.ForeignKey(CustomBudget, on_delete=models.CASCADE, null=True, blank=True)
+    savings_goal = models.ForeignKey(SavingsGoal, on_delete=models.CASCADE, null=True, blank=True)
+    stock_league = models.ForeignKey(StockLeague, on_delete=models.CASCADE, null=True, blank=True)  # ✅ New field for stock leagues
 
     def __str__(self):
         return f"Notification for {self.user.username}: {self.type}"
+

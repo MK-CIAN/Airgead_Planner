@@ -21,7 +21,7 @@ interface ShowFriendsProps {
   onInvite: (friendId: number) => void; // Function to handle inviting a friend
   triggerElement: React.ReactNode; // The element that triggers the popup
   entityId: string | undefined; // ID of the budget or savings goal
-  entityType: "budget" | "savingsGoal"; // Context to distinguish between budgets and savings goals
+  entityType: "budget" | "savingsGoal" | "stockLeague"; // Context to distinguish between budgets and savings goals
 }
 
 const ShowFriends: React.FC<ShowFriendsProps> = ({
@@ -38,40 +38,47 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
     const fetchFriendsAndContributors = async () => {
       try {
         console.log("Fetching friends and contributors...");
-
-        // Fetch all friends
+  
+        // ✅ Fetch all friends
         const friendsResponse = await Axios.get(`/friends/`);
         console.log("Friends fetched:", friendsResponse.data);
-
-        // Fetch contributors based on entity type
-        const contributorsResponse = await Axios.get(
-          `/data/${entityType === "budget" ? "custom-budget" : "savings"}/${entityId}/`
-        );
-        console.log(
-          "Contributors fetched for entity:",
-          contributorsResponse.data.contributors
-        );
-
+  
+        // ✅ Fetch contributors based on entity type
+        let contributorsUrl = "";
+        if (entityType === "budget") {
+          contributorsUrl = `/data/custom-budget/${entityId}/`;
+        } else if (entityType === "savingsGoal") {
+          contributorsUrl = `/data/savings/${entityId}/`;
+        } else if (entityType === "stockLeague") {
+          contributorsUrl = `/data/leagues/${entityId}/`;  // ✅ Check API request
+        }
+        
+        console.log("Fetching contributors from:", contributorsUrl);
+        
+        const contributorsResponse = await Axios.get(contributorsUrl);
+        console.log("Contributors response:", contributorsResponse.data);
+  
         const contributorsList = contributorsResponse.data.contributors || [];
-        setContributors(contributorsList); // Store contributor IDs directly
-
-        // Map friends with their relationship to the entity
+        console.log("Extracted contributors list:", contributorsList);
+        setContributors(contributorsList);
+  
+        // ✅ Map friends with their relationship to the entity
         const friendsWithStatus = friendsResponse.data.map((friend: Friend) => {
-          if (contributorsList.includes(friend.id)) {
-            return { ...friend, status: "joined" }; // Check against the array of IDs
-          }
-          return { ...friend, status: "none" }; // Default to "none"
+          return contributorsList.includes(friend.id)
+            ? { ...friend, status: "joined" }
+            : { ...friend, status: "none" };
         });
-
+  
         console.log("Mapped friends with status:", friendsWithStatus);
         setFriends(friendsWithStatus);
       } catch (error) {
         console.error("Error fetching friends or contributors:", error);
       }
     };
-
-    if (entityId) fetchFriendsAndContributors(); // Only fetch if entityId is available
+  
+    if (entityId) fetchFriendsAndContributors(); // ✅ Ensure this runs only when entityId is available
   }, [entityId, entityType]);
+  
 
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);

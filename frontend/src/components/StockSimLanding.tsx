@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { toast } from "@/hooks/use-toast";
 
 interface League {
   id: string;
@@ -38,17 +39,16 @@ const StockSimLanding: React.FC = () => {
       alert("League name is required.");
       return;
     }
-
+  
     setLoading(true);
     try {
       const response = await Axios.post("data/leagues/", { name });
-
+  
       if (response.status === 201) {
-        const { league_id } = response.data;
         setShowForm(false);
         setName(""); // ✅ Reset form
         fetchLeagues(); // ✅ Reload leagues to show the new one
-        handleSelectPortfolio("league", league_id); // ✅ Redirect to new league
+        toast({title: "League created successfully!", description: "Refreshing Page", variant: "successfull"}); // ✅ Inform user
       }
     } catch (error) {
       console.error("Error creating league:", error);
@@ -56,6 +56,7 @@ const StockSimLanding: React.FC = () => {
       setLoading(false);
     }
   };
+  
 
   // Universal function for selecting a portfolio
   const handleSelectPortfolio = (portfolioType: "personal" | "league", leagueId?: string) => {

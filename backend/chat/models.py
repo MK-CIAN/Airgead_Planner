@@ -16,14 +16,22 @@ class ChatRoom(models.Model):
         blank=True,
         related_name='chat_rooms'
     )
+    stock_league = models.OneToOneField(
+        'data.StockLeague', 
+        on_delete=models.CASCADE,
+        related_name='chat_room',
+        null=True,
+        blank=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'chat_room'
         constraints = [
             models.CheckConstraint(
-                check=~models.Q(budget__isnull=True) | ~models.Q(savings_goal__isnull=True),
-                name="check_budget_or_savings_goal"
+                check=~models.Q(budget__isnull=True) | ~models.Q(savings_goal__isnull=True) |
+                    ~models.Q(stock_league__isnull=True),
+                name="check_budget_or_savings_goal_or_stock_league"
             )
         ]
         

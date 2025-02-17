@@ -378,7 +378,8 @@ class Transaction(models.Model):
 # Portfolio History 
 class PortfolioHistory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    portfolio = models.ForeignKey('Portfolio', on_delete=models.CASCADE, null=True)  # ✅ Add ForeignKey
+    portfolio = models.ForeignKey('Portfolio', on_delete=models.CASCADE, null=True)
+    league = models.ForeignKey('StockLeague', null=True, blank=True, on_delete=models.CASCADE)  # ✅ NEW FIELD
     timestamp = models.DateTimeField(auto_now_add=True)
     total_value = models.DecimalField(max_digits=12, decimal_places=2)
     cash_balance = models.DecimalField(max_digits=12, decimal_places=2)
@@ -386,6 +387,7 @@ class PortfolioHistory(models.Model):
 
     def __str__(self):
         return f"{self.portfolio} - {self.timestamp}"
+
     
 # Financial Articles
 class FinancialArticle(models.Model):
