@@ -332,9 +332,22 @@ class StockRealTimeData(models.Model):
         
 # Portfolio 
 class Portfolio(models.Model):
+    PERSONAL = 'personal'
+    LEAGUE = 'league'
+    
+    PORTFOLIO_TYPES = [
+        (PERSONAL, 'Personal'),
+        (LEAGUE, 'League'),
+    ]
+    
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    league = models.ForeignKey('StockLeague', null=True, blank=True, on_delete=models.CASCADE)
+    portfolio_type = models.CharField(max_length=10, choices=PORTFOLIO_TYPES, default=PERSONAL)
     balance = models.DecimalField(max_digits=12, decimal_places=2, default=10000.00)
     totalbalance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    
+    class Meta:
+        unique_together = ['user', 'league', 'portfolio_type']
 
 # Stock Holdings
 class StockHolding(models.Model):
@@ -346,6 +359,12 @@ class StockHolding(models.Model):
         """Fetch the latest price for this stock"""
         latest_stock = StockRealTimeData.objects.filter(ticker=self.ticker).order_by('-timestamp').first()
         return latest_stock.close_price if latest_stock else Decimal(0)
+    
+class StockLeague(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='stock_leagues')
+    created_at = models.DateTimeField(auto_now_add=True)
 
 # Transactions
 class Transaction(models.Model):
@@ -359,13 +378,14 @@ class Transaction(models.Model):
 # Portfolio History 
 class PortfolioHistory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    portfolio = models.ForeignKey('Portfolio', on_delete=models.CASCADE, null=True)  # ✅ Add ForeignKey
     timestamp = models.DateTimeField(auto_now_add=True)
     total_value = models.DecimalField(max_digits=12, decimal_places=2)
     cash_balance = models.DecimalField(max_digits=12, decimal_places=2)
     transaction_label = models.CharField(max_length=255, null=True, blank=True)
-    
+
     def __str__(self):
-        return f"{self.user} - {self.timestamp}"
+        return f"{self.portfolio} - {self.timestamp}"
     
 # Financial Articles
 class FinancialArticle(models.Model):

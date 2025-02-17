@@ -21,6 +21,7 @@ import TestNav from './components/TestNav'
 import { Toaster } from './components/ui/toaster';
 import FinancialSuggestions from './components/FinancialSuggestions'
 import LoanDetails from './components/Loans/LoanDetails'
+import StockSimLanding from './components/StockSimLanding'
 
 function App() {
   const location = useLocation()
@@ -51,6 +52,7 @@ function App() {
                 <Route path="/loans" element={<Loans />} />
                 <Route path="/loan-details/:id" element={<LoanDetails />} />
                 <Route path="/pensions" element={<Pensions />} />
+                <Route path="/stocksimlanding" element={<StockSimLanding/>} />
                 <Route path="/stocksim" element={<StockSim />} />
                 <Route path="/news" element={<News />} />
                 <Route path="/income" element={<Income />} />

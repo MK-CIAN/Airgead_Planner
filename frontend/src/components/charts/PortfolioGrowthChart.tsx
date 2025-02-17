@@ -18,14 +18,23 @@ interface PortfolioHistoryEntry {
   transaction_label?: string | null;
 }
 
-const PortfolioGrowthChart: React.FC = () => {
+interface PortfolioGrowthChartProps {
+  portfolioType: "personal" | "league";
+  leagueId?: string;
+}
+
+const PortfolioGrowthChart: React.FC<PortfolioGrowthChartProps> = ({ portfolioType, leagueId }) => {
   const [history, setHistory] = useState<PortfolioHistoryEntry[]>([]);
   const initialBalance = 10000;
 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const response = await Axios.get(`data/portfolio/history/`);
+        const url = portfolioType === "league"
+          ? `data/portfolio/history/?portfolio_type=league&league_id=${leagueId}`
+          : `data/portfolio/history/?portfolio_type=personal`;
+
+        const response = await Axios.get(url);
         setHistory(response.data);
       } catch (error) {
         console.error("Failed to fetch portfolio history:", error);
@@ -34,6 +43,8 @@ const PortfolioGrowthChart: React.FC = () => {
 
     fetchHistory();
   }, []);
+
+  console.log(history);
 
   // ✅ Step 1: Format Data Correctly
   const formattedData = history

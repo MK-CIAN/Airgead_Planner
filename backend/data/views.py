@@ -373,13 +373,24 @@ class PortfolioViewSet(viewsets.ViewSet):
         return latest_stock.close_price if latest_stock else 0
 
     def list(self, request):
-        portfolio, created = Portfolio.objects.get_or_create(user=request.user)
-        
+        portfolio_type = request.query_params.get('portfolio_type', 'personal')
+        league_id = request.query_params.get('league_id')
+
+        if portfolio_type == 'league' and league_id:
+            portfolio = Portfolio.objects.filter(user=request.user, league_id=league_id).first()
+        else:
+            portfolio = Portfolio.objects.filter(user=request.user, portfolio_type=Portfolio.PERSONAL).first()
+
+        if not portfolio:
+            return Response({"error": "Portfolio not found"}, status=404)
+
         self.update_total_balance(portfolio)
-        
+        self._update_portfolio_history(portfolio)
         holdings = StockHolding.objects.filter(portfolio=portfolio)
 
         response_data = {
+            "portfolio_type": portfolio.portfolio_type,
+            "league_id": portfolio.league_id if portfolio.league else None,
             "balance": str(portfolio.balance),
             "totalbalance": round(portfolio.totalbalance, 2),
             "holdings": [
@@ -395,7 +406,17 @@ class PortfolioViewSet(viewsets.ViewSet):
         return Response(response_data)
 
     def create(self, request):
-        portfolio = Portfolio.objects.get(user=request.user)
+        portfolio_type = request.data.get("portfolio_type", "personal")
+        league_id = request.data.get("league_id")
+
+        if portfolio_type == 'league' and league_id:
+            portfolio, created = Portfolio.objects.get_or_create(
+                user=request.user, league_id=league_id, portfolio_type=Portfolio.LEAGUE
+            )
+        else:
+            portfolio, created = Portfolio.objects.get_or_create(
+                user=request.user, portfolio_type=Portfolio.PERSONAL
+            )
         ticker = request.data.get("ticker")
         transaction_type = request.data.get("transaction_type")
         quantity = Decimal(request.data.get("quantity", "0"))
@@ -480,7 +501,7 @@ class PortfolioViewSet(viewsets.ViewSet):
         self._update_portfolio_history(portfolio, "SELL", ticker, quantity)
 
         return Response(TransactionSerializer(transaction).data)
-
+        
     def _update_portfolio_history(self, portfolio, transaction_type=None, ticker=None, quantity=None):
         self.update_total_balance(portfolio)
 
@@ -489,13 +510,29 @@ class PortfolioViewSet(viewsets.ViewSet):
             action = "Bought" if transaction_type == "BUY" else "Sold"
             transaction_label = f"{action} {quantity} {ticker} shares"
 
-        PortfolioHistory.objects.create(
-            user=portfolio.user,
-            total_value=portfolio.totalbalance,  # ✅ Store updated total balance
-            cash_balance=portfolio.balance,  # ✅ Store updated cash balance
-            transaction_label=transaction_label,
-            timestamp=datetime.now(),
+        today = now().date()
+
+        # ✅ Find today's existing entry for the portfolio
+        history_entry, created = PortfolioHistory.objects.get_or_create(
+            portfolio=portfolio,
+            timestamp__date=today,  # Ensures the date matches, avoiding duplicates
+            defaults={  # ✅ Only set default values if a new entry is created
+                "user": portfolio.user,
+                "total_value": portfolio.totalbalance,
+                "cash_balance": portfolio.balance,
+                "transaction_label": transaction_label or "Portfolio Updated with Current Prices",
+                "timestamp": now(),
+            }
         )
+        
+        if not created:
+            # ✅ If an entry exists, update it instead of making a new one
+            history_entry.total_value = portfolio.totalbalance
+            history_entry.cash_balance = portfolio.balance
+            history_entry.transaction_label = transaction_label or history_entry.transaction_label
+            history_entry.timestamp = now()  # ✅ Refresh timestamp
+            history_entry.save()
+
         
 
 class PortfolioHistoryView(APIView):
@@ -508,11 +545,20 @@ class PortfolioHistoryView(APIView):
         latest_stock = StockRealTimeData.objects.filter(ticker=ticker).order_by('-timestamp').first()
         return latest_stock.close_price if latest_stock else 0  # Return 0 if no stock data is available
 
-    def _calculate_portfolio_value(self, portfolio):
+    def _calculate_portfolio_value(self, user, portfolio_type, league_id=None):
         """
         Calculate the current total value of the portfolio.
         """
-        holdings = StockHolding.objects.filter(portfolio=portfolio)
+        if portfolio_type == "league" and league_id:
+            holdings = StockHolding.objects.filter(portfolio__user=user, portfolio__league_id=league_id)
+            portfolio = Portfolio.objects.filter(user=user, league_id=league_id, portfolio_type=Portfolio.LEAGUE).first()
+        else:
+            holdings = StockHolding.objects.filter(portfolio__user=user, portfolio__portfolio_type=Portfolio.PERSONAL)
+            portfolio = Portfolio.objects.filter(user=user, portfolio_type=Portfolio.PERSONAL).first()
+
+        if not portfolio:
+            return None
+
         total_holdings_value = sum(
             holding.quantity * self._get_stock_price(holding.ticker) for holding in holdings
         )
@@ -520,34 +566,35 @@ class PortfolioHistoryView(APIView):
 
     def get(self, request):
         user = request.user
-        portfolio = Portfolio.objects.get(user=user)
+        portfolio_type = request.query_params.get("portfolio_type", "personal")
+        league_id = request.query_params.get("league_id", None)
+
+        # ✅ Fetch the correct portfolio based on type
+        if portfolio_type == "league" and league_id:
+            portfolio = Portfolio.objects.filter(user=user, league_id=league_id, portfolio_type=Portfolio.LEAGUE).first()
+        else:
+            portfolio = Portfolio.objects.filter(user=user, portfolio_type=Portfolio.PERSONAL).first()
+
+        if not portfolio:
+            return Response({"error": "Portfolio not found"}, status=404)
+
         today = datetime.now().date()
 
-        # Get today's portfolio history entry (if exists)
-        today_entry = PortfolioHistory.objects.filter(user=user, timestamp__date=today).order_by('-timestamp').first()
-        
-        # Calculate current portfolio value
-        current_value = self._calculate_portfolio_value(portfolio)
+        # ✅ Get today's portfolio history entry for the correct portfolio
+        today_entry = PortfolioHistory.objects.filter(portfolio=portfolio, timestamp__date=today).first()
 
-        # If an entry for today exists, update it instead of creating a new one
+        # ✅ Calculate current portfolio value
+        current_value = self._calculate_portfolio_value(user, portfolio_type, league_id)
+
+        # ✅ Update or create today's entry
         if today_entry:
             today_entry.total_value = current_value
-            today_entry.cash_balance = portfolio.balance
+            today_entry.cash_balance = portfolio.balance  # ✅ Ensure single portfolio
             today_entry.transaction_label = "Portfolio Updated with Current Prices"
             today_entry.timestamp = datetime.now()  # Update timestamp to latest
             today_entry.save()
-        else:
-            # Create a new entry if one does not exist for today
-            PortfolioHistory.objects.create(
-                user=user,
-                total_value=current_value,
-                cash_balance=portfolio.balance,
-                transaction_label="Portfolio Updated with Current Prices",
-                timestamp=datetime.now(),
-            )
-
-        # Fetch all history and group by day, keeping only the latest entry for each day
-        history = PortfolioHistory.objects.filter(user=user).order_by("-timestamp")
+        
+        history = PortfolioHistory.objects.filter(portfolio=portfolio).order_by("-timestamp")
 
         latest_per_day = OrderedDict()
         for entry in history:
@@ -555,12 +602,9 @@ class PortfolioHistoryView(APIView):
             if entry_date not in latest_per_day:
                 latest_per_day[entry_date] = entry  # Keep only the latest entry per day
 
-        # Serialize and return only the latest entry per day
+        # ✅ Serialize and return only the latest entry per day
         serializer = PortfolioHistorySerializer(list(latest_per_day.values()), many=True)
         return Response(serializer.data)
-
-
-
 
     def _generate_date_range(self, start_date, end_date):
         """
@@ -573,6 +617,29 @@ class PortfolioHistoryView(APIView):
             dates.append(current_date)
             current_date += delta
         return dates
+    
+class StockLeagueViewSet(viewsets.ModelViewSet):
+    queryset = StockLeague.objects.all()
+    serializer_class = StockLeagueSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        """
+        Fetch all leagues where the user is a member.
+        """
+        return StockLeague.objects.filter(members=self.request.user)
+
+    def perform_create(self, serializer):
+        """
+        Create a new league, add the creator as a member, and create their league portfolio.
+        """
+        league = serializer.save(created_by=self.request.user)
+        league.members.add(self.request.user)  # ✅ Auto-add the creator
+
+        # ✅ Create a portfolio for the creator in this league
+        Portfolio.objects.create(user=self.request.user, league=league, portfolio_type=Portfolio.LEAGUE)
+
+        return Response({"message": "League created successfully", "league_id": league.id}, status=201)
 
     
 # Financial Articles View

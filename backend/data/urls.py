@@ -13,6 +13,7 @@ router.register('income-tax', IncomeTaxViewSet, basename='income')
 router.register('pension-planner', PensionProjectionViewSet, basename='pension-planner')
 router.register('stocks', StockDataViewSet, basename='stocks')
 router.register('stock-realtime', StockRealTimeDataViewSet, basename='stocks-realtime')
+router.register('leagues', StockLeagueViewSet, basename='leagues')
 router.register('portfolio', PortfolioViewSet, basename='portfolio')
 router.register('active-loan', ActiveLoanViewSet, basename='active-loan')
 

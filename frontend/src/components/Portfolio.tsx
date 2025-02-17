@@ -15,10 +15,12 @@ interface Portfolio {
 }
 
 interface PortfolioProps {
+  portfolioType: "personal" | "league";
+  leagueId?: string;
   stocks: Record<string, { close_price: number } | null>;
 }
 
-const Portfolio: React.FC<PortfolioProps> = ({ stocks }) => {
+const Portfolio: React.FC<PortfolioProps> = ({ portfolioType, leagueId, stocks }) => {
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
   const [ticker, setTicker] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(0);
@@ -30,7 +32,11 @@ const Portfolio: React.FC<PortfolioProps> = ({ stocks }) => {
   const fetchPortfolio = async () => {
     try {
       setLoading(true);
-      const response = await Axios.get(`data/portfolio/`);
+      const url = portfolioType === "league"
+      ? `data/portfolio/?portfolio_type=league&league_id=${leagueId}`
+      : `data/portfolio/?portfolio_type=personal`;
+
+      const response = await Axios.get(url);
       setPortfolio(response.data);
     } catch (error) {
       console.error("Error fetching portfolio data:", error);
@@ -39,6 +45,7 @@ const Portfolio: React.FC<PortfolioProps> = ({ stocks }) => {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     if (!ticker || !stocks[ticker]?.close_price || parseFloat(amount) <= 0) {
@@ -47,7 +54,7 @@ const Portfolio: React.FC<PortfolioProps> = ({ stocks }) => {
     }
     const pricePerShare = stocks[ticker]?.close_price || 0;
     setQuantity(parseFloat(amount) / pricePerShare);
-  }, [amount, ticker]);
+  }, [amount, ticker, stocks]);
 
 
   const handleTransaction = async () => {
@@ -70,8 +77,10 @@ const Portfolio: React.FC<PortfolioProps> = ({ stocks }) => {
     const response = await Axios.post(`data/portfolio/`, {
       ticker,
       transaction_type: transactionType,
-      quantity: calculatedQuantity, // ✅ Send decimal quantity
+      quantity: calculatedQuantity,
       price_per_share: pricePerShare,
+      portfolio_type: portfolioType,  // ✅ Specifies if it's personal or league portfolio
+      league_id: portfolioType === "league" ? leagueId : undefined, // ✅ Only send if league
     });
 
     if (response.status === 200 || response.status === 201) {
@@ -90,7 +99,7 @@ const Portfolio: React.FC<PortfolioProps> = ({ stocks }) => {
 
   useEffect(() => {
     fetchPortfolio();
-  }, []);
+  }, [portfolioType, leagueId]);
 
   return (
     <div className="p-6">
@@ -116,7 +125,7 @@ const Portfolio: React.FC<PortfolioProps> = ({ stocks }) => {
                     <Card key={holding.ticker}>
                       <CardContent>
                         <p>Ticker: {holding.ticker}</p>
-                        <p>Quantity: {holding.quantity.toFixed(6)}</p>
+                        <p>Quantity: {holding.quantity.toFixed(4)}</p>
                         <p>Current Price: ${holding.current_price.toFixed(2)}</p>
                         <p>Value: ${(holding.current_price * holding.quantity).toFixed(2)}</p>
                       </CardContent>
@@ -148,7 +157,7 @@ const Portfolio: React.FC<PortfolioProps> = ({ stocks }) => {
                 </SelectContent>
               </Select>
               <Input placeholder="Amount to Spend" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
-              <p>Shares: {quantity.toFixed(6)}</p>
+              <p>Shares: {quantity.toFixed(4)}</p>
               <div className="flex gap-2">
                 <Button variant={transactionType === "BUY" ? "default" : "outline"} onClick={() => setTransactionType("BUY")}>
                   Buy
@@ -166,7 +175,7 @@ const Portfolio: React.FC<PortfolioProps> = ({ stocks }) => {
 
         {/* ✅ Chart Section */}
         <div className="flex-1">
-          <PortfolioGrowthChart />
+        <PortfolioGrowthChart portfolioType={portfolioType} leagueId={leagueId} />
         </div>
       </div>
     </div>

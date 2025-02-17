@@ -133,7 +133,7 @@ class PortfolioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Portfolio
-        fields = ['balance', 'totalbalance', 'holdings']
+        fields = ['portfolio_type', 'league_id', 'balance', 'totalbalance', 'holdings']
 
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -143,7 +143,16 @@ class TransactionSerializer(serializers.ModelSerializer):
 class PortfolioHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = PortfolioHistory
-        fields = ['timestamp', 'total_value', 'cash_balance', 'transaction_label']
+        fields = ['portfolio', 'timestamp', 'total_value', 'cash_balance', 'transaction_label']
+        
+class StockLeagueSerializer(serializers.ModelSerializer):
+    created_by = serializers.StringRelatedField()
+    members = serializers.StringRelatedField(many=True, read_only=True)
+
+    class Meta:
+        model = StockLeague
+        fields = ["id", "name", "created_by", "members", "created_at"]
+        read_only_fields = ["id", "created_by", "members", "created_at"]
 
 class FinancialArticleSerializer(serializers.ModelSerializer):
     class Meta:
