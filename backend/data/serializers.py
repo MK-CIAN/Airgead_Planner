@@ -99,7 +99,7 @@ class IncomeTaxSerializer(serializers.ModelSerializer):
         model = IncomeTax
         fields = [
             'id', 'user', 'salary', 'pension_contribution', 'taxable_income', 'income_tax', 'tax_credit', 'net_tax',
-            'usc', 'prsi', 'total_deductions', 'net_salary', 'created_at'
+            'usc', 'prsi', 'total_deductions', 'net_salary', 'net_monthly', 'net_weekly', 'created_at'
         ]
         read_only_fields = ['id', 'user', 'created_at']  # Only 'user' and 'created_at' are read-only
 

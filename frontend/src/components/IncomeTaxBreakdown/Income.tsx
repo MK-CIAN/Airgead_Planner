@@ -8,6 +8,7 @@ import {
   TableHead,
   TableRow,
   TableCell,
+  TableHeader,
 } from "@/components/ui/table";
 import IncomeComparison from "./IncomeComparisons";
 import IncomeBreakdownChart from "../charts/IncomeBreakdownChart";
@@ -40,6 +41,8 @@ interface IncomeTaxBreakdown {
   prsi: number;
   total_deductions: number;
   net_salary: number;
+  net_monthly: number;
+  net_weekly: number;
 }
 
 const IncomeTaxCalculator: React.FC = () => {
@@ -80,6 +83,8 @@ const IncomeTaxCalculator: React.FC = () => {
           prsi: parseFloat(income.prsi),
           total_deductions: parseFloat(income.total_deductions),
           net_salary: parseFloat(income.net_salary),
+          net_monthly: parseFloat(income.net_monthly),
+          net_weekly: parseFloat(income.net_weekly)
         }));
         setSavedBreakdowns(formattedData);
       })
@@ -134,6 +139,9 @@ const IncomeTaxCalculator: React.FC = () => {
     // Net salary
     const netSalary = salary - totalDeductions - pensionContribution;
 
+    const netMonthly = netSalary / 12;
+    const netWeekly = netSalary / 52;
+
     // Prepare the breakdown object
     const calculatedBreakdown: IncomeTaxBreakdown = {
       id: savedBreakdowns.length + 1,
@@ -147,6 +155,8 @@ const IncomeTaxCalculator: React.FC = () => {
       prsi: parseFloat(prsi.toFixed(2)),
       total_deductions: parseFloat(totalDeductions.toFixed(2)),
       net_salary: parseFloat(netSalary.toFixed(2)),
+      net_monthly: parseFloat(netMonthly.toFixed(2)),
+      net_weekly: parseFloat(netWeekly.toFixed(2)),
     };
 
     setBreakdown(calculatedBreakdown); // Update state
@@ -284,57 +294,107 @@ const IncomeTaxCalculator: React.FC = () => {
                       Tax Breakdown
                     </h2>
                     <Table>
-                      <TableHead>
+                      <TableHeader>
                         <TableRow>
-                          <TableCell>Type</TableCell>
-                          <TableCell>Amount (€)</TableCell>
+                          <TableHead className="text-left w-16">Type</TableHead>
+                          <TableHead className="text-right">
+                            Amount (€)
+                          </TableHead>
                         </TableRow>
-                      </TableHead>
+                      </TableHeader>
                       <TableBody>
-                        <TableRow>
-                          <TableCell>Taxable Income</TableCell>
-                          <TableCell>
-                            {breakdown.taxable_income.toFixed(2)}
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Income Tax</TableCell>
-                          <TableCell>
-                            {breakdown.income_tax.toFixed(2)}
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Tax Credit</TableCell>
-                          <TableCell>
-                            {breakdown.tax_credit.toFixed(2)}
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Net Tax</TableCell>
-                          <TableCell>{breakdown.net_tax.toFixed(2)}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>USC</TableCell>
-                          <TableCell>{breakdown.usc.toFixed(2)}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>PRSI</TableCell>
-                          <TableCell>{breakdown.prsi.toFixed(2)}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Total Deductions</TableCell>
-                          <TableCell>
-                            {breakdown.total_deductions.toFixed(2)}
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Net Salary</TableCell>
-                          <TableCell>
-                            {breakdown.net_salary.toFixed(2)}
-                          </TableCell>
-                        </TableRow>
+                        {breakdown ? (
+                          <>
+                            <TableRow>
+                              <TableCell className="text-left">
+                                Taxable Income
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {breakdown.taxable_income.toFixed(2)}
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="text-left">
+                                Income Tax
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {breakdown.income_tax.toFixed(2)}
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="text-left">
+                                Tax Credit
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {breakdown.tax_credit.toFixed(2)}
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="text-left">
+                                Net Tax
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {breakdown.net_tax.toFixed(2)}
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="text-left">USC</TableCell>
+                              <TableCell className="text-right">
+                                {breakdown.usc.toFixed(2)}
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="text-left">PRSI</TableCell>
+                              <TableCell className="text-right">
+                                {breakdown.prsi.toFixed(2)}
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="text-left">
+                                Total Deductions
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {breakdown.total_deductions.toFixed(2)}
+                              </TableCell>
+                            </TableRow>
+                            <TableRow className="bg-neutral-300 hover:bg-neutral-300">
+                              <TableCell className="font-semibold text-left">
+                                Net Salary
+                              </TableCell>
+                              <TableCell className="font-semibold text-right">
+                                {breakdown.net_salary.toFixed(2)}
+                              </TableCell>
+                            </TableRow>
+                            <TableRow className="bg-neutral-300 hover:bg-neutral-300">
+                              <TableCell className="font-semibold text-left">
+                                Net Monthly
+                              </TableCell>
+                              <TableCell className="font-semibold text-right">
+                                {breakdown.net_monthly.toFixed(2)}
+                              </TableCell>
+                            </TableRow>
+                            <TableRow className="bg-neutral-300 hover:bg-neutral-300">
+                              <TableCell className="font-semibold text-left">
+                                Net Weekly
+                              </TableCell>
+                              <TableCell className="font-semibold text-right">
+                                {breakdown.net_weekly.toFixed(2)}
+                              </TableCell>
+                            </TableRow>
+                          </>
+                        ) : (
+                          <TableRow>
+                            <TableCell
+                              colSpan={2}
+                              className="text-center text-gray-500"
+                            >
+                              No breakdown available.
+                            </TableCell>
+                          </TableRow>
+                        )}
                       </TableBody>
                     </Table>
+
                     <Button
                       onClick={saveBreakdown}
                       className="mt-4 w-full bg-green-500 text-white"
@@ -403,60 +463,110 @@ const IncomeTaxCalculator: React.FC = () => {
                         <CarouselContent>
                           <CarouselItem>
                             <Table>
-                              <TableHead>
+                              <TableHeader>
                                 <TableRow>
-                                  <TableCell>Type</TableCell>
-                                  <TableCell>Amount (€)</TableCell>
+                                  <TableHead className="text-left w-16">
+                                    Type
+                                  </TableHead>
+                                  <TableHead className="text-right">
+                                    Amount (€)
+                                  </TableHead>
                                 </TableRow>
-                              </TableHead>
+                              </TableHeader>
                               <TableBody>
-                                <TableRow>
-                                  <TableCell>Taxable Income</TableCell>
-                                  <TableCell>
-                                    € {income.taxable_income.toFixed(2)}
-                                  </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell>Income Tax</TableCell>
-                                  <TableCell>
-                                    € {income.income_tax.toFixed(2)}
-                                  </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell>Tax Credit</TableCell>
-                                  <TableCell>
-                                    € {income.tax_credit.toFixed(2)}
-                                  </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell>Net Tax</TableCell>
-                                  <TableCell>
-                                    € {income.net_tax.toFixed(2)}
-                                  </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell>USC</TableCell>
-                                  <TableCell>
-                                    € {income.usc.toFixed(2)}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell>PRSI</TableCell>
-                                  <TableCell>
-                                    € {income.prsi.toFixed(2)}
-                                  </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell>Total Deductions</TableCell>
-                                  <TableCell>
-                                    € {income.total_deductions.toFixed(2)}
-                                  </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell>Net Salary</TableCell>
-                                  <TableCell>
-                                    € {income.net_salary.toFixed(2)}
-                                  </TableCell>
-                                </TableRow>
+                                {income ? (
+                                  <>
+                                    <TableRow>
+                                      <TableCell className="text-left">
+                                        Taxable Income
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        {income.taxable_income.toFixed(2)}
+                                      </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                      <TableCell className="text-left">
+                                        Income Tax
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        {income.income_tax.toFixed(2)}
+                                      </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                      <TableCell className="text-left">
+                                        Tax Credit
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        {income.tax_credit.toFixed(2)}
+                                      </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                      <TableCell className="text-left">
+                                        Net Tax
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        {income.net_tax.toFixed(2)}
+                                      </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                      <TableCell className="text-left">
+                                        USC
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        {income.usc.toFixed(2)}
+                                      </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                      <TableCell className="text-left">
+                                        PRSI
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        {income.prsi.toFixed(2)}
+                                      </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                      <TableCell className="text-left">
+                                        Total Deductions
+                                      </TableCell>
+                                      <TableCell className="text-right">
+                                        {income.total_deductions.toFixed(2)}
+                                      </TableCell>
+                                    </TableRow>
+                                    <TableRow className="bg-neutral-300 hover:bg-neutral-300">
+                                      <TableCell className="font-semibold text-left">
+                                        Net Salary
+                                      </TableCell>
+                                      <TableCell className="font-semibold text-right">
+                                        {income.net_salary.toFixed(2)}
+                                      </TableCell>
+                                    </TableRow>
+                                    <TableRow className="bg-neutral-300 hover:bg-neutral-300">
+                                      <TableCell className="font-semibold text-left">
+                                        Net Monthly
+                                      </TableCell>
+                                      <TableCell className="font-semibold text-right">
+                                        {income.net_monthly.toFixed(2)}
+                                      </TableCell>
+                                    </TableRow>
+                                    <TableRow className="bg-neutral-300 hover:bg-neutral-300">
+                                      <TableCell className="font-semibold text-left">
+                                        Net Weekly
+                                      </TableCell>
+                                      <TableCell className="font-semibold text-right">
+                                        {income.net_weekly.toFixed(2)}
+                                      </TableCell>
+                                    </TableRow>
+                                  </>
+                                ) : (
+                                  <TableRow>
+                                    <TableCell
+                                      colSpan={2}
+                                      className="text-center text-gray-500"
+                                    >
+                                      No breakdown available.
+                                    </TableCell>
+                                  </TableRow>
+                                )}
                               </TableBody>
                             </Table>
                           </CarouselItem>

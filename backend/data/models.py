@@ -274,6 +274,8 @@ class IncomeTax(models.Model):
     prsi = models.DecimalField(max_digits=12, decimal_places=2)
     total_deductions = models.DecimalField(max_digits=12, decimal_places=2)
     net_salary = models.DecimalField(max_digits=12, decimal_places=2)
+    net_monthly = models.DecimalField(max_digits=12, decimal_places=2)
+    net_weekly = models.DecimalField(max_digits=12, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

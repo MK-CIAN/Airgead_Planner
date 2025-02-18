@@ -270,6 +270,79 @@ const StockSim: React.FC = () => {
         stocks={stocks}
       />
 
+{portfolioType === "league" && leagueId && (
+        <div className="my-6">
+          <h3 className="text-center text-lg font-semibold mb-4">
+            League Overview
+          </h3>
+
+          {/* ✅ Responsive Grid Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* ✅ Leaderboard Section */}
+            <Card>
+              <CardContent className="p-4">
+                <h3 className="text-lg font-semibold text-center mb-2">
+                  Leaderboard
+                </h3>
+
+                {leaderboardLoading ? (
+                  <Skeleton className="h-32 w-full" />
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-16 text-left">Rank</TableHead>
+                        <TableHead className="text-left">User</TableHead>
+                        <TableHead className="text-right">
+                          Total Balance
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {leaderboard.length > 0 ? (
+                        leaderboard.map((entry, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-semibold">
+                              {index + 1}
+                            </TableCell>
+                            <TableCell>{entry.user__username}</TableCell>
+                            <TableCell className="text-right">
+                              ${entry.total_balance.toFixed(2)}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell
+                            colSpan={3}
+                            className="text-center text-gray-500"
+                          >
+                            No leaderboard data available.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* ✅ Chatroom Section */}
+            <Card>
+              <CardContent className="p-4">
+                <h3 className="text-lg font-semibold text-center mb-2">
+                  League Chatroom
+                </h3>
+                <ChatRoom
+                  entityId={Number(leagueId)}
+                  entityType="stockLeague"
+                />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
       {expandedStock ? (
         <div className="flex flex-col items-center p-4">
           <Card className="w-full max-w-3xl lg:w-3/4 xl:w-2/3 max-w-screen-lg">
@@ -377,79 +450,6 @@ const StockSim: React.FC = () => {
             </div>
           </div>
         ))
-      )}
-
-      {portfolioType === "league" && leagueId && (
-        <div className="my-6">
-          <h3 className="text-center text-lg font-semibold mb-4">
-            League Overview
-          </h3>
-
-          {/* ✅ Responsive Grid Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* ✅ Leaderboard Section */}
-            <Card>
-              <CardContent className="p-4">
-                <h3 className="text-lg font-semibold text-center mb-2">
-                  Leaderboard
-                </h3>
-
-                {leaderboardLoading ? (
-                  <Skeleton className="h-32 w-full" />
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-16 text-left">Rank</TableHead>
-                        <TableHead className="text-left">User</TableHead>
-                        <TableHead className="text-right">
-                          Total Balance
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {leaderboard.length > 0 ? (
-                        leaderboard.map((entry, index) => (
-                          <TableRow key={index}>
-                            <TableCell className="font-semibold">
-                              {index + 1}
-                            </TableCell>
-                            <TableCell>{entry.user__username}</TableCell>
-                            <TableCell className="text-right">
-                              ${entry.total_balance.toFixed(2)}
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell
-                            colSpan={3}
-                            className="text-center text-gray-500"
-                          >
-                            No leaderboard data available.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* ✅ Chatroom Section */}
-            <Card>
-              <CardContent className="p-4">
-                <h3 className="text-lg font-semibold text-center mb-2">
-                  League Chatroom
-                </h3>
-                <ChatRoom
-                  entityId={Number(leagueId)}
-                  entityType="stockLeague"
-                />
-              </CardContent>
-            </Card>
-          </div>
-        </div>
       )}
     </div>
   );
