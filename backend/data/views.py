@@ -737,6 +737,21 @@ class StockLeagueViewSet(viewsets.ModelViewSet):
             return Response({"message": "League and all associated data deleted."}, status=200)
         except Exception as e:
             return Response({"error": str(e)}, status=500)
+        
+    @action(detail=True, methods=['get'], url_path='leaderboard')
+    def leaderboard(self, request, pk=None):
+        """ Retrieves league members sorted by total balance. """
+        league = self.get_object()
+        
+        # ✅ Get all league members with their total balance
+        leaderboard = (
+            Portfolio.objects.filter(league=league)
+            .values("user__username")
+            .annotate(total_balance=Sum("totalbalance"))
+            .order_by("-total_balance")  # ✅ Sort descending
+        )
+
+        return Response(leaderboard, status=200)
 
     
 # Financial Articles View

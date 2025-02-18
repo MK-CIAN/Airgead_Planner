@@ -11,6 +11,14 @@ import { TrendingDown, TrendingUp } from "lucide-react";
 import ShowFriends from "./UserServices/ShowFriends";
 import { toast } from "@/hooks/use-toast";
 import ChatRoom from "./UserServices/ChatRoom";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./ui/table";
 
 interface StockData {
   previous_close: any;
@@ -22,6 +30,11 @@ interface StockData {
   low_price: number;
   adj_close_price?: number;
   volume: number;
+}
+
+interface LeaderboardEntry {
+  user__username: string;
+  total_balance: number;
 }
 
 const STOCK_CATEGORIES = {
@@ -40,11 +53,13 @@ const StockSim: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [expandedStock, setExpandedStock] = useState<string | null>(null);
   const today = dayjs().format("YYYY-MM-DD");
-  const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
   const [searchParams] = useSearchParams();
   const portfolioType =
     (searchParams.get("portfolio_type") as "personal" | "league") || "personal";
   const leagueId = searchParams.get("league_id") ?? undefined;
+  const [leagueName, setLeagueName] = useState<string | null>(null);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState<boolean>(true);
 
   const fetchCurrentDayData = async (ticker: string) => {
     try {
@@ -73,35 +88,65 @@ const StockSim: React.FC = () => {
   const fetchPreviousDayData = async (ticker: string) => {
     let daysBack = 1; // Start searching from yesterday
     let previousClose = null;
-  
-    while (!previousClose && daysBack < 7) { // Limit to 7 days to avoid infinite loops
+
+    while (!previousClose && daysBack < 7) {
+      // Limit to 7 days to avoid infinite loops
       const checkDate = dayjs().subtract(daysBack, "day").format("YYYY-MM-DD");
       console.log(`Checking date: ${checkDate} for ${ticker}`);
-  
+
       try {
         const response = await Axios.get(`data/stocks/`, {
           params: { ticker, start_date: checkDate, end_date: checkDate },
         });
-  
+
         if (response.data.length > 0) {
           previousClose = Number(response.data[0].close_price);
         } else {
         }
-      } catch (error) {
-      }
-  
+      } catch (error) {}
+
       daysBack++; // Move one day further back
     }
-  
+
     if (!previousClose) {
-      console.warn(`⚠️ No previous close found for ${ticker} in the last 7 days!`);
+      console.warn(
+        `⚠️ No previous close found for ${ticker} in the last 7 days!`
+      );
     }
 
     console.log(`Previous Close: ${previousClose} for ${ticker}`);
-  
+
     return previousClose; // ✅ Ensure the function returns previousClose
   };
-  
+
+  const fetchYearlyData = async (ticker: string) => {
+    setExpandedLoading(true);
+    const startDate = dayjs().subtract(1, "year").format("YYYY-MM-DD");
+
+    try {
+      const response = await Axios.get(`data/stocks/`, {
+        params: { ticker, start_date: startDate, end_date: today },
+      });
+      const fullData = response.data.map((entry: any) => ({
+        ticker,
+        close_price: Number(entry.close_price),
+        open_price: Number(entry.open_price),
+        high_price: Number(entry.high_price),
+        low_price: Number(entry.low_price),
+        adj_close_price: Number(entry.adj_close_price),
+        volume: Number(entry.volume),
+        date: dayjs(entry.date).format("YYYY-MM-DD"),
+      }));
+
+      if (stocks[ticker]) fullData.push(stocks[ticker] as StockData);
+      setExpandedStockData(fullData);
+      console.log(`Full Data Loaded for ${ticker}`);
+    } catch (error) {
+      setError("Failed to load full data.");
+    } finally {
+      setExpandedLoading(false);
+    }
+  };
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -144,6 +189,35 @@ const StockSim: React.FC = () => {
     loadInitialData();
   }, []);
 
+  useEffect(() => {
+    if (portfolioType === "league" && leagueId) {
+      const fetchLeagueDetails = async () => {
+        try {
+          const response = await Axios.get(`/data/leagues/${leagueId}/`);
+          setLeagueName(response.data.name);
+        } catch (error) {
+          console.error("Error fetching league details:", error);
+        }
+      };
+
+      const fetchLeaderboard = async () => {
+        try {
+          const response = await Axios.get(
+            `/data/leagues/${leagueId}/leaderboard/`
+          );
+          setLeaderboard(response.data);
+        } catch (error) {
+          console.error("Error fetching leaderboard:", error);
+        } finally {
+          setLeaderboardLoading(false);
+        }
+      };
+
+      fetchLeagueDetails();
+      fetchLeaderboard();
+    }
+  }, [portfolioType, leagueId]);
+
   const handleViewMore = (ticker: string) => {
     if (ticker === expandedStock) {
       setExpandedStock(null);
@@ -154,38 +228,15 @@ const StockSim: React.FC = () => {
     }
   };
 
-  const fetchYearlyData = async (ticker: string) => {
-    setExpandedLoading(true);
-    const startDate = dayjs().subtract(1, "year").format("YYYY-MM-DD");
-
-    try {
-      const response = await Axios.get(`data/stocks/`, {
-        params: { ticker, start_date: startDate, end_date: today },
-      });
-      const fullData = response.data.map((entry: any) => ({
-        ticker,
-        close_price: Number(entry.close_price),
-        open_price: Number(entry.open_price),
-        high_price: Number(entry.high_price),
-        low_price: Number(entry.low_price),
-        adj_close_price: Number(entry.adj_close_price),
-        volume: Number(entry.volume),
-        date: dayjs(entry.date).format("YYYY-MM-DD"),
-      }));
-
-      if (stocks[ticker]) fullData.push(stocks[ticker] as StockData);
-      setExpandedStockData(fullData);
-    } catch (error) {
-      setError("Failed to load full data.");
-    } finally {
-      setExpandedLoading(false);
-    }
-  };
-
   const handleInvite = async (friendId: number) => {
     try {
-      await Axios.post(`/data/leagues/${leagueId}/invite-friend/`, { friend_id: friendId });
-      toast({ title: "Invitation Sent", description: "Your friend has been invited." });
+      await Axios.post(`/data/leagues/${leagueId}/invite-friend/`, {
+        friend_id: friendId,
+      });
+      toast({
+        title: "Invitation Sent",
+        description: "Your friend has been invited.",
+      });
     } catch (error) {
       console.error("Error inviting friend:", error);
     }
@@ -199,7 +250,17 @@ const StockSim: React.FC = () => {
         Viewing{" "}
         {portfolioType === "personal"
           ? "Personal Portfolio"
-          : `League: ${leagueId}`}
+          : `League: ${leagueName || "Loading..."}`}
+        {portfolioType === "league" && leagueId && (
+          <div className="flex justify-center my-4">
+            <ShowFriends
+              onInvite={handleInvite}
+              triggerElement={<Button className="bg-green-500 hover:bg-green-600 text-white">Invite Friends</Button>}
+              entityId={leagueId}
+              entityType="stockLeague"
+            />
+          </div>
+        )}
       </h2>
 
       {/* ✅ Pass portfolio type & league ID to Portfolio */}
@@ -208,17 +269,6 @@ const StockSim: React.FC = () => {
         leagueId={leagueId}
         stocks={stocks}
       />
-
-      {portfolioType === "league" && leagueId && (
-        <div className="flex justify-center my-4">
-          <ShowFriends
-            onInvite={handleInvite}
-            triggerElement={<Button>Invite Friends</Button>}
-            entityId={leagueId}
-            entityType="stockLeague"
-          />
-        </div>
-      )}
 
       {expandedStock ? (
         <div className="flex flex-col items-center p-4">
@@ -328,13 +378,79 @@ const StockSim: React.FC = () => {
           </div>
         ))
       )}
+
       {portfolioType === "league" && leagueId && (
         <div className="my-6">
-          <h3 className="text-center text-lg font-semibold">League Chatroom</h3>
-          <ChatRoom entityId={Number(leagueId)} entityType="stockLeague" />
+          <h3 className="text-center text-lg font-semibold mb-4">
+            League Overview
+          </h3>
+
+          {/* ✅ Responsive Grid Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* ✅ Leaderboard Section */}
+            <Card>
+              <CardContent className="p-4">
+                <h3 className="text-lg font-semibold text-center mb-2">
+                  Leaderboard
+                </h3>
+
+                {leaderboardLoading ? (
+                  <Skeleton className="h-32 w-full" />
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-16 text-left">Rank</TableHead>
+                        <TableHead className="text-left">User</TableHead>
+                        <TableHead className="text-right">
+                          Total Balance
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {leaderboard.length > 0 ? (
+                        leaderboard.map((entry, index) => (
+                          <TableRow key={index}>
+                            <TableCell className="font-semibold">
+                              {index + 1}
+                            </TableCell>
+                            <TableCell>{entry.user__username}</TableCell>
+                            <TableCell className="text-right">
+                              ${entry.total_balance.toFixed(2)}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell
+                            colSpan={3}
+                            className="text-center text-gray-500"
+                          >
+                            No leaderboard data available.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* ✅ Chatroom Section */}
+            <Card>
+              <CardContent className="p-4">
+                <h3 className="text-lg font-semibold text-center mb-2">
+                  League Chatroom
+                </h3>
+                <ChatRoom
+                  entityId={Number(leagueId)}
+                  entityType="stockLeague"
+                />
+              </CardContent>
+            </Card>
+          </div>
         </div>
       )}
-
     </div>
   );
 };

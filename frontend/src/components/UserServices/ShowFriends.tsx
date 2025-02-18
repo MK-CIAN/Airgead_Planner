@@ -1,15 +1,8 @@
 import React, { useState, useEffect } from "react";
-import {
-  Popover,
-  List,
-  ListItem,
-  ListItemText,
-  Button,
-  Box,
-  Typography,
-} from "@mui/material";
 import Axios from "../Axios";
 import { toast } from "@/hooks/use-toast";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Button } from "../ui/button";
 
 interface Friend {
   id: number;
@@ -31,103 +24,63 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
   entityType,
 }) => {
   const [friends, setFriends] = useState<Friend[]>([]);
-  const [contributors, setContributors] = useState<number[]>([]); // Store contributor IDs separately
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [contributors, setContributors] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchFriendsAndContributors = async () => {
       try {
-        console.log("Fetching friends and contributors...");
-  
-        // ✅ Fetch all friends
         const friendsResponse = await Axios.get(`/friends/`);
-        console.log("Friends fetched:", friendsResponse.data);
-  
-        // ✅ Fetch contributors based on entity type
         let contributorsUrl = "";
+        
         if (entityType === "budget") {
           contributorsUrl = `/data/custom-budget/${entityId}/`;
         } else if (entityType === "savingsGoal") {
           contributorsUrl = `/data/savings/${entityId}/`;
         } else if (entityType === "stockLeague") {
-          contributorsUrl = `/data/leagues/${entityId}/`;  // ✅ Check API request
+          contributorsUrl = `/data/leagues/${entityId}/`;
         }
         
-        console.log("Fetching contributors from:", contributorsUrl);
-        
         const contributorsResponse = await Axios.get(contributorsUrl);
-        console.log("Contributors response:", contributorsResponse.data);
-  
         const contributorsList = contributorsResponse.data.contributors || [];
-        console.log("Extracted contributors list:", contributorsList);
         setContributors(contributorsList);
-  
-        // ✅ Map friends with their relationship to the entity
-        const friendsWithStatus = friendsResponse.data.map((friend: Friend) => {
-          return contributorsList.includes(friend.id)
-            ? { ...friend, status: "joined" }
-            : { ...friend, status: "none" };
-        });
-  
-        console.log("Mapped friends with status:", friendsWithStatus);
+
+        const friendsWithStatus = friendsResponse.data.map((friend: Friend) => ({
+          ...friend,
+          status: contributorsList.includes(friend.id) ? "joined" : "none",
+        }));
+
         setFriends(friendsWithStatus);
       } catch (error) {
         console.error("Error fetching friends or contributors:", error);
       }
     };
-  
-    if (entityId) fetchFriendsAndContributors(); // ✅ Ensure this runs only when entityId is available
+
+    if (entityId) fetchFriendsAndContributors();
   }, [entityId, entityType]);
-  
-
-  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
   const getStatus = (friendId: number): "none" | "joined" => {
     return contributors.includes(friendId) ? "joined" : "none"; // Check if friendId exists in contributors
   };
 
   return (
-    <>
-      <div onClick={handleOpen}>{triggerElement}</div>
-      <Popover
-        open={Boolean(anchorEl)}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right", // Anchor to the bottom-right of the button
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left", // Align the popup's top-left corner to the button
-        }}
-      >
-        <Box sx={{ p: 2, width: "300px", maxHeight: 400, overflowY: "auto" }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Invite Friends
-          </Typography>
-          <List>
-            {friends.map((friend) => (
-              <ListItem
-                key={friend.id}
-                sx={{ display: "flex", justifyContent: "space-between" }}
-              >
-                <ListItemText primary={friend.username} />
-                {getStatus(friend.id) === "none" ? (
+    <Popover>
+      <PopoverTrigger asChild>{triggerElement}</PopoverTrigger>
+      <PopoverContent className="w-80 p-4">
+        <h4 className="font-medium text-lg mb-2">Invite Friends</h4>
+        <div className="flex flex-col gap-2">
+          {friends.length > 0 ? (
+            friends.map((friend) => (
+              <div key={friend.id} className="flex items-center justify-between">
+                <span>{friend.username}</span>
+                {friend.status === "none" ? (
                   <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
+                    className="hover:bg-green-600 hover:text-white"
+                    variant="secondary"
+                    size="sm"
                     onClick={() => {
                       onInvite(friend.id);
                       toast({
-                        title: "Friend invited",
+                        title: "Friend Invited",
                         description: friend.username,
                       });
                     }}
@@ -135,14 +88,16 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
                     Invite
                   </Button>
                 ) : (
-                  <Typography color="primary">Joined</Typography>
+                  <span className="text-green-600 text-sm">Joined</span>
                 )}
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      </Popover>
-    </>
+              </div>
+            ))
+          ) : (
+            <p className="text-muted-foreground">No friends available to invite.</p>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 };
 

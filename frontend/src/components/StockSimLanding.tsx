@@ -163,29 +163,31 @@ const StockSimLanding: React.FC = () => {
                 <p className="text-gray-600">
                   Compete in this stock market league
                 </p>
-                <Button
-                  className="bg-green-500 hover:bg-green-600 text-white"
-                  onClick={() => handleSelectPortfolio("league", league.id)}
-                >
-                  Enter League
-                </Button>
 
-                {/* ✅ Show Leave or Delete button depending on user role */}
-                {league.is_creator ? (
+                <div className="flex justify-center gap-4 mt-4">
                   <Button
-                    className="bg-red-500 hover:bg-red-600 text-white mt-2"
-                    onClick={() => handleDeleteLeague(league.id)}
+                    className="bg-green-500 hover:bg-green-600 text-white"
+                    onClick={() => handleSelectPortfolio("league", league.id)}
                   >
-                    Delete League
+                    Enter League
                   </Button>
-                ) : (
-                  <Button
-                    className="bg-red-500 hover:bg-red-600 text-white mt-2"
-                    onClick={() => handleLeaveLeague(league.id)}
-                  >
-                    Leave League
-                  </Button>
-                )}
+
+                  {league.is_creator ? (
+                    <Button
+                      className="bg-red-500 hover:bg-red-600 text-white"
+                      onClick={() => handleDeleteLeague(league.id)}
+                    >
+                      Delete League
+                    </Button>
+                  ) : (
+                    <Button
+                      className="bg-red-500 hover:bg-red-600 text-white"
+                      onClick={() => handleLeaveLeague(league.id)}
+                    >
+                      Leave League
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))
