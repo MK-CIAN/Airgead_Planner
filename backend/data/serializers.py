@@ -146,13 +146,19 @@ class PortfolioHistorySerializer(serializers.ModelSerializer):
         fields = ['portfolio', 'timestamp', 'total_value', 'cash_balance', 'transaction_label']
         
 class StockLeagueSerializer(serializers.ModelSerializer):
-    created_by = serializers.StringRelatedField()
+    created_by = serializers.PrimaryKeyRelatedField(read_only=True)
+    is_creator = serializers.SerializerMethodField()
     members = serializers.StringRelatedField(many=True, read_only=True)
 
     class Meta:
         model = StockLeague
-        fields = ["id", "name", "created_by", "members", "created_at"]
-        read_only_fields = ["id", "created_by", "members", "created_at"]
+        fields = ["id", "name", "created_by", "members", "created_at", "is_creator"]
+        read_only_fields = ["id", "created_by", "members", "created_at", "is_creator"]
+        
+    def get_is_creator(self, obj):
+        """Check if the logged-in user is the creator of the league."""
+        request = self.context.get("request")  # Get request context
+        return request.user == obj.created_by if request else False
 
 class FinancialArticleSerializer(serializers.ModelSerializer):
     class Meta:

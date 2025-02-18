@@ -638,22 +638,16 @@ class StockLeagueViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        """
-        Fetch all leagues where the user is a member.
-        """
         return StockLeague.objects.filter(members=self.request.user)
     
     def retrieve(self, request, *args, **kwargs):
-        """
-        Fetch a stock league with members as contributors (for frontend consistency).
-        """
         instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        
+        serializer = self.get_serializer(instance, context={"request": request})
         members = instance.members.values_list('id', flat=True)  # Returns a list of user IDs
         
         data = serializer.data
         data["contributors"] = list(members)
+        data["is_creator"] = request.user.id == instance.created_by.id
         return Response(data)
 
 
@@ -667,7 +661,6 @@ class StockLeagueViewSet(viewsets.ModelViewSet):
         )
 
         ChatRoom.objects.get_or_create(stock_league=league)
-        
         return Response({"message": "League created successfully", "league_id": league.id}, status=201)
 
     
@@ -694,6 +687,56 @@ class StockLeagueViewSet(viewsets.ModelViewSet):
             return Response({"message": "Invitation sent successfully."}, status=status.HTTP_200_OK)
         except CustomUser.DoesNotExist:
             return Response({"error": "Friend not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+    @action(detail=True, methods=['post'], url_path='leave-league')
+    def leave_league(self, request, pk=None):
+        """ Allows a user to leave a stock league, deleting their portfolio & holdings. """
+        league = self.get_object()
+        user = request.user
+
+        if user == league.created_by:
+            return Response({"error": "Creators cannot leave their own league. Delete it instead."}, status=403)
+
+        try:
+            with transaction.atomic():
+                # Deleting user's portfolio & related data
+                Portfolio.objects.filter(user=user, league=league).delete()
+                StockHolding.objects.filter(portfolio__user=user, portfolio__league=league).delete()
+                Transaction.objects.filter(portfolio__user=user, portfolio__league=league).delete()
+                PortfolioHistory.objects.filter(user=user, league=league).delete()
+                
+                # Removing user from league members
+                league.members.remove(user)
+
+            return Response({"message": "Successfully left the league."}, status=200)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+        
+    @action(detail=True, methods=['delete'], url_path='delete-league')
+    def delete_league(self, request, pk=None):
+        """ Allows the league creator to delete the entire league & all related data. """
+        league = self.get_object()
+        user = request.user
+
+        if user != league.created_by:
+            return Response({"error": "Only the league creator can delete the league."}, status=403)
+
+        try:
+            with transaction.atomic(): 
+                # Delete all related data
+                StockHolding.objects.filter(portfolio__league=league).delete()
+                Transaction.objects.filter(portfolio__league=league).delete()
+                PortfolioHistory.objects.filter(league=league).delete()
+                Portfolio.objects.filter(league=league).delete()
+                Notification.objects.filter(stock_league=league).delete()
+                
+                # Remove all members and delete the league
+                league.members.clear()
+                league.delete()
+
+            return Response({"message": "League and all associated data deleted."}, status=200)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
 
     
 # Financial Articles View
