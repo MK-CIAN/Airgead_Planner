@@ -94,8 +94,8 @@ const IncomeTaxCalculator: React.FC = () => {
   }, []);
 
   const calculateTaxBreakdown = () => {
-    if (!salary || !pensionContribution) {
-      alert("Please provide valid inputs!");
+    if (salary === "" || pensionContribution === "") {
+      toast({title: "Please Provide Valid Inputs!", variant: "destructive"});
       return;
     }
 

@@ -79,7 +79,7 @@ const LoanChart: React.FC<LoanChartProps> = ({
                   width={800}
                   height={400}
                   data={chartData}
-                  margin={{ left: 20, right: 20, top: 10, bottom: 0 }}
+                  margin={{ left: 10, right: 20, top: 10, bottom: 0 }}
                 >
                   <CartesianGrid vertical={false} strokeDasharray="3 3" />
                   <XAxis

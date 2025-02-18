@@ -50,7 +50,7 @@ const UpdateSavingsForm: React.FC<UpdateSavingsFormProps> = ({
               <Input
                 id="contribution"
                 type="number"
-                value={contribution}
+                value={contribution === 0 ? "" : contribution}
                 onChange={(e) => setContribution(Number(e.target.value))}
                 placeholder={`Max: €${remainingAmount.toFixed(2)}`}
                 className="mt-1"

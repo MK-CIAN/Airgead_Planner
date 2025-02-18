@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ActiveLoanChart from "./ActiveLoanChart";
+import { toast } from "@/hooks/use-toast";
 
 interface LoanDetailsProps {}
 
@@ -89,7 +90,7 @@ const LoanDetails: React.FC<LoanDetailsProps> = () => {
       amount: parseFloat(paymentAmount),
     })
       .then((response) => {
-        alert("Payment Successful!");
+        toast({title: "Payment Successful!", description: paymentAmount + " Euro Contributed to Your Loan", variant: "successfull"});
 
         // Update state with new balance and new payment history
         setLoan((prevLoan) =>
@@ -100,7 +101,8 @@ const LoanDetails: React.FC<LoanDetailsProps> = () => {
         setPaymentHistory([...paymentHistory, response.data.payment]);
         setPaymentAmount("");
       })
-      .catch((error) => console.error("Error making payment:", error));
+      .catch((error) => console.error("Error making payment:", error))
+      toast({title: "Payment Unsuccessfull", description: "Error While Attempting to Contribute", variant: "destructive"});;
   };
 
   const formattedPayments = loan
