@@ -1,8 +1,10 @@
 import requests
 import time
 import logging
+import random
 from datetime import datetime, timedelta, timezone
 from django.utils.timezone import make_aware, is_aware
+from django.core.cache import cache
 from decouple import config
 from ..models import StockData, StockRealTimeData
 from django_q.tasks import async_task, schedule
@@ -11,12 +13,11 @@ import yfinance as yf
 # Set up logging
 logger = logging.getLogger(__name__)
 
-# Your Alpha Vantage API key (stored in .env)
-API_KEY = config("STOCK_API_KEY")
-
 # Expanded stock list (FAANG + Tesla, Microsoft, Nvidia)
 STOCK_TICKERS = ['META', 'AMZN', 'AAPL', 'NFLX', 'GOOGL', 'TSLA', 'MSFT', 'NVDA']
 CRYPTO_TICKERS = ['BTC-USD', 'ETH-USD', 'DOGE-USD']
+
+BATCH_SIZE = 5
 
 # Define the cutoff date (last 5 years from today)
 #CUTOFF_DATE = make_aware(datetime.now() - timedelta(days=5 * 365))
@@ -65,61 +66,102 @@ def fetch_historical_stock_data():
 
 
 def fetch_realtime_stock_data():
-    """
-    Fetch and store the most recent stock & crypto prices using yfinance.
-    Runs every 30 minutes and uses system time for timestamps.
-    """
     logger.info("Fetching latest stock & crypto prices...")
+    now = make_aware(datetime.now())
 
-    now = make_aware(datetime.now())  # Use system time for timestamp
+    # Fetching stock prices in batches
+    for i in range(0, len(STOCK_TICKERS), BATCH_SIZE):
+        batch_tickers = STOCK_TICKERS[i:i + BATCH_SIZE]
+        
+        # Skipping request if all batch tickers are cached
+        if all(cache.get(f"stock_price_{ticker}") for ticker in batch_tickers):
+            logger.info(f"Using cached data for batch: {batch_tickers}")
+            continue  
 
-    # Fetch stock prices
-    for ticker in STOCK_TICKERS:
-        stock = yf.Ticker(ticker)
-        current_price = stock.info.get("currentPrice", None)
+        try:
+            for ticker in batch_tickers:
+                cache_key = f"stock_price_{ticker}"
+                cached_price = cache.get(cache_key)
 
-        if current_price is None:
-            logger.warning(f"No current price data for {ticker}. Market may be closed.")
-            continue
+                if cached_price:
+                    logger.info(f"Using cached data for {ticker}: {cached_price}")
+                    continue  # Skip API call if data exists in cache
 
-        StockRealTimeData.objects.update_or_create(
-            ticker=ticker,
-            timestamp=now,  # Use real system time
-            defaults={
-                'open_price': current_price,
-                'high_price': current_price,
-                'low_price': current_price,
-                'close_price': current_price,
-                'volume': stock.info.get("volume", 0),  # Handle missing volume
-            }
-        )
+                stock = yf.Ticker(ticker)
+                current_price = stock.info.get("currentPrice", None)
 
-        logger.info(f"Saved real-time stock data for {ticker} at {now} - Price: {current_price}")
+                if current_price is None:
+                    logger.warning(f"No current price data for {ticker}. Market may be closed.")
+                    continue
 
-    # Fetch cryptocurrency prices
+                # Store in database
+                StockRealTimeData.objects.update_or_create(
+                    ticker=ticker,
+                    timestamp=now,
+                    defaults={
+                        'open_price': current_price,
+                        'high_price': current_price,
+                        'low_price': current_price,
+                        'close_price': current_price,
+                        'volume': stock.info.get("volume", 0),
+                    }
+                )
+
+                # Cache stock price for 30 minutes
+                cache.set(cache_key, current_price, timeout=1800)
+
+                logger.info(f"Saved real-time stock data for {ticker} at {now} - Price: {current_price}")
+
+                # Introduce a small random delay between requests
+                time.sleep(random.uniform(2, 5))
+
+        except Exception as e:
+            logger.error(f"Error fetching stock data: {e}")
+            time.sleep(10)  # Short wait before retrying the next batch
+
+    # Fetching cryptocurrency prices
     for ticker in CRYPTO_TICKERS:
-        crypto = yf.Ticker(ticker)
-        data = crypto.history(period="1d", interval="1m")  # Get last 1-minute price
+        cache_key = f"crypto_price_{ticker}"
+        cached_price = cache.get(cache_key)
 
-        if data.empty:
-            logger.warning(f"No recent price data for {ticker}.")
-            continue
+        if cached_price:
+            logger.info(f"Using cached data for {ticker}: {cached_price}")
+            continue  # Skip API call if data exists in cache
 
-        latest = data.iloc[-1]  # Get last available price
+        try:
+            crypto = yf.Ticker(ticker)
+            data = crypto.history(period="1d", interval="1m")  # Get last 1-minute price
 
-        StockRealTimeData.objects.update_or_create(
-            ticker=ticker,
-            timestamp=now,
-            defaults={
-                'open_price': latest["Open"],
-                'high_price': latest["High"],
-                'low_price': latest["Low"],
-                'close_price': latest["Close"],
-                'volume': latest["Volume"],
-            }
-        )
+            if data.empty:
+                logger.warning(f"No recent price data for {ticker}.")
+                continue
 
-        logger.info(f"Saved real-time crypto data for {ticker} at {now} - Price: {current_price}")
+            latest = data.iloc[-1]  # Get last available price
+            current_price = float(latest["Close"])
+
+            StockRealTimeData.objects.update_or_create(
+                ticker=ticker,
+                timestamp=now,
+                defaults={
+                    'open_price': float(latest["Open"]),
+                    'high_price': float(latest["High"]),
+                    'low_price': float(latest["Low"]),
+                    'close_price': current_price,
+                    'volume': int(latest["Volume"]),
+                }
+            )
+
+            # Cache crypto price for 30 minutes
+            cache.set(cache_key, current_price, timeout=1800)
+
+            logger.info(f"Saved real-time crypto data for {ticker} at {now} - Price: {current_price}")
+
+            # Introduce a small delay to prevent API bursts
+            time.sleep(random.uniform(2, 5))
+
+        except Exception as e:
+            logger.error(f"Error fetching crypto data for {ticker}: {e}")
+            time.sleep(10)  # Short wait before retrying
 
     logger.info("Real-time stock & crypto data update complete.")
 

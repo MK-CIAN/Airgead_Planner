@@ -1,16 +1,9 @@
 import React, { useState, useEffect } from "react";
-import {
-  Popover,
-  TextField,
-  List,
-  ListItem,
-  ListItemText,
-  Button,
-  Box,
-  Typography,
-  IconButton,
-} from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "@/hooks/use-toast";
+import { Search } from "lucide-react";
 import Axios from "../Axios";
 
 interface User {
@@ -20,18 +13,9 @@ interface User {
   status: "pending" | "friends" | "none";
 }
 
-const Search: React.FC = () => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+const SearchUsers: React.FC = () => {
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState<User[]>([]);
-
-  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -68,60 +52,66 @@ const Search: React.FC = () => {
           user.id === receiverId ? { ...user, status: "pending" } : user
         )
       );
+      toast({
+        title: "Friend Request Sent",
+        description: "Your friend request has been sent successfully.",
+      });
     } catch (error) {
       console.error("Error sending friend request:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send friend request.",
+        variant: "destructive",
+      });
     }
   };
 
   return (
-    <>
-      <IconButton color="inherit" onClick={handleOpen}>
-        <SearchIcon />
-      </IconButton>
-      <Popover
-        open={Boolean(anchorEl)}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "center",
-        }}
-      >
-        <Box p={2} width={400} sx={{ maxHeight: 400, overflowY: "auto" }}>
-          <TextField
-            fullWidth
-            label="Search for users"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            sx={{ marginBottom: 2 }}
-          />
-          <List>
-            {searchResults.map((user) => (
-              <ListItem key={user.id}>
-                <ListItemText primary={user.username} secondary={user.email} />
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="ghost">
+          <Search className="w-5 h-5" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80 p-4">
+        <h4 className="font-medium text-lg mb-2">Search Users</h4>
+        <Input
+          placeholder="Search for users..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="mb-3"
+        />
+        <div className="flex flex-col gap-2">
+          {searchResults.length > 0 ? (
+            searchResults.map((user) => (
+              <div key={user.id} className="flex items-center justify-between">
+                <div className="text-sm">
+                  <p className="font-medium">{user.username}</p>
+                  <p className="text-xs text-muted-foreground">{user.email}</p>
+                </div>
                 {user.status === "none" ? (
                   <Button
+                    className="hover:bg-green-500"
+                    variant="secondary"
+                    size="sm"
                     onClick={() => sendFriendRequest(user.id)}
-                    color="primary"
                   >
                     Add Friend
                   </Button>
                 ) : user.status === "pending" ? (
-                  <Typography color="textSecondary">Request Pending</Typography>
+                  <span className="text-sm text-muted-foreground">Pending</span>
                 ) : (
-                  <Typography color="primary">Friends</Typography>
+                  <span className="text-sm text-green-500">Friends</span>
                 )}
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      </Popover>
-    </>
+              </div>
+            ))
+          ) : (
+            <p className="text-muted-foreground">No users found.</p>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 };
 
-export default Search;
+export default SearchUsers;

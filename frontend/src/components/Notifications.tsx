@@ -1,37 +1,22 @@
 import React, { useEffect, useState } from "react";
-import {
-  Popover,
-  List,
-  ListItem,
-  Button,
-  Box,
-  Typography,
-  Badge,
-  IconButton,
-} from "@mui/material";
-import NotificationsIcon from "@mui/icons-material/Notifications";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Bell, Check, X } from "lucide-react"; // Using Lucide icons for better integration
 import Axios from "./Axios";
+import { toast } from "@/hooks/use-toast";
 
 interface Notification {
   id: number;
-  type: string; // "friend_request" or "budget_invite"
+  type: string; // "friend_request", "budget_invite", "savings_invite", "stock_league_invite"
   message: string;
   sender: string | null;
-  budget_id?: number; // Optional, included for budget invites
+  budget_id?: number;
   stock_league_id?: number;
 }
 
 const Notifications: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -50,24 +35,32 @@ const Notifications: React.FC = () => {
   const handleAccept = async (notification: Notification) => {
     try {
       const payload: any = { notification_id: notification.id };
-  
+
       if (notification.type === "budget_invite" && notification.budget_id) {
         payload.budget_id = notification.budget_id;
       } else if (notification.type === "stock_league_invite" && notification.stock_league_id) {
         payload.stock_league_id = notification.stock_league_id;
       }
-  
+
       await Axios.post(`notifications/accept`, payload, {
         headers: { Authorization: `Bearer ${localStorage.getItem("Token")}` },
       });
-  
+
       setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
+
+      toast({
+        title: "Accepted",
+        description: "You have successfully accepted the invitation.",
+      });
     } catch (error) {
       console.error("Error accepting notification:", error);
+      toast({
+        title: "Error",
+        description: "Failed to accept the notification.",
+        variant: "destructive",
+      });
     }
   };
-  
-
 
   const handleDeny = async (id: number) => {
     try {
@@ -79,97 +72,76 @@ const Notifications: React.FC = () => {
         }
       );
       setNotifications((prev) => prev.filter((n) => n.id !== id));
+
+      toast({
+        title: "Denied",
+        description: "Notification request has been declined.",
+      });
     } catch (error) {
       console.error("Error denying notification:", error);
+      toast({
+        title: "Error",
+        description: "Failed to deny the notification.",
+        variant: "destructive",
+      });
     }
   };
 
   return (
-    <>
-      <IconButton color="inherit" onClick={handleOpen}>
-        <Badge badgeContent={notifications.length} color="error">
-          <NotificationsIcon />
-        </Badge>
-      </IconButton>
-      <Popover
-        open={Boolean(anchorEl)}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
-      >
-        <Box p={2} width={350} sx={{ maxHeight: 400, overflowY: "auto" }}>
-          <Typography variant="h6" sx={{ marginBottom: 2 }}>
-            Notifications
-          </Typography>
-          <List>
-            {notifications.length === 0 ? (
-              <Typography
-                variant="body2"
-                color="textSecondary"
-                sx={{ textAlign: "center" }}
-              >
-                No new notifications
-              </Typography>
-            ) : (
-              notifications.map((notification) => (
-                <ListItem
-                  key={notification.id}
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: 1,
-                  }}
-                >
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="body1">
-                      {notification.message}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="textSecondary"
-                      sx={{ fontSize: "0.85rem" }}
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" className="relative">
+          {notifications.length > 0 && (
+            <Badge className="absolute -top-1 -right-1 text-xs bg-red-500">
+              {notifications.length}
+            </Badge>
+          )}
+          <Bell className="w-5 h-5" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80 p-4">
+        <h4 className="font-medium text-lg mb-2">Notifications</h4>
+        <div className="flex flex-col gap-2 max-h-60 overflow-y-auto">
+          {notifications.length > 0 ? (
+            notifications.map((notification) => (
+              <div key={notification.id} className="flex items-center justify-between border-b pb-2">
+                <div className="text-sm flex-1">
+                  <p className="font-medium">{notification.message}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {notification.sender || "Unknown sender"}
+                  </p>
+                </div>
+                {(notification.type === "friend_request" ||
+                  notification.type === "budget_invite" ||
+                  notification.type === "savings_invite" ||
+                  notification.type === "stock_league_invite") && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="hover:bg-green-600"
+                      onClick={() => handleAccept(notification)}
                     >
-                      {notification.sender || "Unknown sender"}
-                    </Typography>
-                  </Box>
-                  {(notification.type === "friend_request" ||
-                    notification.type === "budget_invite" ||
-                    notification.type === "savings_invite" ||
-                    notification.type === "stock_league_invite") && (
-                    <Box sx={{ display: "flex", gap: 1 }}>
-                      <Button
-                        onClick={() => handleAccept(notification)}
-                        variant="contained"
-                        color="success"
-                        size="small"
-                      >
-                        Accept
-                      </Button>
-                      <Button
-                        onClick={() => handleDeny(notification.id)}
-                        variant="outlined"
-                        color="error"
-                        size="small"
-                      >
-                        Deny
-                      </Button>
-                    </Box>
-                  )}
-                </ListItem>
-              ))
-            )}
-          </List>
-        </Box>
-      </Popover>
-    </>
+                      <Check className="w-4 h-4 text-green-600" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="hover:bg-red-500 hover:text-white"
+                      onClick={() => handleDeny(notification.id)}
+                    >
+                      <X className="w-4 h-4 text-red-500" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <p className="text-muted-foreground text-center">No new notifications</p>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 };
 
