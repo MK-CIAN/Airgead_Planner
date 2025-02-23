@@ -8,6 +8,7 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { useLocation, Link, useNavigate } from "react-router-dom";
@@ -83,10 +84,6 @@ export default function TestNav({ content }: { content: React.ReactNode }) {
     { path: "/income", label: "Income Tax Calculator", icon: TrendingDown },
     { custom: true, label: "Logout", icon: Logout, onClick: logoutUser },
   ];
-
-  const currentBreadcrumb = drawerItems.find(
-    (item) => item.path === location.pathname
-  )?.label;
 
   const isActive = (item: DrawerItem) => {
     // Extract only the base pathname (ignore query parameters)
@@ -226,13 +223,13 @@ export default function TestNav({ content }: { content: React.ReactNode }) {
           <Breadcrumb>
             <BreadcrumbList>
               {getBreadcrumbItems().map((crumb, index, arr) => (
-                <BreadcrumbItem key={index}>
+                <><BreadcrumbItem key={index}>
                   {index === arr.length - 1 ? (
                     crumb.label
                   ) : (
                     <Link to={crumb.path}>{crumb.label}</Link>
                   )}
-                </BreadcrumbItem>
+                </BreadcrumbItem><BreadcrumbSeparator /></>
               ))}
             </BreadcrumbList>
           </Breadcrumb>

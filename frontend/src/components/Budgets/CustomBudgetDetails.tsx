@@ -1,18 +1,29 @@
 import React, { useState, useEffect } from "react";
 import Axios from "../Axios";
 import CustomBudgetForm from "../forms/CustomBudgetForm";
-import {
-  Typography,
-} from "@mui/material";
+import { Typography } from "@mui/material";
 import { useParams } from "react-router-dom";
 import ShowFriends from "../UserServices/ShowFriends";
 import "../../App.css";
 import ChatRoom from "../UserServices/ChatRoom";
 import TestBudgetChart from "../charts/TestBudgetChart";
-import { Table, TableBody, TableCell, TableHead, TableRow } from "../ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../ui/carousel";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "../ui/carousel";
 import BudgetRadarChart from "./BudgetRadarChart";
 
 interface BudgetData {
@@ -129,7 +140,11 @@ const CustomBudgetDetails: React.FC = () => {
   return (
     <div className="p-4 max-w-7xl mx-auto">
       {/* Header */}
-      <Typography variant="h4" align="center" className="mb-4 text-xl md:text-2xl">
+      <Typography
+        variant="h4"
+        align="center"
+        className="mb-4 text-xl md:text-2xl"
+      >
         {budgetName}
       </Typography>
 
@@ -150,45 +165,69 @@ const CustomBudgetDetails: React.FC = () => {
           </Typography>
           <div className="max-h-[250px]">
             <Table className="table-auto w-full text-sm">
-              <TableHead>
-                <TableRow>
-                  <TableCell className="text-left px-2 py-1">Category</TableCell>
-                  <TableCell className="text-right px-2 py-1">Amount</TableCell>
-                  <TableCell className="text-left px-2 py-1">Type</TableCell>
-                  <TableCell className="text-center px-2 py-1">Actions</TableCell>
+              <TableHeader>
+                <TableRow className="h-6">
+                  {" "}
+                  {/* Reduce row height */}
+                  <TableHead className="text-left w-1/4 px-2 py-1">
+                    Category
+                  </TableHead>
+                  <TableHead className="text-right w-1/4 px-2 py-1">
+                    Amount (€)
+                  </TableHead>
+                  <TableHead className="text-right w-1/4 px-2 py-1">
+                    Type
+                  </TableHead>
+                  <TableHead className="text-right w-1/4 px-2 py-1">
+                    Actions
+                  </TableHead>
                 </TableRow>
-              </TableHead>
+              </TableHeader>
               <TableBody>
-                {budgetData.map((item) => (
-                  <TableRow key={item.id} className="hover:bg-gray-100">
-                    <TableCell className="text-left px-2 py-1 truncate max-w-[100px]">
-                      {item.label}
-                    </TableCell>
-                    <TableCell className="text-right px-2 py-1">
-                      €{item.value.toFixed(2)}
-                    </TableCell>
-                    <TableCell
-                      className={`text-left px-2 py-1 capitalize ${
-                        item.type === "income"
-                          ? "text-green-600"
-                          : item.type === "debt"
-                          ? "text-red-600"
-                          : "text-blue-600"
-                      }`}
-                    >
-                      {item.type}
-                    </TableCell>
-                    <TableCell className="text-center px-2 py-1">
-                      <Button
-                        className="bg-red-600 text-white text-xs px-2 py-1"
-                        size="sm"
-                        onClick={() => handleRemoveBudgetItem(item.id)}
+                {budgetData.length > 0 ? (
+                  budgetData.map((item) => (
+                    <TableRow key={item.id} className="hover:bg-gray-100 h-6">
+                      <TableCell className="text-left px-2 py-1">
+                        {item.label}
+                      </TableCell>
+                      <TableCell className="text-right px-2 py-1">
+                        €{item.value.toFixed(2)}
+                      </TableCell>
+                      <TableCell
+                        className={`text-right px-2 py-1 capitalize ${
+                          item.type === "income"
+                            ? "text-green-600"
+                            : item.type === "debt"
+                            ? "text-red-600"
+                            : "text-blue-600"
+                        }`}
                       >
-                        Remove
-                      </Button>
+                        {item.type}
+                      </TableCell>
+                      {/* Fix alignment issue */}
+                      <TableCell className="text-right px-2 py-1">
+                        <div className="flex justify-end">
+                          <Button
+                            className="bg-red-600 text-white text-xs px-3 py-1"
+                            size="sm"
+                            onClick={() => handleRemoveBudgetItem(item.id)}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow className="h-6">
+                    <TableCell
+                      colSpan={4}
+                      className="text-center text-gray-500 px-2 py-1"
+                    >
+                      No budget items available.
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </div>

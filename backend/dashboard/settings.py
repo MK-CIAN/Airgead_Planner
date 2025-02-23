@@ -44,13 +44,13 @@ else:
 #'NAME': config("POSTGRES_DB"),
 #'USER': config("POSTGRES_USER"),
 #'PASSWORD': config("POSTGRES_PASSWORD"),
-IS_LOCAL = True
+#IS_LOCAL = True
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'admin',
-        'PASSWORD': 'password123',
+        'NAME': config("POSTGRES_DB"),
+        'USER': config("POSTGRES_USER"),
+        'PASSWORD': config("POSTGRES_PASSWORD"),
         'HOST': "localhost" if IS_LOCAL else "postgres",  # Use 'postgis' as host in Docker
         'PORT': POSTGRES_PORT if IS_LOCAL else "5432",
         'OPTIONS': {
@@ -83,7 +83,7 @@ if DEPLOY_SECURE:
     CORS_ALLOWED_ORIGINS = ['https://airgeadplanner.com']
     
     STATIC_URL = '/static/'
-    STATIC_ROOT = '/usr/share/nginx/html/static'
+    STATIC_ROOT = '/app/static'
 
     MEDIA_URL = '/media/'
     MEDIA_ROOT = '/app/media'

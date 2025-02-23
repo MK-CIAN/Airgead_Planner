@@ -24,7 +24,7 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
   entityType,
 }) => {
   const [friends, setFriends] = useState<Friend[]>([]);
-  const [contributors, setContributors] = useState<number[]>([]);
+  const [, setContributors] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchFriendsAndContributors = async () => {
@@ -57,10 +57,6 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
 
     if (entityId) fetchFriendsAndContributors();
   }, [entityId, entityType]);
-
-  const getStatus = (friendId: number): "none" | "joined" => {
-    return contributors.includes(friendId) ? "joined" : "none"; // Check if friendId exists in contributors
-  };
 
   return (
     <Popover>

@@ -10,6 +10,7 @@ import {
   TableBody,
   TableCell,
   TableHead,
+  TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
@@ -21,7 +22,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "../ui/carousel";
-import FinancialSuggestions from "../FinancialSuggestions"
+import FinancialSuggestions from "../FinancialSuggestions";
 
 interface BudgetData {
   id: number;
@@ -44,34 +45,40 @@ const Budget: React.FC = () => {
     const formattedMonth = month.format("YYYY-MM-DD"); // Ensure correct format
 
     try {
-        console.log(`Fetching budget for: ${formattedMonth}`);
-        const response = await Axios.get("data/budget/", { params: { month: formattedMonth } });
+      console.log(`Fetching budget for: ${formattedMonth}`);
+      const response = await Axios.get("data/budget/", {
+        params: { month: formattedMonth },
+      });
 
-        if (response.data.length > 0) {
-            const budget = response.data[0];
-            setBudgetId(budget.id);
-            console.log(`Budget found: ${budget.id}`);
+      if (response.data.length > 0) {
+        const budget = response.data[0];
+        setBudgetId(budget.id);
+        console.log(`Budget found: ${budget.id}`);
 
-            const formattedData: BudgetData[] = (budget.items || []).map((item: any) => ({
-                id: item.id,
-                value: parseFloat(item.amount),
-                label: item.category,
-                type: item.transaction_type,
-            }));
-            setBudgetData(formattedData);
-        } else {
-            console.log("No budget found for this month. Creating a new one...");
-            const budgetResponse = await Axios.post("data/budget/", { month: formattedMonth }); // Corrected format
-            const newBudgetId = budgetResponse.data.id;
-            setBudgetId(newBudgetId);
-            console.log(`New budget created: ${newBudgetId}`);
-            
-            setBudgetData([]);
-        }
+        const formattedData: BudgetData[] = (budget.items || []).map(
+          (item: any) => ({
+            id: item.id,
+            value: parseFloat(item.amount),
+            label: item.category,
+            type: item.transaction_type,
+          })
+        );
+        setBudgetData(formattedData);
+      } else {
+        console.log("No budget found for this month. Creating a new one...");
+        const budgetResponse = await Axios.post("data/budget/", {
+          month: formattedMonth,
+        }); // Corrected format
+        const newBudgetId = budgetResponse.data.id;
+        setBudgetId(newBudgetId);
+        console.log(`New budget created: ${newBudgetId}`);
+
+        setBudgetData([]);
+      }
     } catch (error) {
-        console.error("Error fetching budget data:");
+      console.error("Error fetching budget data:");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -172,9 +179,9 @@ const Budget: React.FC = () => {
           </Icon>
         </Button>
       </div>
-      
+
       <div className="justify-center">
-        <FinancialSuggestions/>
+        <FinancialSuggestions />
       </div>
 
       {/* Responsive Layout */}
@@ -191,49 +198,69 @@ const Budget: React.FC = () => {
           </Typography>
           <div className="max-h-[250px]">
             <Table className="table-auto w-full text-sm">
-              <TableHead>
-                <TableRow>
-                  <TableCell className="text-left px-2 py-1">
+              <TableHeader>
+                <TableRow className="h-6">
+                  {" "}
+                  {/* Reduce row height */}
+                  <TableHead className="text-left w-1/4 px-2 py-1">
                     Category
-                  </TableCell>
-                  <TableCell className="text-right px-2 py-1">Amount</TableCell>
-                  <TableCell className="text-left px-2 py-1">Type</TableCell>
-                  <TableCell className="text-center px-2 py-1">
+                  </TableHead>
+                  <TableHead className="text-right w-1/4 px-2 py-1">
+                    Amount (€)
+                  </TableHead>
+                  <TableHead className="text-right w-1/4 px-2 py-1">
+                    Type
+                  </TableHead>
+                  <TableHead className="text-right w-1/4 px-2 py-1">
                     Actions
-                  </TableCell>
+                  </TableHead>
                 </TableRow>
-              </TableHead>
+              </TableHeader>
               <TableBody>
-                {budgetData.map((item) => (
-                  <TableRow key={item.id} className="hover:bg-gray-100">
-                    <TableCell className="text-left px-2 py-4 truncate max-w-[100px]">
-                      {item.label}
-                    </TableCell>
-                    <TableCell className="text-right px-2 py-1">
-                      €{item.value.toFixed(2)}
-                    </TableCell>
-                    <TableCell
-                      className={`text-left px-2 py-1 capitalize ${
-                        item.type === "income"
-                          ? "text-green-600"
-                          : item.type === "debt"
-                          ? "text-red-600"
-                          : "text-blue-600"
-                      }`}
-                    >
-                      {item.type}
-                    </TableCell>
-                    <TableCell className="text-center px-2 py-1">
-                      <Button
-                        className="bg-red-600 text-white text-xs px-2 py-1"
-                        size="sm"
-                        onClick={() => handleRemoveBudgetItem(item.id)}
+                {budgetData.length > 0 ? (
+                  budgetData.map((item) => (
+                    <TableRow key={item.id} className="hover:bg-gray-100 h-6">
+                      <TableCell className="text-left px-2 py-1">
+                        {item.label}
+                      </TableCell>
+                      <TableCell className="text-right px-2 py-1">
+                        €{item.value.toFixed(2)}
+                      </TableCell>
+                      <TableCell
+                        className={`text-right px-2 py-1 capitalize ${
+                          item.type === "income"
+                            ? "text-green-600"
+                            : item.type === "debt"
+                            ? "text-red-600"
+                            : "text-blue-600"
+                        }`}
                       >
-                        Remove
-                      </Button>
+                        {item.type}
+                      </TableCell>
+                      {/* Fix alignment issue */}
+                      <TableCell className="text-right px-2 py-1">
+                        <div className="flex justify-end">
+                          <Button
+                            className="bg-red-600 text-white text-xs px-3 py-1"
+                            size="sm"
+                            onClick={() => handleRemoveBudgetItem(item.id)}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow className="h-6">
+                    <TableCell
+                      colSpan={4}
+                      className="text-center text-gray-500 px-2 py-1"
+                    >
+                      No budget items available.
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </div>

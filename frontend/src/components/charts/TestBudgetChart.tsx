@@ -70,22 +70,6 @@ const TestBudgetChart: React.FC<BudgetChartProps> = ({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Prepare chart data
-  const chartData = useMemo(
-    () =>
-      data.map((item) => ({
-        value: item.value,
-        name: item.label,
-        fill:
-          item.type === "income"
-            ? "rgba(6,170,19,0.85)" // Green for income
-            : item.type === "debt"
-            ? "rgba(255,0,0,0.80)" // Red for debt
-            : getColorForLabel(item.label), // Color for expenses
-      })),
-    [data]
-  );
-
   // Calculate totals for income, expenses, and debt
   const totals = useMemo(() => {
     const income = data
@@ -97,19 +81,40 @@ const TestBudgetChart: React.FC<BudgetChartProps> = ({
     return { income, expensesAndDebt };
   }, [data]);
 
+  // Prepare chart data
+  const chartData = useMemo(() => {
+    const totalRemaining = Math.max(totals.income - totals.expensesAndDebt, 0);
+    const filteredData = data
+      .filter((item) => item.type !== "income") // Exclude direct income from chart
+      .map((item) => ({
+        value: item.value,
+        name: item.label,
+        fill: item.type === "debt" ? "rgba(255,0,0,0.80)" : getColorForLabel(item.label),
+      }));
+  
+    return [
+      ...filteredData,
+      {
+        value: totalRemaining,
+        name: "Remaining Income",
+        fill: "rgba(6,170,19,0.85)", // Green for remaining balance
+      },
+    ];
+  }, [data, totals.income, totals.expensesAndDebt]);
+
   // Center label component
   const CenterLabel = (props: { viewBox?: any }) => {
     const { viewBox } = props;
     if (!viewBox || typeof viewBox.cx !== "number" || typeof viewBox.cy !== "number") return null;
-
+  
     const { cx, cy } = viewBox;
     const fontSize = Math.max(chartSize.width * 0.08, 16);
-    const total = totals.income - totals.expensesAndDebt;
-
+    const totalRemaining = Math.max(totals.income - totals.expensesAndDebt, 0);
+  
     return (
       <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" className="fill-foreground text-center">
         <tspan x={cx} y={cy - fontSize * 0.2} className="font-bold" style={{ fontSize: `${fontSize}px` }}>
-          €{total.toFixed(2)}
+          €{totalRemaining.toFixed(2)}
         </tspan>
         <tspan x={cx} y={cy + fontSize * 0.5} className="fill-muted-foreground" style={{ fontSize: `${fontSize * 0.5}px` }}>
           Remaining Amount
@@ -117,6 +122,7 @@ const TestBudgetChart: React.FC<BudgetChartProps> = ({
       </text>
     );
   };
+  
 
   // Chart Component
   const ChartComponent = (

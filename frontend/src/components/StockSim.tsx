@@ -48,9 +48,9 @@ const StockSim: React.FC = () => {
   const [expandedStockData, setExpandedStockData] = useState<
     StockData[] | null
   >(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [, setLoading] = useState<boolean>(true);
   const [expandedLoading, setExpandedLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const [expandedStock, setExpandedStock] = useState<string | null>(null);
   const today = dayjs().format("YYYY-MM-DD");
   const [searchParams] = useSearchParams();

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Axios from "../Axios";
+import { toast } from "@/hooks/use-toast";
 
 interface UpdateSavingsFormProps {
   savingsGoal: {
@@ -33,8 +34,10 @@ const UpdateSavingsForm: React.FC<UpdateSavingsFormProps> = ({
         current_amount: newAmount,
       });
       onUpdate(response.data); // Pass updated data to the parent
+      toast({title: "€" + contribution + " Added Towards Your Saving Goal!", variant: "successfull"})
     } catch (error) {
       console.error("Error updating savings goal:", error);
+      toast({title: "Error While Trying to Contribute to Your Goal", variant: "destructive"})
     }
   };
 
