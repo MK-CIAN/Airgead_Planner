@@ -21,6 +21,7 @@ SHELL [ "conda", "run", "-n", "airgead_geo", "/bin/bash", "-c" ]
 RUN pip install django-rest-knox
 RUN pip install django-rest-passwordreset
 RUN pip install django-q2
+RUN pip install yfinance
 
 RUN echo "conda activate airgead_geo" >> ~/.bashrc
 SHELL ["/bin/bash", "--login", "-c"]

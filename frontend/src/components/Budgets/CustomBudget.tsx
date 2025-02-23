@@ -6,6 +6,13 @@ import TestBudgetChart from "../charts/TestBudgetChart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import { format } from "date-fns";
 import {
   Card,
   CardContent,
@@ -37,9 +44,7 @@ interface BudgetData {
 }
 
 const MainBudgetPage: React.FC = () => {
-  const [currentMonth] = useState<Dayjs>(
-    dayjs().startOf("month")
-  );
+  const [currentMonth] = useState<Dayjs>(dayjs().startOf("month"));
   const [budgetData, setBudgetData] = useState<BudgetData[]>([]);
   const [customBudgets, setCustomBudgets] = useState<CustomBudget[]>([]);
   const [name, setName] = useState("");
@@ -52,36 +57,37 @@ const MainBudgetPage: React.FC = () => {
   const fetchMonthlyBudget = async (month: Dayjs) => {
     setLoading(true);
     try {
-        console.log(`Fetching budget for: ${month.format("YYYY-MM")}`);
-        const response = await Axios.get("data/budget/", { params: { month: month.format("YYYY-MM") } });
+      console.log(`Fetching budget for: ${month.format("YYYY-MM")}`);
+      const response = await Axios.get("data/budget/", {
+        params: { month: month.format("YYYY-MM") },
+      });
 
-        if (response.data.length > 0) {
-            const budget = response.data[0]; // Assume one budget per user per month
+      if (response.data.length > 0) {
+        const budget = response.data[0]; // Assume one budget per user per month
 
-            console.log("Budget found:", budget);
+        console.log("Budget found:", budget);
 
-            // Ensure items are mapped correctly
-            const formattedData: BudgetData[] = budget.items
-                ? budget.items.map((item: any) => ({
-                    id: item.id,
-                    value: parseFloat(item.amount),
-                    label: item.category || "Unknown",
-                    type: item.transaction_type || "expense",
-                }))
-                : [];
+        // Ensure items are mapped correctly
+        const formattedData: BudgetData[] = budget.items
+          ? budget.items.map((item: any) => ({
+              id: item.id,
+              value: parseFloat(item.amount),
+              label: item.category || "Unknown",
+              type: item.transaction_type || "expense",
+            }))
+          : [];
 
-            setBudgetData(formattedData);
-        } else {
-            console.log("No budget found for this month.");
-            setBudgetData([]); // Ensure state is reset if no budget exists
-        }
+        setBudgetData(formattedData);
+      } else {
+        console.log("No budget found for this month.");
+        setBudgetData([]); // Ensure state is reset if no budget exists
+      }
     } catch (error) {
-        console.error("Error fetching budget data:", error);
+      console.error("Error fetching budget data:", error);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-};
-
+  };
 
   const fetchCustomBudgets = () => {
     Axios.get("data/custom-budget/")
@@ -173,21 +179,43 @@ const MainBudgetPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="start-date">Start Date</Label>
-                <Input
-                  id="start-date"
-                  type="date"
-                  value={startDate ? startDate.format("YYYY-MM-DD") : ""}
-                  onChange={(e) => setStartDate(dayjs(e.target.value))}
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full text-left">
+                      {startDate
+                        ? format(startDate.toDate(), "PPP")
+                        : "Pick a date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent>
+                    <Calendar
+                      mode="single"
+                      selected={startDate ? startDate.toDate() : undefined}
+                      onSelect={(date) => setStartDate(dayjs(date))}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               <div>
-                <Label htmlFor="end-date">End Date</Label>
-                <Input
-                  id="end-date"
-                  type="date"
-                  value={endDate ? endDate.format("YYYY-MM-DD") : ""}
-                  onChange={(e) => setEndDate(dayjs(e.target.value))}
-                />
+              <Label htmlFor="start-date">End Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full text-left">
+                      {endDate
+                        ? format(endDate.toDate(), "PPP")
+                        : "Pick a date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent>
+                    <Calendar
+                      mode="single"
+                      selected={endDate ? endDate.toDate() : undefined}
+                      onSelect={(date) => setEndDate(dayjs(date))}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
             <Button
@@ -228,9 +256,7 @@ const MainBudgetPage: React.FC = () => {
             <CarouselContent>
               {customBudgets.map((budget) => (
                 <CarouselItem key={budget.id}>
-                  <Card
-                    onClick={() => navigate(`/custom-budget/${budget.id}`)}
-                  >
+                  <Card onClick={() => navigate(`/custom-budget/${budget.id}`)}>
                     <CardHeader>
                       <CardTitle>{budget.name}</CardTitle>
                       <CardDescription>
@@ -268,4 +294,3 @@ const MainBudgetPage: React.FC = () => {
 };
 
 export default MainBudgetPage;
-

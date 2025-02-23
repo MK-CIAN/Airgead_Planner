@@ -48,9 +48,9 @@ else:
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config("POSTGRES_DB"),
-        'USER': config("POSTGRES_USER"),
-        'PASSWORD': config("POSTGRES_PASSWORD"),
+        'NAME': "postgres",
+        'USER': "admin",
+        'PASSWORD': "password123",
         'HOST': "localhost" if IS_LOCAL else "postgres",  # Use 'postgis' as host in Docker
         'PORT': POSTGRES_PORT if IS_LOCAL else "5432",
         'OPTIONS': {
