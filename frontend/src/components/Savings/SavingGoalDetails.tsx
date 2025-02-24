@@ -10,8 +10,8 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
   CarouselPrevious,
+  CarouselNext,
 } from "@/components/ui/carousel";
 import {
   Table,
@@ -123,8 +123,9 @@ const SavingsGoalDetails: React.FC = () => {
   };
 
   if (!savingsGoal) {
-    return <Typography>Loading...</Typography>;
+    return <Typography data-testid="loading-state">Loading...</Typography>;
   }
+  
 
   console.log(savingsGoal);
 
@@ -213,7 +214,7 @@ const SavingsGoalDetails: React.FC = () => {
       </Card>
 
       {/* Contributors */}
-      <div className="mt-6">
+      {/*<div className="mt-6">
         <h2 className="text-xl font-semibold mb-4">Contributors</h2>
         <Table>
           <TableHead>
@@ -224,12 +225,13 @@ const SavingsGoalDetails: React.FC = () => {
           <TableBody>
             {savingsGoal.contributors.map((contributor) => (
               <TableRow key={contributor.id}>
-                <TableCell>{contributor.id}</TableCell>
+                <TableCell>{contributor.username}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
+      */}
 
       {/* Contributors Section */}
       <div className="text-right mt-4">

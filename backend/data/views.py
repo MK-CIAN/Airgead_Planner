@@ -16,8 +16,6 @@ from users.models import Notification
 from chat.models import ChatRoom
 CustomUser = get_user_model()  # Retrieve the custom user model
 
-
-
 # Monthly Budget Viewset
 class MonthlyBudgetViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -39,13 +37,12 @@ class MonthlyBudgetViewSet(viewsets.ModelViewSet):
         Ensure only one budget exists per user per month.
         """
         month = serializer.validated_data.get('month')
-
         # Check if a budget already exists for this user and month
         existing_budget = MonthlyBudget.objects.filter(user=self.request.user, month=month).first()
 
         if existing_budget:
-            print(f"Existing budget found: {existing_budget.id}")
-            serializer.instance = existing_budget  # Prevent duplicate creation
+            serializer.instance = existing_budget
+            self.request._request.status_code = status.HTTP_200_OK  # Ensure correct status
             return Response(MonthlyBudgetSerializer(existing_budget).data, status=status.HTTP_200_OK)
         
         # If no budget exists, create a new one
@@ -70,8 +67,6 @@ class MonthlyBudgetViewSet(viewsets.ModelViewSet):
         print("Validation Errors:", serializer.errors)  # DEBUG LOG
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-
     @action(detail=True, methods=['delete'], url_path='items/(?P<item_id>[^/.]+)')
     def delete_item(self, request, pk=None, item_id=None):
         """
@@ -85,8 +80,6 @@ class MonthlyBudgetViewSet(viewsets.ModelViewSet):
             return Response({"message": "Item deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
         except MonthlyBudgetItem.DoesNotExist:
             return Response({"error": "Item not found."}, status=status.HTTP_404_NOT_FOUND)
-
-
         
 class CustomBudgetViewSet(viewsets.ModelViewSet):
     queryset = CustomBudget.objects.all()

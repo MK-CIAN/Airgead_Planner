@@ -5,6 +5,7 @@ Django settings for Airgead Planner dashboard.
 from pathlib import Path
 import os
 import socket
+import sys
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -44,7 +45,7 @@ else:
 #'NAME': config("POSTGRES_DB"),
 #'USER': config("POSTGRES_USER"),
 #'PASSWORD': config("POSTGRES_PASSWORD"),
-#IS_LOCAL = True
+IS_LOCAL = True
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -223,3 +224,12 @@ Q_CLUSTER = {
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Use an in-memory database for testing
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    }

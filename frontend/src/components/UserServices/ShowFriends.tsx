@@ -30,8 +30,13 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
     const fetchFriendsAndContributors = async () => {
       try {
         const friendsResponse = await Axios.get(`/friends/`);
+    
+        if (!Array.isArray(friendsResponse.data)) {
+          console.error("Unexpected API response:", friendsResponse.data);
+          return; // Exit early if data is not an array
+        }
+    
         let contributorsUrl = "";
-        
         if (entityType === "budget") {
           contributorsUrl = `/data/custom-budget/${entityId}/`;
         } else if (entityType === "savingsGoal") {
@@ -39,22 +44,25 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
         } else if (entityType === "stockLeague") {
           contributorsUrl = `/data/leagues/${entityId}/`;
         }
-        
+    
         const contributorsResponse = await Axios.get(contributorsUrl);
-        const contributorsList = contributorsResponse.data.contributors || [];
+        const contributorsList = Array.isArray(contributorsResponse.data.contributors)
+          ? contributorsResponse.data.contributors
+          : [];
+    
         setContributors(contributorsList);
-
-        const friendsWithStatus = friendsResponse.data.map((friend: Friend) => ({
+    
+        const friendsWithStatus: Friend[] = friendsResponse.data.map((friend: Friend) => ({
           ...friend,
-          status: contributorsList.includes(friend.id) ? "joined" : "none",
+          status: contributorsList.includes(friend.id) ? "joined" as const : "none" as const,
         }));
-
+        
         setFriends(friendsWithStatus);
       } catch (error) {
         console.error("Error fetching friends or contributors:", error);
       }
     };
-
+    
     if (entityId) fetchFriendsAndContributors();
   }, [entityId, entityType]);
 

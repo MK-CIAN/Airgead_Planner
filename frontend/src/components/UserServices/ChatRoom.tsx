@@ -25,14 +25,15 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ entityId, entityType }) => {
           ? { budget_id: entityId }
           : entityType === "savingsGoal"
           ? { savings_goal_id: entityId }
-          : entityType === "stockLeague" // ✅ FIX: Fetch messages using stock_league_id
+          : entityType === "stockLeague" 
           ? { stock_league_id: entityId }
           : {};
   
       const response = await Axios.get("/chat/messages/", { params });
-      setMessages(response.data);
+      setMessages(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error("Error fetching messages:", error);
+      setMessages([]);
     }
   };
   

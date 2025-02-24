@@ -14,6 +14,16 @@ class MonthlyBudgetSerializer(serializers.ModelSerializer):
         model = MonthlyBudget
         fields = ['id', 'month', 'user', 'items']
         read_only_fields = ['user']
+        
+    def validate(self, data):
+        user = self.context["request"].user
+        month = data.get("month")
+
+        if MonthlyBudget.objects.filter(user=user, month=month).exists():
+            raise serializers.ValidationError({"detail": "A budget already exists for this month."})
+
+        return data
+
 
         
 class BudgetItemSerializer(serializers.ModelSerializer):
