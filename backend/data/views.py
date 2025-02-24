@@ -318,7 +318,6 @@ class PensionProjectionViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-
 # Stock Data Viewset
 class StockDataViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
