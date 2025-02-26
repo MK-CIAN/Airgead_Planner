@@ -8,12 +8,6 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    },
-    "types": ["jest", "@testing-library/jest-dom"],
-    "jsx": "react-jsx",
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "allowJs": true,
-    "lib": ["ES2017", "DOM"]
+    }
   }
 }
