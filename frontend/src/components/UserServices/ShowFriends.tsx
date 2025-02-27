@@ -7,24 +7,23 @@ import { Button } from "../ui/button";
 interface Friend {
   id: number;
   username: string;
-  status: "none" | "joined"; // Relationship with the entity
+  status: "none" | "joined" | "pending"; // Relationship with the entity
 }
 
 interface ShowFriendsProps {
-  onInvite: (friendId: number) => void; // Function to handle inviting a friend
   triggerElement: React.ReactNode; // The element that triggers the popup
-  entityId: string | undefined; // ID of the budget or savings goal
-  entityType: "budget" | "savingsGoal" | "stockLeague"; // Context to distinguish between budgets and savings goals
+  entityId: string | undefined; // ID of the budget/savings goal/stock league
+  entityType: "budget" | "savingsGoal" | "stockLeague";
 }
 
 const ShowFriends: React.FC<ShowFriendsProps> = ({
-  onInvite,
   triggerElement,
   entityId,
   entityType,
 }) => {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [, setContributors] = useState<number[]>([]);
+  const [pendingInvites, setPendingInvites] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchFriendsAndContributors = async () => {
@@ -33,9 +32,9 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
     
         if (!Array.isArray(friendsResponse.data)) {
           console.error("Unexpected API response:", friendsResponse.data);
-          return; // Exit early if data is not an array
+          return;
         }
-    
+
         let contributorsUrl = "";
         if (entityType === "budget") {
           contributorsUrl = `/data/custom-budget/${entityId}/`;
@@ -44,17 +43,30 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
         } else if (entityType === "stockLeague") {
           contributorsUrl = `/data/leagues/${entityId}/`;
         }
-    
+
         const contributorsResponse = await Axios.get(contributorsUrl);
         const contributorsList = Array.isArray(contributorsResponse.data.contributors)
           ? contributorsResponse.data.contributors
           : [];
-    
+
         setContributors(contributorsList);
-    
+
+        // Fetch pending invites
+        const pendingResponse = await Axios.get(`/notifications/pending-invites`, {
+          params: { entity_id: entityId, entity_type: entityType },
+        });
+
+        const pendingIds = pendingResponse.data.map((invite: any) => invite.friend_id);
+        setPendingInvites(pendingIds);
+
+        // Update friend statuses
         const friendsWithStatus: Friend[] = friendsResponse.data.map((friend: Friend) => ({
           ...friend,
-          status: contributorsList.includes(friend.id) ? "joined" as const : "none" as const,
+          status: contributorsList.includes(friend.id)
+            ? "joined" as const
+            : pendingIds.includes(friend.id)
+            ? "pending" as const
+            : "none" as const,
         }));
         
         setFriends(friendsWithStatus);
@@ -66,6 +78,55 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
     if (entityId) fetchFriendsAndContributors();
   }, [entityId, entityType]);
 
+  const handleInvite = async (friendId: number) => {
+    if (pendingInvites.includes(friendId)) {
+      return; // Preventing sending duplicate invites
+    }
+
+    let inviteUrl = "";
+    if (entityType === "budget") {
+      inviteUrl = `/data/custom-budget/${entityId}/invite-friend/`;
+    } else if (entityType === "savingsGoal") {
+      inviteUrl = `/data/savings/${entityId}/invite-friend/`;
+    } else if (entityType === "stockLeague") {
+      inviteUrl = `/data/leagues/${entityId}/invite-friend/`;
+    }
+
+    try {
+      await Axios.post(inviteUrl, { friend_id: friendId });
+
+      // Update UI to reflect "pending" status
+      setPendingInvites((prev) => [...prev, friendId]);
+      setFriends((prev) =>
+        prev.map((friend) =>
+          friend.id === friendId ? { ...friend, status: "pending" } : friend
+        )
+      );
+
+      toast({
+        title: "Friend Invited",
+        description: "Invitation sent successfully.",
+        variant: "successfull",
+      });
+    } catch (error: any) {
+      console.error("Error sending invite:", error);
+
+      if (error.response && error.response.status === 400) {
+        toast({
+          title: "Invite Failed",
+          description: "This user has already been invited.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to send invitation.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   return (
     <Popover>
       <PopoverTrigger asChild>{triggerElement}</PopoverTrigger>
@@ -76,23 +137,19 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
             friends.map((friend) => (
               <div key={friend.id} className="flex items-center justify-between">
                 <span>{friend.username}</span>
-                {friend.status === "none" ? (
+                {friend.status === "joined" ? (
+                  <span className="text-green-600 text-sm">Joined</span>
+                ) : friend.status === "pending" ? (
+                  <span className="text-sm text-muted-foreground">Pending</span>
+                ) : (
                   <Button
                     className="hover:bg-green-600 hover:text-white"
                     variant="secondary"
                     size="sm"
-                    onClick={() => {
-                      onInvite(friend.id);
-                      toast({
-                        title: "Friend Invited",
-                        description: friend.username,
-                      });
-                    }}
+                    onClick={() => handleInvite(friend.id)}
                   >
                     Invite
                   </Button>
-                ) : (
-                  <span className="text-green-600 text-sm">Joined</span>
                 )}
               </div>
             ))
@@ -106,3 +163,4 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
 };
 
 export default ShowFriends;
+

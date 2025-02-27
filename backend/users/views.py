@@ -251,6 +251,37 @@ class DenyNotificationView(APIView):
             return Response({"error": "Friend request not found."}, status=404)
         except Exception as e:
             return Response({"error": str(e)}, status=400)
+        
+class PendingInvitesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        entity_id = request.query_params.get("entity_id")
+        entity_type = request.query_params.get("entity_type")
+
+        if not entity_id or not entity_type:
+            return Response({"error": "Entity ID and type are required."}, status=400)
+
+        # Mapping entity_type to the stored notification type
+        entity_type_mapping = {
+            "budget": "budget_invite",
+            "savingsGoal": "savings_invite",
+            "stockLeague": "stock_league_invite",
+        }
+
+        notification_type = entity_type_mapping.get(entity_type)
+
+        if not notification_type:
+            return Response({"error": "Invalid entity type provided."}, status=400)
+
+        # Fetch only pending invites related to this entity
+        pending_invites = Notification.objects.filter(
+            sender=request.user,
+            type=notification_type,
+            is_read=False,
+        ).values("user_id")
+
+        return Response([{"friend_id": invite["user_id"]} for invite in pending_invites])
 
         
 class FriendsListView(APIView):

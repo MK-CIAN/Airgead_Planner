@@ -15,5 +15,6 @@ urlpatterns = router.urls + [
     path("notifications", NotificationListView.as_view(), name="notifications"),
     path("notifications/accept", AcceptNotificationView.as_view(), name="accept-notification"),
     path("notifications/deny", DenyNotificationView.as_view(), name="deny-notification"),
+    path("notifications/pending-invites/", PendingInvitesView.as_view(), name="pending-invite"),
     path('friends/', FriendsListView.as_view(), name='friends-list'),
 ]

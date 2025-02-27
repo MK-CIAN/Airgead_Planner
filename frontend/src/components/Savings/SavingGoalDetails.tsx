@@ -108,20 +108,6 @@ const SavingsGoalDetails: React.FC = () => {
     }
   };
 
-  const handleInviteFriend = async (friendId: number) => {
-    try {
-      await Axios.post(`data/savings/${id}/invite-friend/`, {
-        friend_id: friendId,
-      });
-      setAlertMessage("Invite to join goal sent.");
-      setTimeout(() => setAlertMessage(null), 3000);
-    } catch (error) {
-      console.error("Error inviting contributor:", error);
-      setAlertMessage("Failed to invite contributor.");
-      setTimeout(() => setAlertMessage(null), 3000);
-    }
-  };
-
   if (!savingsGoal) {
     return <Typography data-testid="loading-state">Loading...</Typography>;
   }
@@ -237,8 +223,7 @@ const SavingsGoalDetails: React.FC = () => {
       <div className="text-right mt-4">
         <ShowFriends
           entityId={id}
-          entityType="budget"
-          onInvite={handleInviteFriend}
+          entityType="savingsGoal"
           triggerElement={
             <Button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2">
               Add Friends

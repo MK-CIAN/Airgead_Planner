@@ -143,6 +143,17 @@ class CustomBudgetViewSet(viewsets.ModelViewSet):
 
         try:
             friend = CustomUser.objects.get(id=friend_id)
+                
+            existing_notification = Notification.objects.filter(
+                user=friend,
+                sender=request.user,
+                type="budget_invite",
+                budget=budget,
+                is_read=False  # Only check for pending invites
+            ).exists()
+
+            if existing_notification:
+                return Response({"error": "Invite already sent."}, status=status.HTTP_400_BAD_REQUEST)
             # Create a notification with the budget reference
             Notification.objects.create(
                 user=friend,
@@ -209,7 +220,18 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
 
         try:
             friend = CustomUser.objects.get(id=friend_id)
-            # Create a notification with the budget reference
+            
+            existing_notification = Notification.objects.filter(
+                user=friend,
+                sender=request.user,
+                type="savings_invite",
+                savings_goal=savings_goal,
+                is_read=False  # Only check for pending invites
+            ).exists()
+            
+            if existing_notification:
+                return Response({"error": "Invite already sent."}, status=status.HTTP_400_BAD_REQUEST)
+            
             Notification.objects.create(
                 user=friend,
                 sender=request.user,
@@ -666,8 +688,18 @@ class StockLeagueViewSet(viewsets.ModelViewSet):
 
         try:
             friend = CustomUser.objects.get(id=friend_id)
-
-            # ✅ Create a notification for the friend
+            
+            existing_notification = Notification.objects.filter(
+                user=friend,
+                sender=request.user,
+                type="stock_league_invite",
+                stock_league=league,
+                is_read=False
+            ).exists()
+            
+            if existing_notification:
+                return Response({"error": "Invite already sent."}, status=status.HTTP_400_BAD_REQUEST)
+            
             Notification.objects.create(
                 user=friend,
                 sender=request.user,

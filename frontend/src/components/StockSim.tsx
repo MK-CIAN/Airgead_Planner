@@ -227,21 +227,6 @@ const StockSim: React.FC = () => {
       fetchYearlyData(ticker);
     }
   };
-
-  const handleInvite = async (friendId: number) => {
-    try {
-      await Axios.post(`/data/leagues/${leagueId}/invite-friend/`, {
-        friend_id: friendId,
-      });
-      toast({
-        title: "Invitation Sent",
-        description: "Your friend has been invited.",
-      });
-    } catch (error) {
-      console.error("Error inviting friend:", error);
-    }
-  };
-
   return (
     <div className="p-6">
       <h1 className="text-center text-3xl font-bold">Stock Market Simulator</h1>
@@ -254,7 +239,6 @@ const StockSim: React.FC = () => {
         {portfolioType === "league" && leagueId && (
           <div className="flex justify-center my-4">
             <ShowFriends
-              onInvite={handleInvite}
               triggerElement={
                 <Button className="bg-green-500 hover:bg-green-600 text-white">
                   Invite Friends

@@ -118,17 +118,6 @@ const CustomBudgetDetails: React.FC = () => {
       });
   };
 
-  const handleInviteFriend = async (friendId: number) => {
-    try {
-      await Axios.post(`data/custom-budget/${id}/invite-friend/`, {
-        friend_id: friendId,
-      });
-      alert("Invitation sent!");
-    } catch (error) {
-      console.error("Error inviting friend:", error);
-    }
-  };
-
   if (loading) {
     return <Typography align="center">Loading...</Typography>;
   }
@@ -240,7 +229,6 @@ const CustomBudgetDetails: React.FC = () => {
         <ShowFriends
           entityId={id}
           entityType="budget"
-          onInvite={handleInviteFriend}
           triggerElement={
             <Button className="bg-green-600 text-white px-4 py-2">
               Add Friends

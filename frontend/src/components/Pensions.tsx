@@ -49,15 +49,13 @@ const PensionPlanner: React.FC = () => {
       .then((response) => {
         const formattedData = response.data.map((proj: any) => ({
           ...proj,
-          total_contributions: parseFloat(proj.total_contributions) || 0,
-          total_growth: parseFloat(proj.total_growth) || 0,
-          final_pension_balance: parseFloat(proj.final_pension_balance) || 0,
+          total_contributions: proj.total_contributions ? parseFloat(proj.total_contributions) : 0,
+          total_growth: proj.total_growth ? parseFloat(proj.total_growth) : 0,
+          final_pension_balance: proj.final_pension_balance ? parseFloat(proj.final_pension_balance) : 0,
         }));
         setSavedProjections(formattedData);
       })
-      .catch((error) =>
-        console.error("Error fetching saved pension projections:", error)
-      );
+      .catch((error) => console.error("Error fetching saved pension projections:", error));
   }, []);
 
   const calculateProjection = () => {
@@ -100,11 +98,11 @@ const PensionPlanner: React.FC = () => {
       contribution_rate: contributionRate.toString(),
       employer_match: employerMatch.toString(),
       roi: roi.toString(),
-      total_contributions: parseFloat(totalContributions.toFixed(2)),
-      total_growth: parseFloat(totalGrowth.toFixed(2)),
-      final_pension_balance: parseFloat(futureValue.toFixed(2)),
+      total_contributions: parseFloat(totalContributions.toFixed(2)) || 0,
+      total_growth: parseFloat(totalGrowth.toFixed(2)) || 0,
+      final_pension_balance: parseFloat(futureValue.toFixed(2)) || 0,
     };
-
+    
     setProjection(calculatedProjection);
     setExpandedProjection(calculatedProjection); // Expand the new projection
     setExpandedCardId(null); // Collapse any previously expanded projection
@@ -256,8 +254,7 @@ const PensionPlanner: React.FC = () => {
                     <strong>Retirement Age:</strong> {proj.retirement_age}
                   </p>
                   <p>
-                    <strong>Final Balance:</strong> €
-                    {proj.final_pension_balance.toFixed(2)}
+                    <strong>Final Balance:</strong> €{Number(proj.final_pension_balance || 0).toFixed(2)}
                   </p>
                   <div className="flex space-x-2">
                     <Button
@@ -313,9 +310,7 @@ const PensionPlanner: React.FC = () => {
                 </TableRow>
                 <TableRow>
                   <TableCell>Final Balance</TableCell>
-                  <TableCell>
-                    €{expandedProjection.final_pension_balance.toFixed(2)}
-                  </TableCell>
+                  <TableCell>€{Number(expandedProjection.final_pension_balance || 0).toFixed(2)}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
