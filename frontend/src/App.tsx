@@ -14,7 +14,7 @@ import PasswordReset from './components/PasswordReset'
 import Savings from './components/Savings/Savings'
 import Income from './components/IncomeTaxBreakdown/Income'
 import UserInterest from './components/UserInterests'
-import CustomBudget from './components/Budgets/CustomBudget'
+import CustomBudget from './components/Budgets/BudgetLanding'
 import CustomBudgetDetails from './components/Budgets/CustomBudgetDetails'
 import SavingsGoalDetails from './components/Savings/SavingGoalDetails'
 import TestNav from './components/TestNav'
@@ -44,13 +44,13 @@ function App() {
             <Routes>
               <Route element={<ProtectedRoute />}>
                 <Route path="/home" element={<Dashboard />} />
-                <Route path="/monthly-budget" element={<Budget />} />
+                <Route path="/budget/monthly-budget" element={<Budget />} />
                 <Route path="/budget" element={<CustomBudget />} />
-                <Route path="/custom-budget/:id" element={<CustomBudgetDetails />} />
+                <Route path="/budget/custom-budget/:id" element={<CustomBudgetDetails />} />
                 <Route path="/savings" element={<Savings />} />
                 <Route path="/savings/:id" element={<SavingsGoalDetails />} />
                 <Route path="/loans" element={<Loans />} />
-                <Route path="/loan-details/:id" element={<LoanDetails />} />
+                <Route path="/loans/loan-details/:id" element={<LoanDetails />} />
                 <Route path="/pensions" element={<Pensions />} />
                 <Route path="/stocksimlanding" element={<StockSimLanding/>} />
                 <Route path="/stocksim" element={<StockSim />} />

@@ -238,7 +238,7 @@ const MainBudgetPage: React.FC = () => {
         <Card
           className="cursor-pointer hover:shadow-md transition-shadow"
           data-testid="monthly-budget-card"
-          onClick={() => navigate("/monthly-budget")}
+          onClick={() => navigate("monthly-budget")}
         >
           <CardHeader>
             <CardTitle>{currentMonth.format("MMMM YYYY")} Budget</CardTitle>
@@ -259,7 +259,7 @@ const MainBudgetPage: React.FC = () => {
             <CarouselContent>
               {customBudgets.map((budget) => (
                 <CarouselItem key={budget.id}>
-                  <Card data-testid="custom-budget-card" onClick={() => navigate(`/custom-budget/${budget.id}`)}>
+                  <Card data-testid="custom-budget-card" onClick={() => navigate(`custom-budget/${budget.id}`)}>
                     <CardHeader>
                       <CardTitle>{budget.name}</CardTitle>
                       <CardDescription>

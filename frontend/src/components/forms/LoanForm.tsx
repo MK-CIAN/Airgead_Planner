@@ -34,7 +34,7 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculateRepayment }) => {
           <Input
               {...field}
               id="name"
-              placeholder="Enter goal name"
+              placeholder="Enter loan name"
               required
               className="w-full"
             />
@@ -96,7 +96,7 @@ const LoanForm: React.FC<LoanFormProps> = ({ onCalculateRepayment }) => {
         />
       </div>
 
-      <Button type="submit" className="w-full bg-green-500 text-white">
+      <Button type="submit" className="w-full bg-green-500 hover:bg-green-600 text-white">
         Calculate Loan
       </Button>
     </form>

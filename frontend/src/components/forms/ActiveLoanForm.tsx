@@ -96,7 +96,7 @@ const ActiveLoanForm: React.FC<ActiveLoanFormProps> = ({ onSaveLoan }) => {
         </Popover>
       </div>
 
-      <Button type="submit" className="w-full bg-blue-500 text-white">
+      <Button type="submit" className="w-full bg-green-500 hover:bg-green-600 text-white">
         Save Loan
       </Button>
     </form>

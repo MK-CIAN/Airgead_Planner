@@ -66,118 +66,123 @@ export default function TestNav({ content }: { content: React.ReactNode }) {
       path: "/budget",
       label: "Budgets",
       icon: PieChart,
-      subPaths: ["/monthly-budget", "/custom-budget"],
+      subPaths: ["/budget/monthly-budget", "/budget/custom-budget"],
     },
-    { path: "/savings", label: "Savings", icon: Savings },
+    { path: "/savings", label: "Savings", icon: Savings, subPaths: ["/savings/"] },
     { path: "/pensions", label: "Pension Planner", icon: TrendingUp },
     {
       path: "/stocksimlanding",
       label: "Stock Market Simulator",
       icon: SsidChart,
       subPaths: [
-        "/stocksim?portfolio_type=league",  // Match league portfolio
-        "/stocksim?portfolio_type=personal" // Match personal portfolio
+        "/stocksim?portfolio_type=league",
+        "/stocksim?portfolio_type=personal"
       ]
     },
     { path: "/news", label: "News For You", icon: Newspaper },
-    { path: "/loans", label: "Loan Repayment Calculator", icon: TrendingDown, subPaths: ["/loan-details"], },
+    { path: "/loans", label: "Loan Repayment Calculator", icon: TrendingDown, subPaths: ["/loans/loan-details/"] },
     { path: "/income", label: "Income Tax Calculator", icon: TrendingDown },
     { custom: true, label: "Logout", icon: Logout, onClick: logoutUser },
-  ];
+  ];  
 
   const isActive = (item: DrawerItem) => {
-    // Extract only the base pathname (ignore query parameters)
-    const basePath = location.pathname.split("?")[0];
+    const basePath = location.pathname.split("?")[0]; // Extract base path (ignore query)
+    const queryParams = new URLSearchParams(location.search);
   
     const matchesPath = item.path
-      ? new RegExp(`^${item.path}(\\/\\d+)?$`).test(basePath) // Match path with optional ID
+      ? basePath.startsWith(item.path) // Match base path
       : false;
   
     const matchesSubPath = item.subPaths
       ? item.subPaths.some((subPath) => {
-          // Extract only the base path for comparison
-          const subBasePath = subPath.split("?")[0];
-  
-          // Check if the base path matches
-          if (new RegExp(`^${subBasePath}(\\/\\d+)?$`).test(basePath)) {
-            return true;
-          }
-  
-          // If subPath contains query parameters, check if they exist in the URL
-          const urlParams = new URLSearchParams(window.location.search);
+          const subBasePath = subPath.split("?")[0]; // Extract base path of subPath
           const subQueryParams = subPath.includes("?") ? new URLSearchParams(subPath.split("?")[1]) : null;
   
+          // Base path must match
+          if (basePath !== subBasePath) return false;
+  
+          // If subPath has query params, ensure they match
           if (subQueryParams) {
             for (const [key, value] of subQueryParams.entries()) {
-              if (urlParams.get(key) !== value) {
-                return false; // A required query parameter doesn't match
+              if (queryParams.get(key) !== value) {
+                return false; // Query params don't match
               }
             }
-            return true; // All query params match
           }
-  
-          return false;
+          return true; // Path and query params match
         })
       : false;
   
     return matchesPath || matchesSubPath;
   };
+  
+  
 
   const getBreadcrumbItems = () => {
     const basePath = location.pathname.split("?")[0]; // Remove query parameters
     const queryParams = new URLSearchParams(location.search);
-  
-    // Find the matching menu item (including subPaths)
-    let matchedItem = drawerItems.find(
-      (item) =>
-        basePath === item.path ||
-        item.subPaths?.some((subPath) => {
-          const subBasePath = subPath.split("?")[0]; // Remove query params from subPaths
-  
-          // Match base path or match query parameters if defined in subPath
-          if (basePath === subBasePath) {
-            return true;
-          }
-  
-          if (subPath.includes("?")) {
-            const subQueryParams = new URLSearchParams(subPath.split("?")[1]);
-            for (const [key, value] of subQueryParams.entries()) {
-              if (queryParams.get(key) !== value) {
-                return false; // A required query parameter doesn't match
-              }
-            }
-            return true;
-          }
-          return false;
-        })
-    );
-  
-    // Default breadcrumb
     let breadcrumbs = [{ label: "Airgead Planner", path: "/home" }];
   
-    if (matchedItem) {
-      breadcrumbs.push({ label: matchedItem.label, path: matchedItem.path ?? "#" });
-
-      const idMatch = basePath.match(/\/(\d+)$/);
-      if (idMatch) {
-        breadcrumbs.push({ label: `ID: ${idMatch[1]}`, path: basePath });
+    // Handle Budget Pages
+    if (basePath.startsWith("/budget")) {
+      breadcrumbs.push({ label: "Budgets", path: "/budget" });
+  
+      if (basePath === "/budget/monthly-budget") {
+        breadcrumbs.push({ label: "Monthly Budget", path: basePath });
+      } else if (basePath.startsWith("/budget/custom-budget/")) {
+        const id = basePath.split("/budget/custom-budget/")[1];
+        breadcrumbs.push({ label: "Custom Budget", path: "" });
       }
-
+    }
+    // Handle Loan Pages
+    else if (basePath.startsWith("/loans")) {
+      breadcrumbs.push({ label: "Loans", path: "/loans" });
+  
+      if (basePath.startsWith("/loans/loan-details/")) {
+        const id = basePath.split("/loans/loan-details/")[1];
+        breadcrumbs.push({ label: "Loan Details", path: "" });
+      }
+    }
+    // Handle Savings Pages
+    else if (basePath.startsWith("/savings")) {
+      breadcrumbs.push({ label: "Savings", path: "/savings" });
+  
+      if (/^\/savings\/\d+$/.test(basePath)) {
+        const id = basePath.split("/savings/")[1];
+        breadcrumbs.push({ label: "Savings Goal", path: "/savings" });
+      }
+    }
+    // Handle Stock Market Simulator (existing functionality)
+    else if (basePath.startsWith("/stocksim")) {
+      breadcrumbs.push({ label: "Stock Market Simulator", path: "/stocksimlanding" });
+  
       if (queryParams.has("portfolio_type")) {
         breadcrumbs.push({
-          label:
-            queryParams.get("portfolio_type") === "league"
-              ? "League Portfolio"
-              : "Personal Portfolio",
+          label: queryParams.get("portfolio_type") === "league" ? "League Portfolio" : "Personal Portfolio",
           path: location.pathname,
         });
       }
-    } else {
-      breadcrumbs.push({ label: "Dashboard", path: "/dashboard" });
+    }
+    // Default case: Find a matching menu item
+    else {
+      let matchedItem = drawerItems.find(
+        (item) =>
+          basePath === item.path ||
+          item.subPaths?.some((subPath) => basePath.startsWith(subPath))
+      );
+  
+      if (matchedItem) {
+        breadcrumbs.push({ label: matchedItem.label, path: matchedItem.path ?? "#" });
+      } else {
+        // If no match, fallback to Dashboard
+        breadcrumbs.push({ label: "Dashboard", path: "/dashboard" });
+      }
     }
   
     return breadcrumbs;
   };
+  
+  
   
   return (
     <SidebarProvider>

@@ -13,13 +13,6 @@ import {
   CarouselPrevious,
   CarouselNext,
 } from "@/components/ui/carousel";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-} from "@/components/ui/table";
 import SavingsChart from "../charts/TestSavingsChart";
 import UpdateSavingsForm from "./SavingsUpdateForms";
 import ShowFriends from "../UserServices/ShowFriends";
@@ -43,7 +36,6 @@ interface SavingsGoal {
 const SavingsGoalDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [savingsGoal, setSavingsGoal] = useState<SavingsGoal | null>(null);
-  const [, setAlertMessage] = useState<string | null>(null);
   const [image, setImage] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -198,26 +190,6 @@ const SavingsGoalDetails: React.FC = () => {
           </form>
         </CardContent>
       </Card>
-
-      {/* Contributors */}
-      {/*<div className="mt-6">
-        <h2 className="text-xl font-semibold mb-4">Contributors</h2>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Contributor</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {savingsGoal.contributors.map((contributor) => (
-              <TableRow key={contributor.id}>
-                <TableCell>{contributor.username}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-      */}
 
       {/* Contributors Section */}
       <div className="text-right mt-4">

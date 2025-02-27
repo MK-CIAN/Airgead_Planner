@@ -9,7 +9,6 @@ import dayjs from "dayjs";
 import Portfolio from "./Portfolio";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import ShowFriends from "./UserServices/ShowFriends";
-import { toast } from "@/hooks/use-toast";
 import ChatRoom from "./UserServices/ChatRoom";
 import {
   Table,

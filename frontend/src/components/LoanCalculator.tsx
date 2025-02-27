@@ -222,7 +222,7 @@ const LoanCalculator: React.FC = () => {
       });
       return;
     }
-    
+
     // Calculate monthly payment
     const monthlyRate = data.interestRate / 100 / 12;
     const monthlyPayment =
@@ -246,23 +246,23 @@ const LoanCalculator: React.FC = () => {
 
     // Send request to backend
     Axios.post("data/active-loan/", formattedLoan)
-    .then((response) => {
-      setActiveLoans([...activeLoans, response.data]);
-      setShowActiveLoanForm(false); // Only reset the form when successfully saved
-      toast({
-        title: "Active Loan Added",
-        description: "Your loan has been successfully added.",
-        variant: "successfull",
+      .then((response) => {
+        setActiveLoans([...activeLoans, response.data]);
+        setShowActiveLoanForm(false); // Only reset the form when successfully saved
+        toast({
+          title: "Active Loan Added",
+          description: "Your loan has been successfully added.",
+          variant: "successfull",
+        });
+      })
+      .catch((error) => {
+        console.error("Error saving loan:", error);
+        toast({
+          title: "Error",
+          description: "Failed to save the loan. Please try again.",
+          variant: "destructive",
+        });
       });
-    })
-    .catch((error) => {
-      console.error("Error saving loan:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save the loan. Please try again.",
-        variant: "destructive",
-      });
-    });
   };
 
   // Function to remove loan
@@ -345,6 +345,12 @@ const LoanCalculator: React.FC = () => {
   // Function to toggle form visibility
   const toggleFormVisibility = () => {
     setIsFormVisible(!isFormVisible);
+    setShowActiveLoanForm(false); // Hide active loan form when this is opened
+  };
+
+  const toggleActiveLoanFormVisibility = () => {
+    setShowActiveLoanForm(!showActiveLoanForm);
+    setIsFormVisible(false); // Hide new loan form when this is opened
   };
 
   function isEditing(_isEditing: boolean) {
@@ -367,16 +373,16 @@ const LoanCalculator: React.FC = () => {
             {isFormVisible ? "Hide Form" : "Calculate New Loan"}
           </Button>
           <Button
-            onClick={() => setShowActiveLoanForm(!showActiveLoanForm)}
+            onClick={toggleActiveLoanFormVisibility}
             className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
           >
-            Add a Loan
+            {showActiveLoanForm ? "Hide Form" : "Add a Loan"}
           </Button>
         </div>
       )}
 
       {/* Show Loan Form */}
-      {isFormVisible && !editingLoan && (
+      {isFormVisible && !editingLoan && !showActiveLoanForm && (
         <Card className="p-4 mt-4">
           <CardContent className="space-y-4">
             <LoanForm onCalculateRepayment={handleCalculateRepayment} />
@@ -554,7 +560,7 @@ const LoanCalculator: React.FC = () => {
               <div className="flex justify-center space-x-4 mt-4">
                 <Button
                   onClick={() => {
-                    navigate(`/loan-details/${loan.id}`);
+                    navigate(`loan-details/${loan.id}`);
                   }}
                   className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
                 >
