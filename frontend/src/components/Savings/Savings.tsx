@@ -94,6 +94,7 @@ const Savings: React.FC = () => {
         {savingsData.map((goal) => (
           <div
             key={goal.id}
+            data-testid="savings-goal-card"
             className="p-6 border rounded-lg shadow-sm bg-white flex flex-col space-y-4 cursor-pointer hover:shadow-md transition-shadow"
           >
             {/* Goal Name */}
@@ -111,6 +112,7 @@ const Savings: React.FC = () => {
             <div className="flex justify-between space-x-4 ">
               <Button
                 className="bg-green-500 hover:bg-green-600 text-white flex-1"
+                data-testid="savings-goal-card-expand"
                 onClick={() => navigate(`/savings/${goal.id}`)}
               >
                 View Goal

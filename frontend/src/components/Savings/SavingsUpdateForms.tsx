@@ -35,6 +35,7 @@ const UpdateSavingsForm: React.FC<UpdateSavingsFormProps> = ({
       });
       onUpdate(response.data); // Pass updated data to the parent
       toast({title: "€" + contribution + " Added Towards Your Saving Goal!", variant: "successfull"})
+      
     } catch (error) {
       console.error("Error updating savings goal:", error);
       toast({title: "Error While Trying to Contribute to Your Goal", variant: "destructive"})
@@ -52,6 +53,7 @@ const UpdateSavingsForm: React.FC<UpdateSavingsFormProps> = ({
               <Label htmlFor="contribution">Contribution Amount</Label>
               <Input
                 id="contribution"
+                data-testid="contribution-amount-input"
                 type="number"
                 value={contribution === 0 ? "" : contribution}
                 onChange={(e) => setContribution(Number(e.target.value))}
@@ -61,6 +63,7 @@ const UpdateSavingsForm: React.FC<UpdateSavingsFormProps> = ({
             </div>
             <Button
               type="submit"
+              data-testid="add-contribution-button"
               className="w-full bg-green-500 hover:bg-green-600"
             >
               Add Contribution

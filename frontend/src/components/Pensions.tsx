@@ -181,6 +181,7 @@ const PensionPlanner: React.FC = () => {
             type="number"
             value={startingAge}
             onChange={(e) => setStartingAge(Number(e.target.value))}
+            data-testid="starting-age-input"
           />
 
           <Label>Retirement Age</Label>
@@ -188,6 +189,7 @@ const PensionPlanner: React.FC = () => {
             type="number"
             value={retirementAge}
             onChange={(e) => setRetirementAge(Number(e.target.value))}
+            data-testid="retirement-age-input"
           />
 
           <Label>Annual Salary (€)</Label>
@@ -195,6 +197,7 @@ const PensionPlanner: React.FC = () => {
             type="number"
             value={annualSalary}
             onChange={(e) => setAnnualSalary(Number(e.target.value))}
+            data-testid="annual-salary-input"
           />
 
           <Label>Contribution Rate (%)</Label>
@@ -202,6 +205,7 @@ const PensionPlanner: React.FC = () => {
             type="number"
             value={contributionRate}
             onChange={(e) => setContributionRate(Number(e.target.value))}
+            data-testid="contribution-rate-input"
           />
 
           <Label>Employer Match (%)</Label>
@@ -209,6 +213,7 @@ const PensionPlanner: React.FC = () => {
             type="number"
             value={employerMatch}
             onChange={(e) => setEmployerMatch(Number(e.target.value))}
+            data-testid="employer-match-input"
           />
 
           <Label>Rate of Return (ROI %)</Label>
@@ -216,10 +221,12 @@ const PensionPlanner: React.FC = () => {
             type="number"
             value={roi}
             onChange={(e) => setRoi(Number(e.target.value))}
+            data-testid="roi-input"
           />
           <div className="flex space-x-2 justify-center">
             <Button
               onClick={calculateProjection}
+              data-testid="calculate-pension-button"
               className="mt-4 bg-green-500 hover:bg-green-600 text-white"
             >
               Calculate
@@ -227,6 +234,7 @@ const PensionPlanner: React.FC = () => {
 
             <Button
               onClick={saveProjection}
+              data-testid="save-pension-button"
               className="mt-4 bg-green-500 hover:bg-green-600 text-white"
             >
               {isSaving ? "Saving..." : "Save Projection"}
@@ -240,7 +248,7 @@ const PensionPlanner: React.FC = () => {
           {savedProjections.length > 0 ? (
             <div className="space-y-4">
               {savedProjections.map((proj) => (
-                <div key={proj.id} className="border p-4 rounded-md cursor-pointer hover:shadow-md transition-shadow">
+                <div key={proj.id} data-testid="saved-pension-card" className="border p-4 rounded-md cursor-pointer hover:shadow-md transition-shadow">
                   <p>
                     <strong>Starting Age:</strong> {proj.starting_age}
                   </p>
@@ -260,6 +268,7 @@ const PensionPlanner: React.FC = () => {
                     </Button>
                     <Button
                       className="bg-red-600 text-white"
+                      data-testid="remove-pension-button"
                       onClick={() => handleRemovePension(proj.id)}
                     >
                       Remove
@@ -276,7 +285,7 @@ const PensionPlanner: React.FC = () => {
 
       {/* Expanded Projection Section */}
       {expandedProjection && (
-        <div className="mt-10 flex flex-col items-center">
+        <div data-testid="pension-projection-card" className="mt-10 flex flex-col items-center">
           {/* Breakdown Table */}
           <div className="w-full max-w-3xl">
             <h2 className="text-xl font-bold mb-4 text-center">
@@ -313,7 +322,7 @@ const PensionPlanner: React.FC = () => {
           </div>
 
           {/* Growth Chart */}
-          <div className="mt-10 w-full max-w-4xl">
+          <div data-testid="pension-growth-chart" className="mt-10 w-full max-w-4xl">
             <PensionGrowthChart
               annualContribution={
                 Number(expandedProjection.annual_salary) *
