@@ -186,7 +186,7 @@ const CustomBudgetDetails: React.FC = () => {
               <TableBody>
                 {budgetData.length > 0 ? (
                   budgetData.map((item) => (
-                    <TableRow key={item.id} className="hover:bg-gray-100 h-6">
+                    <TableRow key={item.id} data-testid="budget-item" className="hover:bg-gray-100 h-6">
                       <TableCell className="text-left px-2 py-1">
                         {item.label}
                       </TableCell>
@@ -210,6 +210,7 @@ const CustomBudgetDetails: React.FC = () => {
                           <Button
                             className="bg-red-600 text-white text-xs px-3 py-1"
                             size="sm"
+                            data-testid="remove-budget-button"
                             onClick={() => handleRemoveBudgetItem(item.id)}
                           >
                             Remove

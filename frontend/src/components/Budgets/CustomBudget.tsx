@@ -171,6 +171,7 @@ const MainBudgetPage: React.FC = () => {
               <Label htmlFor="budget-name">Budget Name</Label>
               <Input
                 id="budget-name"
+                data-testid="custom-budget-name-input"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter budget name"
@@ -181,7 +182,7 @@ const MainBudgetPage: React.FC = () => {
                 <Label htmlFor="start-date">Start Date</Label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full text-left">
+                    <Button variant="outline" data-testid="custom-budget-start-date" className="w-full text-left">
                       {startDate
                         ? format(startDate.toDate(), "PPP")
                         : "Pick a date"}
@@ -201,7 +202,7 @@ const MainBudgetPage: React.FC = () => {
               <Label htmlFor="start-date">End Date</Label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full text-left">
+                    <Button variant="outline" data-testid="custom-budget-end-date" className="w-full text-left">
                       {endDate
                         ? format(endDate.toDate(), "PPP")
                         : "Pick a date"}
@@ -220,6 +221,7 @@ const MainBudgetPage: React.FC = () => {
             </div>
             <Button
               className="w-full bg-green-500 hover:bg-green-600 text-white"
+              data-testid="create-custom-budget-button"
               onClick={handleCreateCustomBudget}
             >
               Create Budget
@@ -235,6 +237,7 @@ const MainBudgetPage: React.FC = () => {
         {/* Monthly Budget Section */}
         <Card
           className="cursor-pointer hover:shadow-md transition-shadow"
+          data-testid="monthly-budget-card"
           onClick={() => navigate("/monthly-budget")}
         >
           <CardHeader>
@@ -256,7 +259,7 @@ const MainBudgetPage: React.FC = () => {
             <CarouselContent>
               {customBudgets.map((budget) => (
                 <CarouselItem key={budget.id}>
-                  <Card onClick={() => navigate(`/custom-budget/${budget.id}`)}>
+                  <Card data-testid="custom-budget-card" onClick={() => navigate(`/custom-budget/${budget.id}`)}>
                     <CardHeader>
                       <CardTitle>{budget.name}</CardTitle>
                       <CardDescription>

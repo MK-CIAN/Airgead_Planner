@@ -49,6 +49,7 @@ const CustomBudgetForm: React.FC<CustomBudgetFormProps> = ({
               <Input
                 {...field}
                 id="amount"
+                data-testid="budget-amount-input"
                 type="number"
                 placeholder="Enter amount €"
                 required
@@ -68,6 +69,7 @@ const CustomBudgetForm: React.FC<CustomBudgetFormProps> = ({
               <Input
                 {...field}
                 id="category"
+                data-testid="budget-category-input"
                 placeholder="Enter label"
                 required
               />
@@ -86,14 +88,15 @@ const CustomBudgetForm: React.FC<CustomBudgetFormProps> = ({
               <Select
                 value={field.value} // This binds the current value properly
                 onValueChange={(value) => field.onChange(value)} // Ensure updates happen correctly
+                data-testid="budget-type-select"
               >
-                <SelectTrigger id="transaction_type" className={!field.value ? "text-muted-foreground" : ""}>
+                <SelectTrigger id="transaction_type" data-testid="budget-type-select" className={!field.value ? "text-muted-foreground" : ""}>
                   {field.value || "Select transaction type"}
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="income">Income</SelectItem>
-                  <SelectItem value="expense">Expense</SelectItem>
-                  <SelectItem value="debt">Debt</SelectItem>
+                  <SelectItem data-testid="select-item-income" value="income">Income</SelectItem>
+                  <SelectItem data-testid="select-item-expense" value="expense">Expense</SelectItem>
+                  <SelectItem data-testid="select-item-debt" value="debt">Debt</SelectItem>
                 </SelectContent>
               </Select>
             )}
@@ -101,7 +104,7 @@ const CustomBudgetForm: React.FC<CustomBudgetFormProps> = ({
         </div>
 
         {/* Submit Button */}
-        <Button type="submit" className="mt-4 w-full bg-green-500 text-white">
+        <Button type="submit" data-testid="add-budget-button" className="mt-4 w-full bg-green-500 text-white">
           Add Budget Item
         </Button>
       </form>

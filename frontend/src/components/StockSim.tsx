@@ -255,7 +255,11 @@ const StockSim: React.FC = () => {
           <div className="flex justify-center my-4">
             <ShowFriends
               onInvite={handleInvite}
-              triggerElement={<Button className="bg-green-500 hover:bg-green-600 text-white">Invite Friends</Button>}
+              triggerElement={
+                <Button className="bg-green-500 hover:bg-green-600 text-white">
+                  Invite Friends
+                </Button>
+              }
               entityId={leagueId}
               entityType="stockLeague"
             />
@@ -270,7 +274,7 @@ const StockSim: React.FC = () => {
         stocks={stocks}
       />
 
-{portfolioType === "league" && leagueId && (
+      {portfolioType === "league" && leagueId && (
         <div className="my-6">
           <h3 className="text-center text-lg font-semibold mb-4">
             League Overview

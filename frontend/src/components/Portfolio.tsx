@@ -94,8 +94,8 @@ const Portfolio: React.FC<PortfolioProps> = ({
         transaction_type: transactionType,
         quantity: calculatedQuantity,
         price_per_share: pricePerShare,
-        portfolio_type: portfolioType, // ✅ Specifies if it's personal or league portfolio
-        league_id: portfolioType === "league" ? leagueId : undefined, // ✅ Only send if league
+        portfolio_type: portfolioType,
+        league_id: portfolioType === "league" ? leagueId : undefined,
       });
 
       if (response.status === 200 || response.status === 201) {

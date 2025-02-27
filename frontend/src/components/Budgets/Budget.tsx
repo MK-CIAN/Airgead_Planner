@@ -139,14 +139,34 @@ const Budget: React.FC = () => {
     if (!budgetId) return;
     try {
       console.log(`Removing item ${itemId} from budget ${budgetId}`);
+  
+      // ✅ Wait for API response before updating UI
       await Axios.delete(`data/budget/${budgetId}/items/${itemId}/`);
-      setBudgetData((prevData) =>
-        prevData.filter((item) => item.id !== itemId)
-      );
+  
+      // ✅ Fetch updated budget data instead of relying on local state
+      const response = await Axios.get(`data/budget/`, {
+        params: { month: currentMonth.format("YYYY-MM-DD") },
+      });
+  
+      if (response.data.length > 0) {
+        const budget = response.data[0];
+        const formattedData: BudgetData[] = (budget.items || []).map((item: any) => ({
+          id: item.id,
+          value: parseFloat(item.amount),
+          label: item.category,
+          type: item.transaction_type,
+        }));
+        setBudgetData(formattedData);
+      } else {
+        setBudgetData([]);
+      }
+  
+      console.log("Budget item removed and UI updated.");
     } catch (error) {
       console.error("Error removing budget item:", error);
     }
   };
+  
 
   if (loading) {
     return <Typography align="center">Loading...</Typography>;
@@ -219,7 +239,7 @@ const Budget: React.FC = () => {
               <TableBody>
                 {budgetData.length > 0 ? (
                   budgetData.map((item) => (
-                    <TableRow key={item.id} className="hover:bg-gray-100 h-6">
+                    <TableRow key={item.id} data-testid="budget-item"className="hover:bg-gray-100 h-6">
                       <TableCell className="text-left px-2 py-1">
                         {item.label}
                       </TableCell>
@@ -242,6 +262,7 @@ const Budget: React.FC = () => {
                         <div className="flex justify-end">
                           <Button
                             className="bg-red-600 text-white text-xs px-3 py-1"
+                            data-testid="remove-budget-button"
                             size="sm"
                             onClick={() => handleRemoveBudgetItem(item.id)}
                           >

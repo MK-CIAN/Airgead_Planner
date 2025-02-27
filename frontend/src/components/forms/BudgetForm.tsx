@@ -52,6 +52,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget }) => {
             render={({ field }) => (
               <Input
                 {...field}
+                data-testid="budget-amount-input"
                 id="amount"
                 type="number"
                 placeholder="Enter amount €"
@@ -70,6 +71,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget }) => {
             render={({ field }) => (
               <Input
                 {...field}
+                data-testid="budget-category-input"
                 id="category"
                 placeholder="Enter Label"
                 required
@@ -89,20 +91,20 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget }) => {
                 value={field.value} // This binds the current value properly
                 onValueChange={(value) => field.onChange(value)} // Ensure updates happen correctly
               >
-                <SelectTrigger id="transaction_type" className={!field.value ? "text-muted-foreground" : ""}>
+                <SelectTrigger data-testid="budget-type-select" id="transaction_type" className={!field.value ? "text-muted-foreground" : ""}>
                   {field.value || "Select transaction type"}
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="income">Income</SelectItem>
-                  <SelectItem value="expense">Expense</SelectItem>
-                  <SelectItem value="debt">Debt</SelectItem>
+                  <SelectItem data-testid="select-item-income" value="income">Income</SelectItem>
+                  <SelectItem data-testid="select-item-expense" value="expense">Expense</SelectItem>
+                  <SelectItem data-testid="select-item-debt" value="debt">Debt</SelectItem>
                 </SelectContent>
               </Select>
             )}
           />
         </div>
 
-        <Button type="submit" className="mt-4 w-full bg-green-500 text-white">
+        <Button type="submit" data-testid="add-budget-button" className="mt-4 w-full bg-green-500 text-white">
           Add Budget Item
         </Button>
       </form>
