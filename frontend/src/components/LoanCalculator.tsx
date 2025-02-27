@@ -8,6 +8,7 @@ import { Card, CardContent } from "./ui/card";
 import dayjs from "dayjs";
 import ActiveLoanForm from "./forms/ActiveLoanForm";
 import { useNavigate } from "react-router-dom";
+import { toast } from "@/hooks/use-toast";
 
 interface LoanData {
   id: string;
@@ -213,6 +214,15 @@ const LoanCalculator: React.FC = () => {
     termLength: number;
     paymentDueDate: string;
   }) => {
+    if (!data.paymentDueDate || data.paymentDueDate.trim() === "") {
+      toast({
+        title: "Missing Payment Due Date",
+        description: "Please enter the first payment date before saving.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Calculate monthly payment
     const monthlyRate = data.interestRate / 100 / 12;
     const monthlyPayment =
@@ -236,11 +246,23 @@ const LoanCalculator: React.FC = () => {
 
     // Send request to backend
     Axios.post("data/active-loan/", formattedLoan)
-      .then((response) => {
-        setActiveLoans([...activeLoans, response.data]);
-        setShowActiveLoanForm(false);
-      })
-      .catch((error) => console.error("Error saving loan:", error));
+    .then((response) => {
+      setActiveLoans([...activeLoans, response.data]);
+      setShowActiveLoanForm(false); // Only reset the form when successfully saved
+      toast({
+        title: "Active Loan Added",
+        description: "Your loan has been successfully added.",
+        variant: "successfull",
+      });
+    })
+    .catch((error) => {
+      console.error("Error saving loan:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save the loan. Please try again.",
+        variant: "destructive",
+      });
+    });
   };
 
   // Function to remove loan

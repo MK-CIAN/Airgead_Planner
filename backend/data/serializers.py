@@ -75,7 +75,7 @@ class SavingsGoalSerializer(serializers.ModelSerializer):
         Return the full URL for the image field if it exists.
         """
         request = self.context.get('request')  # Get the current request context
-        if obj.image:
+        if obj.image and request:
             return request.build_absolute_uri(obj.image.url)
         return None
 

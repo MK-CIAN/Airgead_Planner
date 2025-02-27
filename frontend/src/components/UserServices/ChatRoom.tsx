@@ -1,5 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Axios from "../Axios";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface ChatMessage {
   id: number;
@@ -9,13 +12,14 @@ interface ChatMessage {
 }
 
 interface ChatRoomProps {
-  entityId: number; // ID of the budget or savings goal
-  entityType: "budget" | "savingsGoal" | "stockLeague"; // Type of entity (budget or savings goal)
+  entityId: number;
+  entityType: "budget" | "savingsGoal" | "stockLeague";
 }
 
 const ChatRoom: React.FC<ChatRoomProps> = ({ entityId, entityType }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Fetch messages from the API
   const fetchMessages = async () => {
@@ -25,10 +29,10 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ entityId, entityType }) => {
           ? { budget_id: entityId }
           : entityType === "savingsGoal"
           ? { savings_goal_id: entityId }
-          : entityType === "stockLeague" 
+          : entityType === "stockLeague"
           ? { stock_league_id: entityId }
           : {};
-  
+
       const response = await Axios.get("/chat/messages/", { params });
       setMessages(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
@@ -36,12 +40,11 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ entityId, entityType }) => {
       setMessages([]);
     }
   };
-  
 
   // Send a new message
   const sendMessage = async () => {
-    if (!newMessage.trim()) return; // Prevent sending empty messages
-  
+    if (!newMessage.trim()) return;
+
     try {
       const data =
         entityType === "budget"
@@ -51,68 +54,77 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ entityId, entityType }) => {
           : entityType === "stockLeague"
           ? { stock_league_id: entityId, content: newMessage }
           : {};
-  
+
       await Axios.post("/chat/messages/", data);
-      setNewMessage(""); // Clear the input after sending
-      fetchMessages(); // Refresh messages
+      setNewMessage("");
+      fetchMessages();
     } catch (error) {
       console.error("Error sending message:", error);
     }
   };
-  
+
+  // Scroll to the latest message when messages update
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   useEffect(() => {
-    fetchMessages(); // Initial fetch
-  }, [entityId, entityType]); // Refetch messages if entityId or entityType changes
+    fetchMessages();
+  }, [entityId, entityType]);
+
+  // Format timestamp as YYYY-MM-DD HH:mm
+  const formatTimestamp = (timestamp: string) => {
+    const dateObj = new Date(timestamp);
+    return dateObj.toISOString().slice(0, 16).replace("T", " "); // Outputs: "YYYY-MM-DD HH:mm"
+  };
 
   return (
-    <div>
-      {/* Messages */}
-      <div
-        style={{
-          maxHeight: "300px",
-          overflowY: "auto",
-          border: "1px solid #ddd",
-          padding: "10px",
-          borderRadius: "8px",
-        }}
-      >
+    <Card className="w-full h-full flex flex-col p-4">
+      {/* Messages container */}
+      <div className="flex-grow overflow-auto border p-3 rounded-md bg-gray-100 dark:bg-gray-800">
         {messages.map((msg) => (
-          <div key={msg.id}>
-            {new Date (msg.timestamp).toLocaleTimeString()} <strong>{msg.sender_name}:</strong> {msg.content}
+          <div key={msg.id} className="mb-2 flex flex-col sm:flex-row sm:items-center gap-y-1">
+            {/* Timestamp stacked on small screens, inline on larger screens */}
+            <span className="text-sm text-gray-500 dark:text-gray-400 sm:hidden">
+              {formatTimestamp(msg.timestamp)}
+            </span>
+
+            <div className="flex sm:flex-row sm:items-center gap-x-2">
+              {/* Timestamp inline on larger screens */}
+              <span className="hidden sm:block text-sm text-gray-500 dark:text-gray-400">
+                {formatTimestamp(msg.timestamp)}
+              </span>
+
+              {/* User & Message */}
+              <div className="flex flex-col sm:flex-row">
+                <strong className="text-gray-900 dark:text-gray-200 flex-shrink-0">
+                  {msg.sender_name}:
+                </strong>
+                <span className="ml-2 text-gray-700 dark:text-gray-300">
+                  {msg.content}
+                </span>
+              </div>
+            </div>
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
 
-      {/* Input for new messages */}
-      <div style={{ marginTop: "10px", display: "flex", gap: "8px" }}>
-        <input
+      {/* Input field and send button */}
+      <div className="mt-3 flex items-center gap-2">
+        <Input
           type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           placeholder="Type a message..."
-          style={{
-            flex: 1,
-            padding: "8px",
-            borderRadius: "4px",
-            border: "1px solid #ddd",
-          }}
+          className="flex-1 text-sm md:text-base"
         />
-        <button
-          onClick={sendMessage}
-          style={{
-            padding: "8px 16px",
-            borderRadius: "4px",
-            backgroundColor: "#007bff",
-            color: "white",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
+        <Button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 text-sm md:text-base" onClick={sendMessage}>
           Send
-        </button>
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 };
 

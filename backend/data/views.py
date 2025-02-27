@@ -186,17 +186,16 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
         
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
-        current_amount = request.data.get("current_amount", instance.current_amount)
 
-        # Ensure current_amount doesn't exceed the target_amount
-        if float(current_amount) > instance.target_amount:
-            instance.current_amount = instance.target_amount
-        else:
-            instance.current_amount = current_amount
+        # Ensure "current_amount" is received properly and parsed as float
+        current_amount = float(request.data.get("current_amount", instance.current_amount))
 
+        # Compute the new amount while enforcing constraints
+        new_amount = max(min(current_amount, instance.target_amount), 0)
+
+        instance.current_amount = new_amount
         instance.save()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+        return Response(SavingsGoalSerializer(instance).data, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=["post"], url_path="upload-image")
     def upload_image(self, request, pk=None):
