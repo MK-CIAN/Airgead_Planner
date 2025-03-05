@@ -179,7 +179,42 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
         return SavingsGoal.objects.filter(
             models.Q(user=user) | models.Q(contributors=user)
         ).distinct()
+        
+    @action(detail=True, methods=['GET'])
+    def contributions(self, request, pk=None):
+        """Fetch contribution history for a specific savings goal."""
+        savings_goal = get_object_or_404(SavingsGoal, id=pk, user=request.user)
+        contributions = SavingsContribution.objects.filter(savings_goal=savings_goal)
+        serializer = SavingsContributionSerializer(contributions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
+    @action(detail=True, methods=['POST'])
+    def add_contribution(self, request, pk=None):
+        """Handles making a contribution towards a savings goal"""
+        savings_goal = get_object_or_404(SavingsGoal, id=pk, user=request.user)
+
+        try:
+            contribution_amount = Decimal(request.data.get('amount', 0))
+
+            # Create a contribution entry
+            contribution = SavingsContribution.objects.create(savings_goal=savings_goal, amount=contribution_amount)
+
+            # Update the savings goal current amount
+            savings_goal.current_amount += contribution_amount
+            if savings_goal.current_amount >= savings_goal.target_amount:
+                savings_goal.current_amount = savings_goal.target_amount  # Ensure it doesn't exceed the goal
+            savings_goal.save()
+
+            return Response({
+                "message": "Contribution added successfully",
+                "new_savings_amount": savings_goal.current_amount,
+                "target_amount": savings_goal.target_amount,
+                "contribution": SavingsContributionSerializer(contribution).data
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
     def perform_create(self, serializer):
         savings_goal = serializer.save(user=self.request.user)
         ChatRoom.objects.create(savings_goal=savings_goal)

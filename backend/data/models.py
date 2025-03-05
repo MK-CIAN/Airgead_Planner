@@ -202,6 +202,18 @@ class SavingsGoal(models.Model):
 
     class Meta:
         db_table = 'savings_goal'
+        
+class SavingsContribution(models.Model):
+    savings_goal = models.ForeignKey(SavingsGoal, on_delete=models.CASCADE, related_name="contributions")
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    contribution_date = models.DateTimeField(default=now)
+
+    class Meta:
+        db_table = 'savings_contribution'
+    
+    def __str__(self):
+        return f"€{self.amount} on {self.contribution_date.strftime('%Y-%m-%d')} for {self.savings_goal.name}"
+
 
 # Loan
 class Loan(models.Model):

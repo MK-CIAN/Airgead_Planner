@@ -104,7 +104,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget }) => {
           />
         </div>
 
-        <Button type="submit" data-testid="add-budget-button" className="mt-4 w-full bg-green-500 text-white">
+        <Button type="submit" data-testid="add-budget-button" className="mt-4 w-full bg-green-500 hover:bg-green-600 text-white">
           Add Budget Item
         </Button>
       </form>

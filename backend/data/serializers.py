@@ -45,7 +45,13 @@ class CustomBudgetSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['user']
 
+class SavingsContributionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SavingsContribution
+        fields = ['id', 'savings_goal', 'amount', 'contribution_date']
+
 class SavingsGoalSerializer(serializers.ModelSerializer):
+    contributions = SavingsContributionSerializer(many=True, read_only=True)
     contributors = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=get_user_model().objects.all(),
@@ -67,6 +73,7 @@ class SavingsGoalSerializer(serializers.ModelSerializer):
             'contributors',
             'image',
             'image_url',  # Include the image URL
+            'contributions',
         ]
         read_only_fields = ['user']
 

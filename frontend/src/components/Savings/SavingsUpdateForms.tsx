@@ -11,7 +11,13 @@ interface UpdateSavingsFormProps {
     current_amount: number;
     target_amount: number;
   };
-  onUpdate: (updatedGoal: any) => void;
+  onUpdate: (updatedGoal: any, newContribution?: SavingsContribution) => void;
+}
+
+interface SavingsContribution {
+  id: string;
+  amount: number;
+  contribution_date: string;
 }
 
 const UpdateSavingsForm: React.FC<UpdateSavingsFormProps> = ({
@@ -26,18 +32,20 @@ const UpdateSavingsForm: React.FC<UpdateSavingsFormProps> = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = parseFloat(e.target.value);
 
-    // Ensure the value is a number and handle edge cases
     if (isNaN(value)) {
       setContribution("");
       return;
     }
 
-    // Enforce constraints: max contribution = remainingAmount, min = -current_amount
+    // Prevent contributions from reducing balance below zero
+    const maxWithdrawal = -savingsGoal.current_amount;
+    if (value < maxWithdrawal) {
+      value = maxWithdrawal;
+    }
+
+    // Prevent contributions exceeding remaining amount
     if (value > remainingAmount) {
       value = remainingAmount;
-    }
-    if (value < -savingsGoal.current_amount) {
-      value = -savingsGoal.current_amount;
     }
 
     setContribution(value.toString());
@@ -56,30 +64,34 @@ const UpdateSavingsForm: React.FC<UpdateSavingsFormProps> = ({
       return;
     }
 
-    // Calculate new amount, ensuring it doesn't exceed the target and doesn't drop below zero
-    const newAmount = Math.max(
-      Math.min(savingsGoal.current_amount + parsedContribution, savingsGoal.target_amount),
-      0
-    );
-
     try {
-      const response = await Axios.patch(`data/savings/${savingsGoal.id}/`, {
-        current_amount: newAmount,
+      const response = await Axios.post(
+        `data/savings/${savingsGoal.id}/add_contribution/`,
+        {
+          amount: parsedContribution,
+        }
+      );
+
+      // Update savings goal immediately
+      onUpdate(response.data, {
+        id: response.data.contribution.id,
+        amount: response.data.contribution.amount,
+        contribution_date: response.data.contribution.contribution_date,
       });
 
-      onUpdate(response.data);
       toast({
-        title: `€${parsedContribution.toFixed(2)} Updated!`,
-        description: "Your savings goal has been updated.",
+        title: `€${parsedContribution.toFixed(2)} Added!`,
+        description: "Your contribution has been recorded.",
         variant: "successfull",
       });
 
-      setContribution(""); // Clear the input after submission
+      setContribution(""); // Clear the input field
+
     } catch (error) {
-      console.error("Error updating savings goal:", error);
+      console.error("Error adding contribution:", error);
       toast({
         title: "Error",
-        description: "Failed to update savings goal.",
+        description: "Failed to add contribution.",
         variant: "destructive",
       });
     }

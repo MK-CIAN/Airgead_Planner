@@ -33,11 +33,20 @@ interface SavingsGoal {
   image_url?: string;
 }
 
+interface SavingsContribution {
+  id: string;
+  amount: number;
+  contribution_date: string;
+}
+
 const SavingsGoalDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [savingsGoal, setSavingsGoal] = useState<SavingsGoal | null>(null);
   const [image, setImage] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [contributionHistory, setContributionHistory] = useState<
+    SavingsContribution[]
+  >([]);
 
   useEffect(() => {
     Axios.get(`data/savings/${id}/`)
@@ -52,9 +61,17 @@ const SavingsGoalDetails: React.FC = () => {
         });
       })
       .catch((error) => console.error("Error fetching savings goal:", error));
+
+    Axios.get(`data/savings/${id}/contributions/`)
+      .then((response) => {
+        setContributionHistory(response.data);
+      })
+      .catch((error) =>
+        console.error("Error fetching savings contributions:", error)
+      );
   }, [id]);
 
-  const handleUpdate = async (updatedGoal: SavingsGoal) => {
+  const handleUpdate = async (updatedGoal: SavingsGoal, newContribution?: SavingsContribution) => {
     try {
       const response = await Axios.get(`data/savings/${updatedGoal.id}/`);
       setSavingsGoal({
@@ -62,6 +79,10 @@ const SavingsGoalDetails: React.FC = () => {
         current_amount: Number(response.data.current_amount),
         target_amount: Number(response.data.target_amount),
       });
+
+      if (newContribution) {
+        setContributionHistory((prevHistory) => [...prevHistory, newContribution]);
+      }
     } catch (error) {
       console.error("Error fetching updated savings goal:", error);
     }
@@ -103,7 +124,6 @@ const SavingsGoalDetails: React.FC = () => {
   if (!savingsGoal) {
     return <Typography data-testid="loading-state">Loading...</Typography>;
   }
-  
 
   console.log(savingsGoal);
 
@@ -203,6 +223,26 @@ const SavingsGoalDetails: React.FC = () => {
           }
         />
       </div>
+
+      {/* Contribution History */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Contribution History</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {contributionHistory.length > 0 ? (
+            <ul>
+              {contributionHistory.map((contribution) => (
+                <li key={contribution.id} className="border-b py-2">
+                  €{Number(contribution.amount).toFixed(2)} on {new Date(contribution.contribution_date).toLocaleDateString()}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No contributions yet.</p>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Chat Room */}
       <div className="mt-6">
