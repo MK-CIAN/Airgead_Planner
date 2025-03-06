@@ -18,7 +18,7 @@ const PasswordResetRequest = () => {
   const [ShowMessage, setShowMessage] = useState(false);
 
   const submission: SubmitHandler<IFormInput> = (data) => {
-    Axios.post(`api/password_reset/`, {
+    Axios.post(`password_reset/`, {
       email: data.email,
     }).then(() => {
       setShowMessage(true);

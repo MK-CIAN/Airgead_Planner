@@ -170,7 +170,7 @@ const IncomeTaxCalculator: React.FC = () => {
     Axios.post("/data/income-tax/", breakdown)
       .then((response) => {
         toast({
-          title: "Salray saved successfully!",
+          title: "Salary saved successfully!",
         });
 
         // Add the saved breakdown to the list with the returned ID

@@ -6,8 +6,7 @@ import Loans from './components/LoanCalculator'
 import Pensions from './components/Pensions'
 import StockSim from './components/StockSim'
 import News from './components/News'
-import Login from './components/Authentication/Login'
-import Register from './components/Authentication/Register'
+import AuthPage from './components/Authentication/Auth'
 import ProtectedRoute from './components/ProtectedRoutes'
 import PasswordResetRequest from './components/PasswordResetRequest'
 import PasswordReset from './components/PasswordReset'
@@ -33,8 +32,7 @@ function App() {
       <Toaster />
       {noNavbar ? (
         <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/" element={<AuthPage />} />
           <Route path="/request/password_reset" element={<PasswordResetRequest />} />
           <Route path="/password-reset/:token" element={<PasswordReset />} />
         </Routes>
