@@ -6,6 +6,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { toast } from "@/hooks/use-toast";
+import StockSimPlaceholder from "./Placeholders/StocksimPlaceholder";
 
 interface League {
   id: string;
@@ -18,6 +19,9 @@ const StockSimLanding: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [personalPortfolioBalance, setPersonalPortfolioBalance] = useState<
+    number | null
+  >(null);
 
   const navigate = useNavigate();
 
@@ -31,10 +35,23 @@ const StockSimLanding: React.FC = () => {
     }
   };
 
+  // Fetch Personal Portfolio Balance
+  const fetchPersonalPortfolio = async () => {
+    try {
+      const response = await Axios.get(
+        `data/portfolio/?portfolio_type=personal`
+      );
+      setPersonalPortfolioBalance(response.data.totalbalance);
+    } catch (error) {
+      console.error("Error fetching personal portfolio:", error);
+    }
+  };
+
   console.log(leagues);
 
   useEffect(() => {
     fetchLeagues();
+    fetchPersonalPortfolio();
   }, []);
 
   // ✅ Handle league creation
@@ -105,7 +122,7 @@ const StockSimLanding: React.FC = () => {
   };
 
   return (
-    <div className="p-6 flex flex-col items-center">
+    <div className="flex flex-col items-center">
       <h1 className="text-3xl font-bold mb-6">Select Your Portfolio</h1>
 
       {/* Show Create League Button */}
@@ -138,29 +155,35 @@ const StockSimLanding: React.FC = () => {
         </div>
       )}
 
-      {/* List Personal & League Portfolios */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-        {/* Personal Portfolio Card */}
-        <Card
-          className="cursor-pointer hover:shadow-lg transition"
-          onClick={() => handleSelectPortfolio("personal")}
-        >
-          <CardContent className="p-6 text-center">
-            <h2 className="text-xl font-semibold">My Portfolio</h2>
-            <p className="text-gray-600">Manage your personal investments</p>
-          </CardContent>
-        </Card>
+      {/* Centered Cards Horizontally */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 items-stretch">
+        {/* Personal Portfolio Check */}
+        {personalPortfolioBalance === 10000 ? (
+          <StockSimPlaceholder portfolioType="personal" />
+        ) : (
+          <Card
+            className="cursor-pointer hover:shadow-lg transition w-full flex flex-col h-full"
+            onClick={() => handleSelectPortfolio("personal")}
+          >
+            <CardContent className="p-6 text-center flex-grow flex flex-col justify-between">
+              <h2 className="text-xl font-semibold">My Portfolio</h2>
+              <p className="text-gray-600 flex-grow">
+                Manage your personal investments
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
-        {/* League Portfolio Cards */}
+        {/* League Portfolio Check */}
         {leagues.length > 0 ? (
           leagues.map((league) => (
             <Card
               key={league.id}
-              className="cursor-pointer hover:shadow-lg transition"
+              className="cursor-pointer hover:shadow-lg transition w-full flex flex-col h-full"
             >
-              <CardContent className="p-6 text-center">
+              <CardContent className="p-6 text-center flex-grow flex flex-col justify-between">
                 <h2 className="text-xl font-semibold">{league.name}</h2>
-                <p className="text-gray-600">
+                <p className="text-gray-600 flex-grow">
                   Compete in this stock market league
                 </p>
 
@@ -192,9 +215,7 @@ const StockSimLanding: React.FC = () => {
             </Card>
           ))
         ) : (
-          <p className="text-gray-500 mt-4">
-            You haven't joined any leagues yet.
-          </p>
+          <StockSimPlaceholder portfolioType="league" />
         )}
       </div>
     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Axios from "./Axios";
-import { HoverEffect } from "./ui/hover-effect"; // Ensure this is correctly imported based on your project structure
+import { HoverEffect } from "./ui/hover-effect";
+import NewsPlaceholder from "./Placeholders/NewsPlaceholder"; // Import the placeholder
 
 // Article interface
 interface Article {
@@ -44,17 +45,24 @@ const RecommendedArticles: React.FC = () => {
     link: article.link,
     image: article.image_url, // Include the image URL
   }));
-  
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Recommended News Articles</h1>
-      {loading && <p>Loading articles...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {!loading && !error && articles.length === 0 && (
-        <p>No recommended articles found.</p>
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold text-center mb-6">
+        Recommended News Articles
+      </h1>
+
+      {loading && <p className="text-center">Loading articles...</p>}
+      {error && <p className="text-center text-red-500">{error}</p>}
+
+      {/* Show Placeholder if No Articles Found */}
+      {!loading && !error && articles.length === 0 ? (
+        <div className="flex justify-center">
+          <NewsPlaceholder />
+        </div>
+      ) : (
+        <HoverEffect items={mappedArticles} className="mt-4" />
       )}
-      <HoverEffect items={mappedArticles} className="mt-4" />
     </div>
   );
 };

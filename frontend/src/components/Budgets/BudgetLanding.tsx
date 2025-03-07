@@ -256,7 +256,7 @@ const MainBudgetPage: React.FC = () => {
             </CardContent>
           </Card>
         ) : (
-          <BudgetPlaceholder />
+          <BudgetPlaceholder type="monthly-budget" />
         )}
 
         {/* Custom Budgets - Carousel */}
@@ -293,9 +293,7 @@ const MainBudgetPage: React.FC = () => {
             <CarouselNext className="absolute right-[-1px] top-1/2 transform -translate-y-1/2" />
           </Carousel>
         ) : (
-          <p className="text-center text-gray-500">
-            No custom budgets available
-          </p>
+          <BudgetPlaceholder type="custom-budget" />
         )}
       </div>
     </div>

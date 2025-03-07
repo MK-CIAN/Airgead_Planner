@@ -16,6 +16,8 @@ import PortfolioGrowthChart from "./charts/PortfolioGrowthChart";
 import { TypewriterEffectSmooth } from "./ui/typewriter-effect";
 import BudgetPlaceholder from "./Placeholders/BudgetPlaceholder";
 import SavingsPlaceholder from "./Placeholders/SavingsPlaceholder";
+import NewsPlaceholder from "./Placeholders/NewsPlaceholder";
+import StocksimPlaceholder from "./Placeholders/StocksimPlaceholder";
 
 interface BudgetData {
   id: number;
@@ -190,72 +192,70 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         ) : (
-          <BudgetPlaceholder />
+          <BudgetPlaceholder type="monthly-budget"/>
         )}
 
         {/* Savings Goal Widget */}
         {savingsData.length > 0 ? (
           <Card
-          className="cursor-pointer transition hover:shadow-lg flex flex-col justify-between"
-          onClick={() =>
-            firstSavingsGoal
-              ? navigate(`/savings/${firstSavingsGoal.id}`)
-              : null
-          }
-        >
-          <CardHeader className="text-center">
-            <h3 className="text-lg font-semibold">Savings Goal</h3>
-            {firstSavingsGoal && (
-              <h4 className="text-xl font-medium text-gray-700">
-                {firstSavingsGoal.name}
-              </h4>
-            )}
-          </CardHeader>
+            className="cursor-pointer transition hover:shadow-lg flex flex-col justify-between"
+            onClick={() =>
+              firstSavingsGoal
+                ? navigate(`/savings/${firstSavingsGoal.id}`)
+                : null
+            }
+          >
+            <CardHeader className="text-center">
+              <h3 className="text-lg font-semibold">Savings Goal</h3>
+              {firstSavingsGoal && (
+                <h4 className="text-xl font-medium text-gray-700">
+                  {firstSavingsGoal.name}
+                </h4>
+              )}
+            </CardHeader>
 
-          <CardContent className="flex flex-col items-center justify-start flex-grow mt-2">
-            {firstSavingsGoal ? (
-              <div className="w-full flex justify-center">
-                <div className="w-full h-auto">
-                  <SavingsChart progress={firstSavingsGoal.progress} />
+            <CardContent className="flex flex-col items-center justify-start flex-grow mt-2">
+              {firstSavingsGoal ? (
+                <div className="w-full flex justify-center">
+                  <div className="w-full h-auto">
+                    <SavingsChart progress={firstSavingsGoal.progress} />
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <p className="text-gray-500 text-sm">
-                No savings goals available.
-              </p>
-            )}
-          </CardContent>
+              ) : (
+                <p className="text-gray-500 text-sm">
+                  No savings goals available.
+                </p>
+              )}
+            </CardContent>
 
-          <div className="text-center border-t py-3 text-sm text-gray-600">
-            {latestContribution ? (
-              <p>
-                Last Contribution: €
-                {Number(latestContribution.amount).toFixed(2)} on{" "}
-                {new Date(
-                  latestContribution.contribution_date
-                ).toLocaleDateString()}
-              </p>
-            ) : (
-              <p>No contributions yet.</p>
-            )}
-          </div>
-        </Card>
+            <div className="text-center border-t py-3 text-sm text-gray-600">
+              {latestContribution ? (
+                <p>
+                  Last Contribution: €
+                  {Number(latestContribution.amount).toFixed(2)} on{" "}
+                  {new Date(
+                    latestContribution.contribution_date
+                  ).toLocaleDateString()}
+                </p>
+              ) : (
+                <p>No contributions yet.</p>
+              )}
+            </div>
+          </Card>
         ) : (
-          <SavingsPlaceholder />
+          <SavingsPlaceholder pageType="dashboard"/>
         )}
       </div>
 
       {/* Second Row: Top News Article Card */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-        <Card className="cursor-pointer transition hover:shadow-lg flex flex-col justify-between">
-          <CardHeader>
-            <CardTitle>Top Financial News</CardTitle>
-            <CardDescription>Stay updated with relevant news</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loadingArticle && <p>Loading article...</p>}
-            {articleError && <p className="text-red-500">{articleError}</p>}
-            {!loadingArticle && !articleError && topArticle ? (
+        {!loadingArticle && !articleError && topArticle ? (
+          <Card className="cursor-pointer transition hover:shadow-lg flex flex-col justify-between">
+            <CardHeader>
+              <CardTitle>Top Financial News</CardTitle>
+              <CardDescription>Stay updated with relevant news</CardDescription>
+            </CardHeader>
+            <CardContent>
               <div className="flex flex-col items-center text-center">
                 {/* Article Image */}
                 {topArticle.image_url && (
@@ -282,23 +282,24 @@ const Dashboard = () => {
                   {new Date(topArticle.pub_date).toLocaleDateString()}
                 </p>
               </div>
-            ) : (
-              <p className="text-center">No news available.</p>
-            )}
-          </CardContent>
-        </Card>
-        <Card
-          className="cursor-pointer transition hover:shadow-lg flex flex-col justify-between"
-          onClick={() => navigate("/stocksim?portfolio_type=personal")}
-        >
-          <CardHeader>
-            <CardTitle>Your Investment Portfolio</CardTitle>
-            <CardDescription>
-              Track your stock market performance
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {portfolio ? (
+            </CardContent>
+          </Card>
+        ) : (
+          <NewsPlaceholder />
+        )}
+
+        {portfolio && portfolio.totalbalance !== 10000 ? (
+          <Card
+            className="cursor-pointer transition hover:shadow-lg flex flex-col justify-between"
+            onClick={() => navigate("/stocksim?portfolio_type=personal")}
+          >
+            <CardHeader>
+              <CardTitle>Your Investment Portfolio</CardTitle>
+              <CardDescription>
+                Track your stock market performance
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
               <div className="text-center">
                 {/* Portfolio Growth Chart */}
                 <div className="mt-4">
@@ -309,11 +310,11 @@ const Dashboard = () => {
                   />
                 </div>
               </div>
-            ) : (
-              <p>Loading portfolio data...</p>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ) : (
+          <StocksimPlaceholder />
+        )}
       </div>
     </div>
   );
