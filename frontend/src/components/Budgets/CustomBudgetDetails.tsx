@@ -6,7 +6,7 @@ import { useParams } from "react-router-dom";
 import ShowFriends from "../UserServices/ShowFriends";
 import "../../App.css";
 import ChatRoom from "../UserServices/ChatRoom";
-import TestBudgetChart from "../charts/TestBudgetChart";
+import TestBudgetChart from "../charts/BudgetChart";
 import {
   Table,
   TableBody,

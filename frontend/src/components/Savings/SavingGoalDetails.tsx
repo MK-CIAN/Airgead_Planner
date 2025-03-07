@@ -13,7 +13,7 @@ import {
   CarouselPrevious,
   CarouselNext,
 } from "@/components/ui/carousel";
-import SavingsChart from "../charts/TestSavingsChart";
+import SavingsChart from "../charts/SavingsChart";
 import UpdateSavingsForm from "./SavingsUpdateForms";
 import ShowFriends from "../UserServices/ShowFriends";
 import ChatRoom from "../UserServices/ChatRoom";

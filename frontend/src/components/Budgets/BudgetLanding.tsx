@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Axios from "../Axios";
 import { useNavigate } from "react-router-dom";
 import dayjs, { Dayjs } from "dayjs";
-import TestBudgetChart from "../charts/TestBudgetChart";
+import BudgetChart from "../charts/BudgetChart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +27,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "../ui/carousel";
+import BudgetPlaceholder from "../Placeholders/BudgetPlaceholder";
 
 interface CustomBudget {
   id: number;
@@ -235,23 +236,28 @@ const MainBudgetPage: React.FC = () => {
         <h2 className="text-center text-2xl font-bold">Your Monthly Budgets</h2>
         <h2 className="text-center text-2xl font-bold">Your Custom Budgets</h2>
         {/* Monthly Budget Section */}
-        <Card
-          className="cursor-pointer hover:shadow-md transition-shadow"
-          data-testid="monthly-budget-card"
-          onClick={() => navigate("monthly-budget")}
-        >
-          <CardHeader>
-            <CardTitle>{currentMonth.format("MMMM YYYY")} Budget</CardTitle>
-            <CardDescription>test description</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TestBudgetChart
-              data={budgetData}
-              showTitle={false}
-              useCard={false}
-            />
-          </CardContent>
-        </Card>
+
+        {budgetData.length > 0 ? (
+          <Card
+            className="cursor-pointer hover:shadow-md transition-shadow"
+            data-testid="monthly-budget-card"
+            onClick={() => navigate("/budget/monthly-budget")}
+          >
+            <CardHeader>
+              <CardTitle>{currentMonth.format("MMMM YYYY")} Budget</CardTitle>
+              <CardDescription>Your Budget For This Month</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <BudgetChart
+                data={budgetData}
+                showTitle={false}
+                useCard={false}
+              />
+            </CardContent>
+          </Card>
+        ) : (
+          <BudgetPlaceholder />
+        )}
 
         {/* Custom Budgets - Carousel */}
         {customBudgets.length > 0 ? (
@@ -268,7 +274,7 @@ const MainBudgetPage: React.FC = () => {
                     </CardHeader>
                     <CardContent>
                       {budget.items.length > 0 ? (
-                        <TestBudgetChart
+                        <BudgetChart
                           data={budget.items}
                           showTitle={false}
                           useCard={false}

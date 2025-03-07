@@ -21,18 +21,26 @@ interface PortfolioHistoryEntry {
 interface PortfolioGrowthChartProps {
   portfolioType: "personal" | "league";
   leagueId?: string;
+  showTitle?: boolean;
+  showCardContainer?: boolean;
 }
 
-const PortfolioGrowthChart: React.FC<PortfolioGrowthChartProps> = ({ portfolioType, leagueId }) => {
+const PortfolioGrowthChart: React.FC<PortfolioGrowthChartProps> = ({
+  portfolioType,
+  leagueId,
+  showTitle = true,
+  showCardContainer = true,
+}) => {
   const [history, setHistory] = useState<PortfolioHistoryEntry[]>([]);
   const initialBalance = 10000;
 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const url = portfolioType === "league"
-          ? `data/portfolio/history/?portfolio_type=league&league_id=${leagueId}`
-          : `data/portfolio/history/?portfolio_type=personal`;
+        const url =
+          portfolioType === "league"
+            ? `data/portfolio/history/?portfolio_type=league&league_id=${leagueId}`
+            : `data/portfolio/history/?portfolio_type=personal`;
 
         const response = await Axios.get(url);
         setHistory(response.data);
@@ -80,18 +88,19 @@ const PortfolioGrowthChart: React.FC<PortfolioGrowthChartProps> = ({ portfolioTy
   const axisFontSize = isMobile ? 8 : 12;
   const leftMargin = isMobile ? -27.5 : 10; // ✅ Fixes left shifting issue
 
-  return (
+  return showCardContainer ? (
     <Card className="w-full max-w-4xl mx-auto">
       <CardContent>
-        <h3 className="text-xl font-semibold text-center mb-2">
-          Portfolio Growth Over Time
-        </h3>
-        {/* ✅ Ensure full-width on mobile */}
+        {showTitle && (
+          <h3 className="text-xl font-semibold text-center mb-2">
+            Portfolio Growth Over Time
+          </h3>
+        )}
         <div className="w-full sm:min-w-full mx-auto h-[300px] md:h-[380px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={formattedData}
-              margin={{ top: 10, right: 10, left: leftMargin, bottom: 10 }} // ✅ Adjusts left margin dynamically
+              margin={{ top: 10, right: 10, left: leftMargin, bottom: 10 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
@@ -120,28 +129,46 @@ const PortfolioGrowthChart: React.FC<PortfolioGrowthChartProps> = ({ portfolioTy
           </ResponsiveContainer>
         </div>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-base">
-        <div className="flex gap-2 font-semibold leading-tight">
-          {portfolioChange >= 0 ? (
-            <>
-              Trending up by {percentageChange}%{" "}
-              <TrendingUp className="h-6 w-6 text-green-500" />
-            </>
-          ) : (
-            <>
-              Down by {percentageChange}%{" "}
-              <TrendingDown className="h-6 w-6 text-red-500" />
-            </>
-          )}
-        </div>
-        <div className="leading-snug text-muted-foreground text-lg">
-          {portfolioChange >= 0
-            ? "Your portfolio is growing!"
-            : "Your portfolio has declined."}
-        </div>
-      </CardFooter>
     </Card>
-  );
+  ) : (
+    <div className="w-full h-[300px] md:h-[380px]">
+      {showTitle && (
+        <h3 className="text-xl font-semibold text-center mb-2">
+          Portfolio Growth Over Time
+        </h3>
+      )}
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart
+          data={formattedData}
+          margin={{ top: 10, right: 10, left: leftMargin, bottom: 10 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis
+            dataKey="date"
+            tick={{ fontSize: axisFontSize }}
+            angle={-45}
+            textAnchor="middle"
+            interval="preserveStartEnd"
+          />
+          <YAxis domain={["auto", "auto"]} tick={{ fontSize: axisFontSize }} />
+          <Tooltip
+            formatter={(value: number | string) => [`$${Number(value).toFixed(2)}`, "Total Value"]}
+            labelFormatter={(label: any, payload: any[]) =>
+              payload.length > 0 ? payload[0].payload.tooltipDate : label
+            }
+          />
+          <Line
+            type="monotone"
+            dataKey="total_value"
+            stroke="hsl(150, 70%, 45%)"
+            strokeWidth={2.5}
+            dot={{ fill: "hsl(120, 60%, 40%)", r: 4 }}
+            activeDot={{ r: 6 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );  
 };
 
 export default PortfolioGrowthChart;
