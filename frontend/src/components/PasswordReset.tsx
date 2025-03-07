@@ -22,7 +22,7 @@ const PasswordReset = () => {
     const [ShowMessage, setShowMessage] = useState(false);
 
     const submission: SubmitHandler<IFormInput> = (data) => {
-        Axios.post(`api/password_reset/confirm/`, {
+        Axios.post(`password_reset/confirm/`, {
             password: data.password,
             token: token,
 

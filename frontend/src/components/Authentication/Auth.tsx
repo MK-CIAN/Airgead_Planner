@@ -124,16 +124,16 @@ const AuthPage = () => {
         email: data.email,
         password: data.password,
       });
-  
+
       const token = response.data.token;
       localStorage.setItem("Token", token);
-  
+
       const interestResponse = await Axios.get("data/interests/", {
         headers: { Authorization: `Bearer ${token}` },
       });
-  
+
       const interests = interestResponse.data.interests;
-  
+
       if (!interests || interests.length === 0) {
         navigate("/userinterests");
       } else {
@@ -141,12 +141,13 @@ const AuthPage = () => {
       }
     } catch (error: any) {
       console.error("Login Error:", error.response?.data || error);
-  
+
       // Handle specific API errors
       const errorDetail =
-        error.response?.data?.detail || "Login failed. Please check your credentials.";
+        error.response?.data?.detail ||
+        "Login failed. Please check your credentials.";
       setErrorMessage(errorDetail);
-  
+
       // Show toast notification for errors
       toast({
         title: "Login Error",
@@ -155,7 +156,6 @@ const AuthPage = () => {
       });
     }
   };
-  
 
   // Register Submission
   const registerSubmission: SubmitHandler<RegisterForm> = async (data) => {
@@ -195,11 +195,12 @@ const AuthPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-background text-foreground">
-      {/* Typewriter Effect */}
-      <TypewriterEffectSmooth
-        key={currentSentence}
-        words={sentences[currentSentence]}
-      />
+      <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight sm:leading-snug">
+        <TypewriterEffectSmooth
+          key={currentSentence}
+          words={sentences[currentSentence]}
+        />
+      </div>
 
       {/* Toggle Login / Signup */}
       <div className="flex space-x-4 my-6">
@@ -232,7 +233,7 @@ const AuthPage = () => {
       </div>
 
       {/* Authentication Card */}
-      <Card className="w-full max-w-md shadow-lg">
+      <Card className="w-full max-w-sm md:max-w-md lg:max-w-lg shadow-lg px-4 py-6">
         <CardHeader className="text-center text-xl font-semibold">
           {isLogin ? "Login" : "Register an Account"}
         </CardHeader>
@@ -286,7 +287,9 @@ const AuthPage = () => {
               >
                 Login
               </Button>
-              <Link to="/request/password_reset">Forgot your password? Reset here</Link>
+              <Link to="/request/password_reset">
+                Forgot your password? Reset here
+              </Link>
             </form>
           ) : (
             <form
