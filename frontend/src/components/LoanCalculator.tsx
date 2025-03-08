@@ -4,11 +4,19 @@ import LoanForm from "./forms/LoanForm";
 import LoanChart from "./charts/LoanChart";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Card, CardContent } from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import dayjs from "dayjs";
 import ActiveLoanForm from "./forms/ActiveLoanForm";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "./ui/carousel";
+import LoanPlaceholder from "./Placeholders/LoanPlaceholder";
 
 interface LoanData {
   id: string;
@@ -363,7 +371,7 @@ const LoanCalculator: React.FC = () => {
         Loan Repayment Calculator
       </h1>
 
-      {/* Conditionally render "Add New Loan" button */}
+      {/* Conditionally render "Add New Loan" buttons */}
       {!editingLoan && (
         <div className="flex justify-center space-x-4 mt-4">
           <Button
@@ -398,8 +406,8 @@ const LoanCalculator: React.FC = () => {
         </Card>
       )}
 
-      {/* Expanded Loan View */}
-      {editingLoan && (
+      {/* Expanded Loan View - Fullscreen when Editing */}
+      {editingLoan ? (
         <div className="w-full lg:w-4/5 mx-auto mb-6">
           {loans
             .filter((loan) => loan.id === editingLoan)
@@ -461,122 +469,166 @@ const LoanCalculator: React.FC = () => {
               </Card>
             ))}
         </div>
-      )}
-
-      {/* Remaining Loans */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-5">
-        {!editingLoan &&
-          loans.map((loan) => (
-            <Card
-              key={loan.id}
-              className="cursor-pointer hover:shadow-md transition-shadow"
-            >
+      ) : (
+        /* Loan Carousels - Render only when NOT editing */
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          {/* Left Card - Calculated Loans */}
+          {loans.length > 0 ? (
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold text-center">
+                  Calculated Loans
+                </CardTitle>
+              </CardHeader>
               <CardContent>
-                <h2 className="text-xl font-bold text-center mb-4">
-                  {loan.name}
-                </h2>
-                <p className="mb-2">
-                  Initial Balance: €{loan.balance.toFixed(2)}
-                </p>
-                <p className="mb-2">Interest Rate: {loan.interestRate}%</p>
-                <p className="mb-2">
-                  Monthly Payment: €{loan.monthlyPayment.toFixed(2)}
-                </p>
-                <p className="mb-2">
-                  Total Interest: €{loan.totalInterest.toFixed(2)}
-                </p>
-                <p className="mb-4">Term Length: {loan.termLength} months</p>
+                <Carousel>
+                  <CarouselContent>
+                    {loans.map((loan) => (
+                      <CarouselItem key={loan.id}>
+                        <Card className="shadow-lg">
+                          <CardContent>
+                            <h2 className="text-xl font-bold text-center mb-4">
+                              {loan.name}
+                            </h2>
+                            <p>Initial Balance: €{loan.balance.toFixed(2)}</p>
+                            <p>Interest Rate: {loan.interestRate}%</p>
+                            <p>
+                              Monthly Payment: €{loan.monthlyPayment.toFixed(2)}
+                            </p>
+                            <p>
+                              Total Interest: €{loan.totalInterest.toFixed(2)}
+                            </p>
+                            <p>Term Length: {loan.termLength} months</p>
 
-                <LoanChart
-                  repaymentSchedule={loan.repaymentSchedule}
-                  totalInterest={loan.totalInterest}
-                  loanBalance={loan.balance}
-                  termLength={loan.termLength}
-                  interestRate={loan.interestRate}
-                  isEditing={editingLoan === loan.id}
-                  isActiveLoan={false}
-                />
+                            <LoanChart
+                              repaymentSchedule={loan.repaymentSchedule}
+                              totalInterest={loan.totalInterest}
+                              loanBalance={loan.balance}
+                              termLength={loan.termLength}
+                              interestRate={loan.interestRate}
+                              isEditing={editingLoan === loan.id}
+                              isActiveLoan={false}
+                            />
 
-                {/* Centered Buttons */}
-                <div className="flex justify-center space-x-4 mt-4">
-                  <Button
-                    onClick={() => {
-                      handleEditLoan(loan);
-                      setIsFormVisible(false);
-                      isEditing(true);
-                    }}
-                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
-                  >
-                    Edit
-                  </Button>
-                  {!loan.saved && (
-                    <Button
-                      onClick={() => handleSaveLoan(loan)}
-                      className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
-                    >
-                      Save
-                    </Button>
+                            <div className="flex justify-center space-x-4 mt-4">
+                              <Button
+                                onClick={() => {
+                                  handleEditLoan(loan);
+                                  setIsFormVisible(false);
+                                  isEditing(true);
+                                }}
+                                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                              >
+                                Edit
+                              </Button>
+                              {!loan.saved && (
+                                <Button
+                                  onClick={() => handleSaveLoan(loan)}
+                                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                                >
+                                  Save
+                                </Button>
+                              )}
+                              <Button
+                                onClick={() => handleRemoveLoan(loan.id)}
+                                className="bg-red-600 text-white px-4 py-2 rounded"
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  {loans.length > 1 && (
+                    <>
+                      <CarouselPrevious />
+                      <CarouselNext />
+                    </>
                   )}
-                  <Button
-                    onClick={() => handleRemoveLoan(loan.id)}
-                    className="bg-red-600 text-white px-4 py-2 rounded"
-                  >
-                    Remove
-                  </Button>
-                </div>
+                </Carousel>
               </CardContent>
             </Card>
-          ))}
-      </div>
+          ) : (
+            <LoanPlaceholder type="calculated-loan" />
+          )}
 
-      {/* Display Active Loans */}
-      <h2 className="text-xl font-semibold mt-6">Active Loans</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {activeLoans.map((loan) => (
-          <Card
-            key={loan.id}
-            className="cursor-pointer hover:shadow-md transition-shadow"
-          >
-            <CardContent>
-              <h2 className="text-xl font-bold">{loan.name}</h2>
-              <p>Balance: €{loan.balance.toFixed(2)}</p>
-              <p>Interest Rate: {loan.interestRate}%</p>
-              <p>Monthly Payment: €{loan.monthlyPayment.toFixed(2)}</p>
-              <p>Payment Due Date: {loan.paymentDueDate}</p>
-              <LoanChart
-                repaymentSchedule={generateRepaymentSchedule(
-                  loan.originalBalance,
-                  loan.interestRate,
-                  loan.termLength
-                )}
-                loanBalance={loan.balance}
-                originalBalance={loan.originalBalance} // Pass original balance
-                interestRate={loan.interestRate}
-                termLength={loan.termLength}
-                totalInterest={loan.totalInterest}
-                isEditing={false}
-                isActiveLoan={true}
-              />
-              <div className="flex justify-center space-x-4 mt-4">
-                <Button
-                  onClick={() => {
-                    navigate(`loan-details/${loan.id}`);
-                  }}
-                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
-                >
-                  Expand
-                </Button>
-                <Button
-                  onClick={() => handleRemoveActiveLoan(loan.id)}
-                  className="bg-red-600 text-white px-4 py-2 rounded"
-                >
-                  Remove
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+          {/* Right Card - Active Loans */}
+          {activeLoans.length > 0 ? (
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold text-center">
+                  Active Loans
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Carousel>
+                  <CarouselContent>
+                    {activeLoans.map((loan) => (
+                      <CarouselItem key={loan.id}>
+                        <Card className="cursor-pointer hover:shadow-md transition-shadow">
+                          <CardContent>
+                            <h2 className="text-xl font-bold text-center mb-4">
+                              {loan.name}
+                            </h2>
+                            <p>Balance: €{loan.balance.toFixed(2)}</p>
+                            <p>Interest Rate: {loan.interestRate}%</p>
+                            <p>
+                              Monthly Payment: €{loan.monthlyPayment.toFixed(2)}
+                            </p>
+                            <p>Payment Due Date: {loan.paymentDueDate}</p>
+
+                            <LoanChart
+                              repaymentSchedule={generateRepaymentSchedule(
+                                loan.originalBalance,
+                                loan.interestRate,
+                                loan.termLength
+                              )}
+                              loanBalance={loan.balance}
+                              originalBalance={loan.originalBalance}
+                              interestRate={loan.interestRate}
+                              termLength={loan.termLength}
+                              totalInterest={loan.totalInterest}
+                              isEditing={false}
+                              isActiveLoan={true}
+                            />
+
+                            <div className="flex justify-center space-x-4 mt-4">
+                              <Button
+                                onClick={() => {
+                                  navigate(`loan-details/${loan.id}`);
+                                }}
+                                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                              >
+                                Expand
+                              </Button>
+                              <Button
+                                onClick={() => handleRemoveActiveLoan(loan.id)}
+                                className="bg-red-600 text-white px-4 py-2 rounded"
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  {activeLoans.length > 1 && (
+                    <>
+                      <CarouselPrevious />
+                      <CarouselNext />
+                    </>
+                  )}
+                </Carousel>
+              </CardContent>
+            </Card>
+          ) : (
+            <LoanPlaceholder type="active-loan" />
+          )}
+        </div>
+      )}
     </div>
   );
 };
