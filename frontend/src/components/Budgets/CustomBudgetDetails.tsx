@@ -25,6 +25,7 @@ import {
   CarouselPrevious,
 } from "../ui/carousel";
 import BudgetRadarChart from "./BudgetRadarChart";
+import FeatureTooltip from "../ui/featureTooltip";
 
 interface BudgetData {
   id: number;
@@ -148,6 +149,7 @@ const CustomBudgetDetails: React.FC = () => {
         </Card>
 
         {/* Budget List */}
+        <FeatureTooltip content="A list of your budget items.">
         <Card className="overflow-y-auto max-h-[350px] border p-4">
           <Typography variant="h6" className="mb-2">
             Budget Items
@@ -222,10 +224,12 @@ const CustomBudgetDetails: React.FC = () => {
             </Table>
           </div>
         </Card>
+        </FeatureTooltip>
       </div>
 
       {/* Contributors Section */}
       <div className="text-right mt-4">
+      <FeatureTooltip content="Add friends to contribute to your budget.">
         <ShowFriends
           entityId={id}
           entityType="budget"
@@ -235,10 +239,12 @@ const CustomBudgetDetails: React.FC = () => {
             </Button>
           }
         />
+      </FeatureTooltip>
       </div>
 
       {/* Budget Charts */}
       <div className="mt-5 flex justify-center">
+      <FeatureTooltip content="Visualizations of your budget data and expenditures spread.">
         <Carousel>
           <CarouselContent>
             <CarouselItem>
@@ -251,14 +257,17 @@ const CustomBudgetDetails: React.FC = () => {
           <CarouselPrevious />
           <CarouselNext />
         </Carousel>
+      </FeatureTooltip>
       </div>
 
       {/* Chatroom Section */}
       <div className="mt-5">
+      <FeatureTooltip content="Chat with contributors and discuss budget details.">
         <Typography variant="h6" className="mb-4">
           Chatroom
         </Typography>
         <ChatRoom entityId={Number(id)} entityType="budget" />
+      </FeatureTooltip>
       </div>
     </div>
   );

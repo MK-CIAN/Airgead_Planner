@@ -14,6 +14,7 @@ import { toast } from "@/hooks/use-toast";
 import { PensionGrowthChart } from "./charts/PensionGrowthChart";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import PensionPlaceholder from "./Placeholders/PensionPlaceholder";
+import FeatureTooltip from "./ui/featureTooltip";
 
 interface PensionProjection {
   id: number;
@@ -174,6 +175,7 @@ const PensionPlanner: React.FC = () => {
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 items-start">
         
         {/* Left Side - Input Section */}
+        <FeatureTooltip content="Calculate a pension projection to see your possible retirement savings.">
         <Card className="hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle className="text-xl font-semibold text-center">
@@ -248,9 +250,11 @@ const PensionPlanner: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+        </FeatureTooltip>
   
         {/* Right Side - Saved Projections */}
         {savedProjections.length > 0 ? (
+          <FeatureTooltip content="Your saved pension projections expand to show more details.">
           <Card className="hover:shadow-md transition-shadow">
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-center">
@@ -290,6 +294,7 @@ const PensionPlanner: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+          </FeatureTooltip>
         ) : (
           <PensionPlaceholder />
         )}
@@ -297,6 +302,7 @@ const PensionPlanner: React.FC = () => {
   
       {/* Expanded Projection Section */}
       {expandedProjection && (
+        <FeatureTooltip content="A breakdown of your calculated pension projection.">
         <div data-testid="pension-projection-card" className="mt-10 flex flex-col items-center">
           {/* Breakdown Table */}
           <div className="w-full max-w-3xl">
@@ -348,6 +354,7 @@ const PensionPlanner: React.FC = () => {
             />
           </div>
         </div>
+        </FeatureTooltip>
       )}
     </div>
   );    

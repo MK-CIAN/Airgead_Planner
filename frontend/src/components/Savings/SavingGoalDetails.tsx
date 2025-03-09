@@ -18,6 +18,7 @@ import UpdateSavingsForm from "./SavingsUpdateForms";
 import ShowFriends from "../UserServices/ShowFriends";
 import ChatRoom from "../UserServices/ChatRoom";
 import ProgressiveImageReveal from "./ProgressiveImageReveal";
+import FeatureTooltip from "../ui/featureTooltip";
 
 interface Contributor {
   id: number;
@@ -138,6 +139,7 @@ const SavingsGoalDetails: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Chart and Summary */}
+        <FeatureTooltip content="Your saving goal progress visualised.">
         <Card className="col-span-1">
           <CardHeader>
             <CardTitle>Progress and Image</CardTitle>
@@ -173,8 +175,10 @@ const SavingsGoalDetails: React.FC = () => {
             </Carousel>
           </CardContent>
         </Card>
+        </FeatureTooltip>
 
         {/* Contribution Form */}
+        <FeatureTooltip content="Add a contribution to your saving goal.">
         <Card className="col-span-1">
           <CardHeader>
             <CardTitle>Add Contribution</CardTitle>
@@ -186,9 +190,11 @@ const SavingsGoalDetails: React.FC = () => {
             />
           </CardContent>
         </Card>
+        </FeatureTooltip>
       </div>
 
       {/* Image Upload */}
+      <FeatureTooltip content="Upload an image to your saving goal to visualise your goal better.">
       <Card className="mt-6">
         <CardHeader>
           <CardTitle>Upload Image</CardTitle>
@@ -210,9 +216,11 @@ const SavingsGoalDetails: React.FC = () => {
           </form>
         </CardContent>
       </Card>
+      </FeatureTooltip>
 
       {/* Contributors Section */}
       <div className="text-right mt-4">
+      <FeatureTooltip content="Have a shared goal with friends? Add them to contribute to your goal.">
         <ShowFriends
           entityId={id}
           entityType="savingsGoal"
@@ -222,9 +230,11 @@ const SavingsGoalDetails: React.FC = () => {
             </Button>
           }
         />
+      </FeatureTooltip>
       </div>
 
       {/* Contribution History */}
+      <FeatureTooltip content="Track your contribution history.">
       <Card className="mt-6">
         <CardHeader>
           <CardTitle>Contribution History</CardTitle>
@@ -243,6 +253,7 @@ const SavingsGoalDetails: React.FC = () => {
           )}
         </CardContent>
       </Card>
+      </FeatureTooltip>
 
       {/* Chat Room */}
       <div className="mt-6">

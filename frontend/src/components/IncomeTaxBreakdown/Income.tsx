@@ -30,6 +30,7 @@ import {
 } from "../ui/carousel";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import IncomePlaceholder from "../Placeholders/IncomePlaceholder";
+import FeatureTooltip from "../ui/featureTooltip";
 
 interface IncomeTaxBreakdown {
   id: number;
@@ -239,6 +240,7 @@ const IncomeTaxCalculator: React.FC = () => {
       <div className="grid gap-6 md:grid-cols-2 items-start">
         
         {/* Input Section */}
+        <FeatureTooltip content="Calculate different income levels to see the effect on tax and net pay.">
         <Card className="hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle className="text-xl font-semibold text-center">
@@ -288,9 +290,11 @@ const IncomeTaxCalculator: React.FC = () => {
             </Button>
           </CardContent>
         </Card>
+        </FeatureTooltip>
   
         {/* Saved Salaries Section */}
         {savedBreakdowns.length > 0 ? (
+          <FeatureTooltip content="Your saved incomes with detailed breakdowns and tax rate chart.">
           <Card className="hover:shadow-md transition-shadow">
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-center">
@@ -466,6 +470,7 @@ const IncomeTaxCalculator: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+          </FeatureTooltip>
         ) : (
           <IncomePlaceholder type="breakdown" />
         )}
@@ -610,6 +615,7 @@ const IncomeTaxCalculator: React.FC = () => {
   
       {/* Comparison Section */}
       {savedBreakdowns.length > 1 ? (
+        <FeatureTooltip content="Compare different incomes to see how they can affect your every day life.">
         <Card className="hover:shadow-md transition-shadow mt-8">
           <CardHeader>
             <CardTitle className="text-xl font-semibold text-center">
@@ -655,6 +661,7 @@ const IncomeTaxCalculator: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+        </FeatureTooltip>
       ) : (
         <IncomePlaceholder type="comparison"/>
       )}

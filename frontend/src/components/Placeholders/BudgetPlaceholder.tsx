@@ -33,7 +33,7 @@ export default function BudgetPlaceholder({ type = "monthly-budget" }) {
             className="bg-green-500 hover:bg-green-600 text-white"
             onClick={() => navigate("/budget/monthly-budget")}
           >
-            Create Budget
+            Start Your Monthly Budget
           </Button>
         )}
       </CardContent>

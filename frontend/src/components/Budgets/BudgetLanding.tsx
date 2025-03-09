@@ -28,6 +28,7 @@ import {
   CarouselPrevious,
 } from "../ui/carousel";
 import BudgetPlaceholder from "../Placeholders/BudgetPlaceholder";
+import FeatureTooltip from "../ui/featureTooltip";
 
 interface CustomBudget {
   id: number;
@@ -152,6 +153,7 @@ const MainBudgetPage: React.FC = () => {
     <div className="p-4 max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <h2 className="text-center text-2xl font-bold">Budgets Overview</h2>
+
       {/* Custom Budget Form - Toggle */}
       <div className="text-center">
         <Button
@@ -183,7 +185,11 @@ const MainBudgetPage: React.FC = () => {
                 <Label htmlFor="start-date">Start Date</Label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" data-testid="custom-budget-start-date" className="w-full text-left">
+                    <Button
+                      variant="outline"
+                      data-testid="custom-budget-start-date"
+                      className="w-full text-left"
+                    >
                       {startDate
                         ? format(startDate.toDate(), "PPP")
                         : "Pick a date"}
@@ -200,10 +206,14 @@ const MainBudgetPage: React.FC = () => {
                 </Popover>
               </div>
               <div>
-              <Label htmlFor="start-date">End Date</Label>
+                <Label htmlFor="end-date">End Date</Label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" data-testid="custom-budget-end-date" className="w-full text-left">
+                    <Button
+                      variant="outline"
+                      data-testid="custom-budget-end-date"
+                      className="w-full text-left"
+                    >
                       {endDate
                         ? format(endDate.toDate(), "PPP")
                         : "Pick a date"}
@@ -231,70 +241,94 @@ const MainBudgetPage: React.FC = () => {
         </Card>
       )}
 
-      {/* Budgets Display - Side by Side Layout */}
+      {/* Budgets Display - Encapsulated in Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <h2 className="text-center text-2xl font-bold">Your Monthly Budgets</h2>
-        <h2 className="text-center text-2xl font-bold">Your Custom Budgets</h2>
-        {/* Monthly Budget Section */}
+        {/* Monthly Budgets Section */}
+        <FeatureTooltip content="Your active monthly budget.">
+        <Card className="p-4">
+          <CardHeader>
+            <CardTitle className="text-center text-2xl font-bold">
+              Your Monthly Budgets
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {budgetData.length > 0 ? (
+              <Card
+                className="cursor-pointer hover:shadow-md transition-shadow"
+                data-testid="monthly-budget-card"
+                onClick={() => navigate("/budget/monthly-budget")}
+              >
+                <CardHeader>
+                  <CardTitle>
+                    {currentMonth.format("MMMM YYYY")} Budget
+                  </CardTitle>
+                  <CardDescription>Your Budget For This Month</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <BudgetChart
+                    data={budgetData}
+                    showTitle={false}
+                    useCard={false}
+                  />
+                </CardContent>
+              </Card>
+            ) : (
+              <BudgetPlaceholder type="monthly-budget" />
+            )}
+          </CardContent>
+        </Card>
+        </FeatureTooltip>
 
-        {budgetData.length > 0 ? (
-          <Card
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            data-testid="monthly-budget-card"
-            onClick={() => navigate("/budget/monthly-budget")}
-          >
-            <CardHeader>
-              <CardTitle>{currentMonth.format("MMMM YYYY")} Budget</CardTitle>
-              <CardDescription>Your Budget For This Month</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <BudgetChart
-                data={budgetData}
-                showTitle={false}
-                useCard={false}
-              />
-            </CardContent>
-          </Card>
-        ) : (
-          <BudgetPlaceholder type="monthly-budget" />
-        )}
-
-        {/* Custom Budgets - Carousel */}
-        {customBudgets.length > 0 ? (
-          <Carousel className="cursor-pointer hover:shadow-md transition-shadow relative">
-            <CarouselContent>
-              {customBudgets.map((budget) => (
-                <CarouselItem key={budget.id}>
-                  <Card data-testid="custom-budget-card" onClick={() => navigate(`custom-budget/${budget.id}`)}>
-                    <CardHeader>
-                      <CardTitle>{budget.name}</CardTitle>
-                      <CardDescription>
-                        {budget.start_date} - {budget.end_date}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {budget.items.length > 0 ? (
-                        <BudgetChart
-                          data={budget.items}
-                          showTitle={false}
-                          useCard={false}
-                        />
-                      ) : (
-                        <p className="text-center text-gray-500">
-                          No data available
-                        </p>
-                      )}
-                    </CardContent>
-                  </Card>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="absolute left-[-1px] top-1/2 transform -translate-y-1/2" />
-            <CarouselNext className="absolute right-[-1px] top-1/2 transform -translate-y-1/2" />
-          </Carousel>
-        ) : (
-          <BudgetPlaceholder type="custom-budget" />
-        )}
+        {/* Custom Budgets Section */}
+        <FeatureTooltip content="Your active custom budgets.">
+        <Card className="p-4">
+          <CardHeader>
+            <CardTitle className="text-center text-2xl font-bold">
+              Your Custom Budgets
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {customBudgets.length > 0 ? (
+              <Carousel className="cursor-pointer hover:shadow-md transition-shadow relative">
+                <CarouselContent>
+                  {customBudgets.map((budget) => (
+                    <CarouselItem key={budget.id}>
+                      <Card
+                        data-testid="custom-budget-card"
+                        onClick={() => navigate(`custom-budget/${budget.id}`)}
+                      >
+                        <CardHeader>
+                          <CardTitle>{budget.name}</CardTitle>
+                          <CardDescription>
+                            {budget.start_date} - {budget.end_date}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          {budget.items.length > 0 ? (
+                            <BudgetChart
+                              data={budget.items}
+                              showTitle={false}
+                              useCard={false}
+                            />
+                          ) : (
+                            <p className="text-center text-gray-500">
+                              No data available
+                            </p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="absolute left-[-1px] top-1/2 transform -translate-y-1/2" />
+                <CarouselNext className="absolute right-[-1px] top-1/2 transform -translate-y-1/2" />
+              </Carousel>
+            ) : (
+              <BudgetPlaceholder type="custom-budget" />
+            )}
+          </CardContent>
+        </Card>
+        </FeatureTooltip>
       </div>
     </div>
   );

@@ -23,6 +23,7 @@ import {
   CarouselPrevious,
 } from "../ui/carousel";
 import FinancialSuggestions from "../FinancialSuggestions";
+import FeatureTooltip from "../ui/featureTooltip";
 
 interface BudgetData {
   id: number;
@@ -207,11 +208,14 @@ const Budget: React.FC = () => {
       {/* Responsive Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
         {/* Budget Form */}
+        <FeatureTooltip content="Add new budget items">
         <Card className="bg-gray-50 p-4 rounded-md">
           <BudgetForm onAddBudget={handleAddBudgetItem} />
         </Card>
+        </FeatureTooltip>
 
         {/* Budget List */}
+        <FeatureTooltip content="A list of your budget items.">
         <Card className="overflow-y-auto max-h-[350px] border p-4">
           <Typography variant="h6" className="mb-2">
             Budget Items
@@ -286,10 +290,12 @@ const Budget: React.FC = () => {
             </Table>
           </div>
         </Card>
+        </FeatureTooltip>
       </div>
 
       {/* Budget Charts */}
       <div className="mt-5 flex justify-center">
+      <FeatureTooltip content="Visualizations of your budget data and expenditures spread">
         <Carousel>
           <CarouselContent>
             <CarouselItem>
@@ -302,6 +308,7 @@ const Budget: React.FC = () => {
           <CarouselPrevious />
           <CarouselNext />
         </Carousel>
+        </FeatureTooltip>
       </div>
     </div>
   );

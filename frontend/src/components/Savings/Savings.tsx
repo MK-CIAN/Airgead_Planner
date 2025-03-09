@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "../ui/card";
 import SavingsPlaceholder from "../Placeholders/SavingsPlaceholder";
+import FeatureTooltip from "../ui/featureTooltip";
 
 interface SavingsGoalData {
   id: string;
@@ -93,9 +94,10 @@ const Savings: React.FC = () => {
       )}
 
       {/* Savings Goals Grid */}
-      {/* Savings Goals Section */}
       {savingsData.length > 0 ? (
+        <FeatureTooltip content="See your savings goals and track your progress.">
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mt-5">
+          
           {savingsData.map((goal) => (
             <div
               key={goal.id}
@@ -133,6 +135,7 @@ const Savings: React.FC = () => {
             </div>
           ))}
         </div>
+        </FeatureTooltip>
       ) : (
         <div className="flex justify-center items-center h-96">
           <SavingsPlaceholder pageType="mainpage" />

@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import FeatureTooltip from "./ui/featureTooltip";
 
 interface Portfolio {
   balance: number;
@@ -136,6 +137,7 @@ const Portfolio: React.FC<PortfolioProps> = ({
           ) : portfolio ? (
             <>
               <div className="mb-4 p-4 border rounded-lg">
+              <FeatureTooltip content="Your current cash balance and total balance.">
                 <p className="text-lg font-semibold">
                   Cash Balance: $
                   {typeof portfolio.balance === "number"
@@ -145,8 +147,10 @@ const Portfolio: React.FC<PortfolioProps> = ({
                 <p className="text-lg font-semibold">
                   Total Balance: ${portfolio?.totalbalance?.toFixed(2)}
                 </p>
+              </FeatureTooltip>
               </div>
 
+              <FeatureTooltip content="Your current stock holdings and their value.">
               <h3 className="font-semibold mb-2">Holdings</h3>
               <div className="space-y-3">
                 {portfolio.holdings.length > 0 ? (
@@ -171,6 +175,7 @@ const Portfolio: React.FC<PortfolioProps> = ({
                   <p>No holdings available.</p>
                 )}
               </div>
+              </FeatureTooltip>
             </>
           ) : (
             <p>No portfolio data available.</p>
@@ -178,6 +183,7 @@ const Portfolio: React.FC<PortfolioProps> = ({
 
           {/* Transaction Section */}
           <div className="mt-6 p-4 border rounded-lg">
+            <FeatureTooltip content="Choose a stock, enter the amount you want to spend, and click 'Submit' to make a transaction.">
             <h3 className="font-semibold mb-2">Make a Transaction</h3>
             <div className="flex flex-col space-y-2">
               <Select onValueChange={(value) => setTicker(value)}>
@@ -225,6 +231,7 @@ const Portfolio: React.FC<PortfolioProps> = ({
                 </Button>
               </div>
             </div>
+            </FeatureTooltip>
           </div>
         </div>
 
