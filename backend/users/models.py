@@ -35,6 +35,7 @@ class CustomUser(AbstractUser):
     email = models.EmailField(max_length=200, unique=True)
     username = models.CharField(max_length=100, unique=True)
     date_of_birth = models.DateField(null=True, blank=True)
+    tooltips_enabled = models.BooleanField(default=True)
 
     objects = CustomUserManager()
 

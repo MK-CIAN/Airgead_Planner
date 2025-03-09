@@ -16,7 +16,7 @@ import UserInterest from './components/UserInterests'
 import CustomBudget from './components/Budgets/BudgetLanding'
 import CustomBudgetDetails from './components/Budgets/CustomBudgetDetails'
 import SavingsGoalDetails from './components/Savings/SavingGoalDetails'
-import TestNav from './components/TestNav'
+import Navigation from './components/Navigation'
 import { Toaster } from './components/ui/toaster';
 import FinancialSuggestions from './components/FinancialSuggestions'
 import LoanDetails from './components/Loans/LoanDetails'
@@ -37,7 +37,7 @@ function App() {
           <Route path="/password-reset/:token" element={<PasswordReset />} />
         </Routes>
       ) : (
-        <TestNav
+        <Navigation
           content={
             <Routes>
               <Route element={<ProtectedRoute />}>

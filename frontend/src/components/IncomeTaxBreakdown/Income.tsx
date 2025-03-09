@@ -669,7 +669,6 @@ const IncomeTaxCalculator: React.FC = () => {
       )}
     </div>
   );
-  
 };
 
 export default IncomeTaxCalculator;

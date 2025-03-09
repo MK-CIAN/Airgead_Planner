@@ -8,10 +8,20 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model, authenticate
 from knox.models import AuthToken
 from rest_framework.views import APIView
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
 User = get_user_model()
+
+class ToggleTooltipsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        user.tooltips_enabled = not user.tooltips_enabled  # Toggle the value
+        user.save()
+        return Response({"tooltips_enabled": user.tooltips_enabled}, status=status.HTTP_200_OK)
 
 #Login Viewset
 class LoginViewset(viewsets.ViewSet):

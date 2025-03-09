@@ -18,6 +18,8 @@ import BudgetPlaceholder from "./Placeholders/BudgetPlaceholder";
 import SavingsPlaceholder from "./Placeholders/SavingsPlaceholder";
 import NewsPlaceholder from "./Placeholders/NewsPlaceholder";
 import StocksimPlaceholder from "./Placeholders/StocksimPlaceholder";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import FeatureTooltip from "./ui/featureTooltip";
 
 interface BudgetData {
   id: number;
@@ -173,29 +175,32 @@ const Dashboard = () => {
       {/* First Row: Budget & Savings Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 items-stretch">
         {/* Budget Chart Widget */}
-        {budgetData.length > 0 ? (
-          <Card
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            data-testid="monthly-budget-card"
-            onClick={() => navigate("/budget/monthly-budget")}
-          >
-            <CardHeader>
-              <CardTitle>{currentMonth.format("MMMM YYYY")} Budget</CardTitle>
-              <CardDescription>Your Budget For This Month</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <BudgetChart
-                data={budgetData}
-                showTitle={false}
-                useCard={false}
-              />
-            </CardContent>
-          </Card>
-        ) : (
-          <BudgetPlaceholder type="monthly-budget"/>
-        )}
+        <FeatureTooltip content="View and manage your monthly budget allocations.">
+          {budgetData.length > 0 ? (
+            <Card
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              data-testid="monthly-budget-card"
+              onClick={() => navigate("/budget/monthly-budget")}
+            >
+              <CardHeader>
+                <CardTitle>{currentMonth.format("MMMM YYYY")} Budget</CardTitle>
+                <CardDescription>Your Budget For This Month</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <BudgetChart
+                  data={budgetData}
+                  showTitle={false}
+                  useCard={false}
+                />
+              </CardContent>
+            </Card>
+          ) : (
+            <BudgetPlaceholder type="monthly-budget" />
+          )}
+        </FeatureTooltip>
 
         {/* Savings Goal Widget */}
+        <FeatureTooltip content="Keep up to date with your saving goals progress.">
         {savingsData.length > 0 ? (
           <Card
             className="cursor-pointer transition hover:shadow-lg flex flex-col justify-between"
@@ -243,12 +248,14 @@ const Dashboard = () => {
             </div>
           </Card>
         ) : (
-          <SavingsPlaceholder pageType="dashboard"/>
+          <SavingsPlaceholder pageType="dashboard" />
         )}
+        </FeatureTooltip>
       </div>
 
       {/* Second Row: Top News Article Card */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+      <FeatureTooltip content="Your top recommended financial news article today.">
         {!loadingArticle && !articleError && topArticle ? (
           <Card className="cursor-pointer transition hover:shadow-lg flex flex-col justify-between">
             <CardHeader>
@@ -287,7 +294,9 @@ const Dashboard = () => {
         ) : (
           <NewsPlaceholder />
         )}
+        </FeatureTooltip>
 
+        <FeatureTooltip content="Your Investment Portolio Widget.">
         {portfolio && portfolio.totalbalance !== 10000 ? (
           <Card
             className="cursor-pointer transition hover:shadow-lg flex flex-col justify-between"
@@ -315,6 +324,7 @@ const Dashboard = () => {
         ) : (
           <StocksimPlaceholder />
         )}
+        </FeatureTooltip>
       </div>
     </div>
   );

@@ -16,18 +16,18 @@ import { useEffect, useState } from "react";
 import Notification from "./Notifications"; // Assume a replacement exists
 import Axios from "./Axios";
 import Search from "./UserServices/Search";
-
 import {
   Home,
   PieChart,
-  Savings,
+  PiggyBank,
   TrendingUp,
-  SsidChart,
+  LineChart,
   Newspaper,
   TrendingDown,
-  Logout,
-} from "@mui/icons-material";
-import { green } from "@mui/material/colors";
+  Calculator,
+  LogOut,
+} from "lucide-react";
+import TooltipToggle from "./UserServices/TooltipToggle";
 
 type DrawerItem = {
   path?: string;
@@ -38,7 +38,7 @@ type DrawerItem = {
   onClick?: () => void;
 };
 
-export default function TestNav({ content }: { content: React.ReactNode }) {
+export default function Navigation({ content }: { content: React.ReactNode }) {
   const [username, setUsername] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -68,12 +68,12 @@ export default function TestNav({ content }: { content: React.ReactNode }) {
       icon: PieChart,
       subPaths: ["/budget/monthly-budget", "/budget/custom-budget"],
     },
-    { path: "/savings", label: "Savings", icon: Savings, subPaths: ["/savings/"] },
+    { path: "/savings", label: "Savings", icon: PiggyBank, subPaths: ["/savings/"] },
     { path: "/pensions", label: "Pension Planner", icon: TrendingUp },
     {
       path: "/stocksimlanding",
       label: "Stock Market Simulator",
-      icon: SsidChart,
+      icon: LineChart,
       subPaths: [
         "/stocksim?portfolio_type=league",
         "/stocksim?portfolio_type=personal"
@@ -81,8 +81,8 @@ export default function TestNav({ content }: { content: React.ReactNode }) {
     },
     { path: "/news", label: "News For You", icon: Newspaper },
     { path: "/loans", label: "Loan Repayment Calculator", icon: TrendingDown, subPaths: ["/loans/loan-details/"] },
-    { path: "/income", label: "Income Tax Calculator", icon: TrendingDown },
-    { custom: true, label: "Logout", icon: Logout, onClick: logoutUser },
+    { path: "/income", label: "Income Tax Calculator", icon: Calculator },
+    { custom: true, label: "Logout", icon: LogOut, onClick: logoutUser },
   ];  
 
   const isActive = (item: DrawerItem) => {
@@ -201,7 +201,7 @@ export default function TestNav({ content }: { content: React.ReactNode }) {
                 className="flex items-center p-2 rounded hover:bg-green-600"
                 onClick={item.onClick}
               >
-                <item.icon className="mr-2" style={{ color: green[500] }} />
+                <item.icon className="mr-2 w-6 h-6 text-green-500" />
                 {item.label}
               </button>
             ) : (
@@ -214,7 +214,7 @@ export default function TestNav({ content }: { content: React.ReactNode }) {
                 }`}
                 key={item.path}
               >
-                <item.icon className="mr-2" style={{ color: green[500] }} />
+                <item.icon className="mr-2 w-6 h-6 text-green-500" />
                 {item.label}
               </Link>
             )
@@ -239,7 +239,9 @@ export default function TestNav({ content }: { content: React.ReactNode }) {
             </BreadcrumbList>
           </Breadcrumb>
 
+
           <div className="flex-1 flex items-center justify-end space-x-4">
+            <TooltipToggle />
             <Search />
             <Notification />
             <div className="text-sm font-medium">

@@ -9,6 +9,7 @@ router.register('login', LoginViewset, basename='login')
 
 # Use path for APIView-based views
 urlpatterns = router.urls + [
+    path('toggle-tooltips/', ToggleTooltipsView.as_view(), name='toggle-tooltips'),
     path('user', UserDetailView.as_view(), name='user-detail'),
     path('search', UserSearchView.as_view(), name='user-search'),
     path('friend-request', SendFriendRequestView.as_view(), name='send-friend-request'),
