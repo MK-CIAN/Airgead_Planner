@@ -24,7 +24,7 @@ export default function IncomePlaceholder({ type }: IncomePlaceholderProps) {
         <p className="text-muted-foreground">
           {type === "breakdown"
             ? "Tax can be complicated. Save different salary breakdowns to see how much tax you pay at different income levels."
-            : "You need at least two saved salary breakdowns to compare their tax impact. Save another salary breakdown to get started."}
+            : "You need at least two saved salary breakdowns to compare their tax and lifestyle impact. Save two salaries breakdown to get started."}
         </p>
       </CardContent>
     </Card>

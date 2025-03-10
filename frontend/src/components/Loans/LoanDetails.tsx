@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ActiveLoanChart from "./ActiveLoanChart";
 import { toast } from "@/hooks/use-toast";
+import FeatureTooltip from "../ui/featureTooltip";
 
 interface LoanDetailsProps {}
 
@@ -154,7 +155,7 @@ console.log("Formatted Payments:", formattedPayments);
           </p>
 
           
-
+          <FeatureTooltip content="See your loan and interest visualized over time.">
           {/* Loan Chart */}
           <ActiveLoanChart
             repaymentSchedule={generateRepaymentSchedule(
@@ -172,10 +173,12 @@ console.log("Formatted Payments:", formattedPayments);
             actualPayments={formattedPayments}
             createdAt={loan.createdAt} // Ensure this matches your API response field
           />
+          </FeatureTooltip>
 
 
           {/* Payment Input */}
           <div className="mt-6">
+            <FeatureTooltip content="Make a payment to reduce your loan balance.">
             <Input
               type="number"
               placeholder="Enter payment amount"
@@ -186,6 +189,7 @@ console.log("Formatted Payments:", formattedPayments);
             <Button onClick={handlePayment} className="bg-green-500 text-white">
               Make Payment
             </Button>
+            </FeatureTooltip>
           </div>
 
           {/* Payment History */}

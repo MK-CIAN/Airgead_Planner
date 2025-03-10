@@ -17,6 +17,7 @@ import {
   CarouselPrevious,
 } from "./ui/carousel";
 import LoanPlaceholder from "./Placeholders/LoanPlaceholder";
+import FeatureTooltip from "./ui/featureTooltip";
 
 interface LoanData {
   id: string;
@@ -41,6 +42,7 @@ interface ActiveLoanData {
   monthlyPayment: number;
   totalInterest: number;
   paymentDueDate: string;
+  remainingMonths: number;
 }
 
 const generateRepaymentSchedule = (
@@ -135,22 +137,33 @@ const LoanCalculator: React.FC = () => {
         console.error("Error fetching loans:", error);
       });
 
-    Axios.get(`data/active-loan/`)
+      Axios.get(`data/active-loan/`)
       .then((response) => {
-        const fetchedActiveLoans = response.data.map((loan: any) => ({
-          id: loan.id,
-          name: loan.name,
-          balance: parseFloat(loan.balance) || 0,
-          originalBalance: parseFloat(loan.original_balance) || 0,
-          interestRate: parseFloat(loan.interest_rate) || 0,
-          termLength: parseInt(loan.term_length, 10) || 0,
-          monthlyPayment: parseFloat(loan.monthly_payment) || 0,
-          totalInterest: parseFloat(loan.total_interest) || 0,
-          paymentDueDate: loan.payment_due_date,
-        }));
-
-        console.log("Original Balance: ", fetchedActiveLoans.originalBalance);
-
+        const fetchedActiveLoans = response.data.map((loan: any) => {
+          // Convert due date to a dayjs object
+          const firstPaymentDate = dayjs(loan.payment_due_date);
+          const today = dayjs();
+  
+          // Calculate months passed
+          const monthsElapsed = today.diff(firstPaymentDate, "month");
+  
+          // Remaining months calculation
+          const remainingMonths = Math.max(loan.term_length - monthsElapsed, 0);
+  
+          return {
+            id: loan.id,
+            name: loan.name,
+            balance: parseFloat(loan.balance) || 0,
+            originalBalance: parseFloat(loan.original_balance) || 0,
+            interestRate: parseFloat(loan.interest_rate) || 0,
+            termLength: parseInt(loan.term_length, 10) || 0,
+            monthlyPayment: parseFloat(loan.monthly_payment) || 0,
+            totalInterest: parseFloat(loan.total_interest) || 0,
+            paymentDueDate: loan.payment_due_date,
+            remainingMonths, // New property
+          };
+        });
+  
         setActiveLoans(fetchedActiveLoans);
       })
       .catch((error) => {
@@ -429,6 +442,7 @@ const LoanCalculator: React.FC = () => {
                   </p>
                   <p className="mb-4">Term Length: {loan.termLength} months</p>
 
+                  <FeatureTooltip content="Edit the monthly payment to see how it affects your repayment schedule.">
                   <Input
                     type="number"
                     placeholder="Custom Monthly Payment"
@@ -436,6 +450,7 @@ const LoanCalculator: React.FC = () => {
                     onChange={(e) => handleCustomMontlyPaymentChange(e, loan)}
                     className="mb-4"
                   />
+                  </FeatureTooltip>
 
                   <LoanChart
                     repaymentSchedule={loan.repaymentSchedule}
@@ -578,6 +593,7 @@ const LoanCalculator: React.FC = () => {
                               Monthly Payment: €{loan.monthlyPayment.toFixed(2)}
                             </p>
                             <p>Payment Due Date: {loan.paymentDueDate}</p>
+                            <p>Remaining Months: {loan.remainingMonths} months</p>
 
                             <LoanChart
                               repaymentSchedule={generateRepaymentSchedule(

@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+import FeatureTooltip from "./ui/featureTooltip";
 
 interface StockData {
   previous_close: any;
@@ -266,6 +267,7 @@ const StockSim: React.FC = () => {
           {/* ✅ Responsive Grid Layout */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* ✅ Leaderboard Section */}
+            <FeatureTooltip content="See how you rank against other league members.">
             <Card>
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold text-center mb-2">
@@ -313,8 +315,10 @@ const StockSim: React.FC = () => {
                 )}
               </CardContent>
             </Card>
+            </FeatureTooltip>
 
             {/* ✅ Chatroom Section */}
+            <FeatureTooltip content="Chat with other league members.">
             <Card>
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold text-center mb-2">
@@ -326,6 +330,7 @@ const StockSim: React.FC = () => {
                 />
               </CardContent>
             </Card>
+            </FeatureTooltip>
           </div>
         </div>
       )}

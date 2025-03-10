@@ -141,12 +141,14 @@ const CustomBudgetDetails: React.FC = () => {
       {/* Responsive Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
         {/* Add Items Form */}
+        <FeatureTooltip content="Add new budget items">
         <Card className="bg-gray-50 p-4 rounded-md">
           <Typography variant="h6" className="mb-4">
             Add Budget Item
           </Typography>
           <CustomBudgetForm onAddBudgetItem={handleAddBudgetItem} />
         </Card>
+        </FeatureTooltip>
 
         {/* Budget List */}
         <FeatureTooltip content="A list of your budget items.">

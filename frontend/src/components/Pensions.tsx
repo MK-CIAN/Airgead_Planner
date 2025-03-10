@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,6 +44,7 @@ const PensionPlanner: React.FC = () => {
   const [expandedProjection, setExpandedProjection] =
     useState<PensionProjection | null>(null);
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
+  const projectionRef = useRef<HTMLDivElement | null>(null);
 
   // Fetch saved projections from the backend
   useEffect(() => {
@@ -109,6 +110,12 @@ const PensionPlanner: React.FC = () => {
     setExpandedProjection(calculatedProjection); // Expand the new projection
     setExpandedCardId(null); // Collapse any previously expanded projection
     toast({ title: "Projection calculated successfully!" });
+
+    setTimeout(() => {
+      if (projectionRef.current) {
+        projectionRef.current.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 300);
   };
 
   const toggleCardExpansion = (id: number) => {
@@ -117,10 +124,25 @@ const PensionPlanner: React.FC = () => {
       setExpandedProjection(null); // Clear expanded projection
     } else {
       const expanded = savedProjections.find((proj) => proj.id === id);
-      setExpandedCardId(id);
-      setExpandedProjection(expanded || null); // Set expanded projection
+      
+      if (expanded) {
+        setExpandedCardId(id);
+        setExpandedProjection({
+          ...expanded,
+          total_contributions: Number(expanded.total_contributions) || 0,
+          total_growth: Number(expanded.total_growth) || 0,
+          final_pension_balance: Number(expanded.final_pension_balance) || 0,
+        });
+  
+        setTimeout(() => {
+          if (projectionRef.current) {
+            projectionRef.current.scrollIntoView({ behavior: "smooth" });
+          }
+        }, 300);
+      }
     }
   };
+  
 
   const handleRemovePension = (id: number) => {
     Axios.delete(`/data/pension-planner/${id}/`)
@@ -133,7 +155,7 @@ const PensionPlanner: React.FC = () => {
           setExpandedProjection(null);
           setExpandedCardId(null);
         }
-        toast({ title: "Pension removed successfully!" });
+        toast({ title: "Pension removed successfully!", variant: "successfull" });
       })
       .catch((error) => {
         console.error("Error removing pension:", error);
@@ -274,7 +296,7 @@ const PensionPlanner: React.FC = () => {
                     <p>
                       <strong>Final Balance:</strong> €{Number(proj.final_pension_balance || 0).toFixed(2)}
                     </p>
-                    <div className="flex space-x-2">
+                    <div className="flex justify-center space-x-2">
                       <Button
                         className="bg-green-500 hover:bg-green-600 text-white"
                         onClick={() => toggleCardExpansion(proj.id)}
@@ -303,7 +325,7 @@ const PensionPlanner: React.FC = () => {
       {/* Expanded Projection Section */}
       {expandedProjection && (
         <FeatureTooltip content="A breakdown of your calculated pension projection.">
-        <div data-testid="pension-projection-card" className="mt-10 flex flex-col items-center">
+        <div ref={projectionRef} data-testid="pension-projection-card" className="mt-10 flex flex-col items-center">
           {/* Breakdown Table */}
           <div className="w-full max-w-3xl">
             <h2 className="text-xl font-bold mb-4 text-center">
