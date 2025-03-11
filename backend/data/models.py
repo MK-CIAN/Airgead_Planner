@@ -431,6 +431,26 @@ class UserInterest(models.Model):
     class Meta:
         db_table = 'user_interest'
         
+class SuggestionType(models.Model):
+    CATEGORY_CHOICES = [
+        ("SAVINGS", "Savings"),
+        ("LOANS", "Loans"),
+        ("BUDGET_ADJUSTMENT", "Budget Adjustment"),
+        ("INVESTMENT", "Investment"),
+        ("HIGH_SPENDING_ALERTS", "High Spending Alerts"),
+    ]
+
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, unique=True)
+    total_accepted = models.PositiveIntegerField(default=0)
+    total_declined = models.PositiveIntegerField(default=0)
+
+    def calculate_acceptance_rate(self):
+        total = self.total_accepted + self.total_declined
+        return (self.total_accepted / total * 100) if total > 0 else 0
+
+    def __str__(self):
+        return f"{self.category}: {self.calculate_acceptance_rate():.2f}% accepted"
+        
 class FinancialSuggestion(models.Model):
     STATUS_CHOICES = [
         ("NEW", "New"),
@@ -449,9 +469,21 @@ class FinancialSuggestion(models.Model):
     status = models.CharField(max_length=12, choices=STATUS_CHOICES, default="NEW")
     user_feedback = models.BooleanField(null=True, blank=True)
     suggestion_category = models.CharField(max_length=12, choices=CATEGORY_CHOICES, default="SUGGESTION")
+    suggestion_type = models.ForeignKey(SuggestionType, on_delete=models.CASCADE, null=True)
     
     class Meta:
         db_table = "financial_suggestions"
         
     def __str__(self):
         return f"Suggestion for {self.user.username}: {self.suggestion_text[:50]}..."    
+    
+    
+class UserProfile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
+    category = models.CharField(
+        max_length=20,
+        choices=[("SAVER", "Saver"), ("SPENDER", "Spender"), ("BALANCED", "Balanced")],
+        default="BALANCED",
+    )
+
+

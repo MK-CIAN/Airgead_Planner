@@ -201,9 +201,9 @@ const Budget: React.FC = () => {
         </Button>
       </div>
 
-      <div className="justify-center">
+      {/*<div className="justify-center">
         <FinancialSuggestions />
-      </div>
+      </div>*/}
 
       {/* Responsive Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">

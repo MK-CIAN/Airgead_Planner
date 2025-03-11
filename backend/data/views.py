@@ -865,7 +865,7 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
     def generate_suggestions(self, user):
         self.delete_redundant_suggestions(user, suggestion_category="Suggestion")
         today = date.today()
-        last_3_months = today - timedelta(days=90)
+        last_12_months = today - timedelta(days=365)
 
         current_month = datetime.now().strftime('%Y-%m-01')
         latest_budget = MonthlyBudget.objects.filter(user=user, month=current_month).first()
@@ -892,35 +892,54 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
         budget_surplus = income_total - (expense_total + debt_total)
         print("TESTING", budget_surplus)
         
+        savings_type = SuggestionType.objects.get_or_create(category="SAVINGS")[0]
+        loan_type = SuggestionType.objects.get_or_create(category="LOANS")[0]
+        budget_type = SuggestionType.objects.get_or_create(category="BUDGET_ADJUSTMENT")[0]
+        investment_type = SuggestionType.objects.get_or_create(category="INVESTMENT")[0]
+        highspending_type = SuggestionType.objects.get_or_create(category="HIGH_SPENDING_ALERTS")[0]
+        
         # Suggesting Savings Goals Contrib
         savings_goals = SavingsGoal.objects.filter(user=user, current_amount__lt=F('target_amount'))  # Exclude completed goals
 
         if savings_goals.exists() and budget_surplus > 100:
             for goal in savings_goals:
-                suggested_contribution = min(budget_surplus * Decimal(0.3), goal.target_amount - goal.current_amount)
+                amount_needed = goal.target_amount - goal.current_amount
+                suggested_contribution = min(budget_surplus * Decimal(0.3), amount_needed)
+
                 if suggested_contribution > 0:
                     FinancialSuggestion.objects.create(
                         user=user,
-                        suggestion_text=f"Consider allocating €{suggested_contribution:.2f} towards your savings goal '{goal.name}'.",
-                        suggestion_category="Suggestion"
+                        suggestion_text=(
+                            f"Your savings goal '{goal.name}' needs €{amount_needed:.2f} to be completed. "
+                            f"Consider allocating €{suggested_contribution:.2f} towards it this month."
+                        ),
+                        suggestion_category="Suggestion",
+                        suggestion_type=savings_type
                     )
                     
         # Suggesting Extra Loan Payement
         loans = ActiveLoan.objects.filter(user=user)
         if loans.exists() and budget_surplus > 100:
             for loan in loans:
-                extra_payment = min(budget_surplus * Decimal(0.3), loan.balance * Decimal(0.1))
-                newbalance = (loan.balance - extra_payment)
+                min_payment = loan.balance * Decimal(0.1)  # Suggest 10% of remaining loan
+                extra_payment = min(budget_surplus * Decimal(0.3), min_payment)
+                new_balance = loan.balance - extra_payment
+
                 if extra_payment > 0:
                     FinancialSuggestion.objects.create(
                         user=user,
-                        suggestion_text=f"You have extra funds in your montly budget of €{budget_surplus}. Consider making an additional payment of €{extra_payment:.2f} towards your loan '{loan.name}'. This would bring the loan balance down to €{newbalance:.2f}.",
-                        suggestion_category="Suggestion"
+                        suggestion_text=(
+                            f"You still owe €{loan.balance:.2f} on your loan '{loan.name}'. "
+                            f"With your surplus of €{budget_surplus:.2f}, consider an extra payment of €{extra_payment:.2f} "
+                            f"to bring your balance down to €{new_balance:.2f} faster."
+                        ),
+                        suggestion_category="Suggestion",
+                        suggestion_type=loan_type
                     )
                     
         # Identifying High Spending Categories
         high_expense_category = (
-            MonthlyBudgetItem.objects.filter(budget__user=user, transaction_type="expense", created_at__gte=last_3_months)
+            MonthlyBudgetItem.objects.filter(budget__user=user, transaction_type="expense", created_at__gte=last_12_months)
             .values("category")
             .annotate(total=Sum("amount"))
             .order_by("-total")
@@ -930,8 +949,13 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
         if high_expense_category and high_expense_category["total"] > (expense_total * Decimal(0.3)):
             FinancialSuggestion.objects.create(
                 user=user,
-                suggestion_text=f"You have a combined high spending in '{high_expense_category['category']}' (€{high_expense_category['total']:.2f} in the last 3 months). Consider adjusting your budget.",
-                suggestion_category="Suggestion"
+                suggestion_text=(
+                    f"You've spent €{high_expense_category['total']:.2f} on '{high_expense_category['category']}' in the last year. "
+                    "Consider adjusting your budget to better allocate funds."
+                ),
+                suggestion_category="Suggestion",
+                suggestion_type=highspending_type
+                
             )
             
         # Suggesting Investments
@@ -940,7 +964,8 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
             FinancialSuggestion.objects.create(
                 user=user,
                 suggestion_text=f"You have an excess of €{budget_surplus:.2f}. Consider investing part of it in your portfolio.",
-                suggestion_category="Suggestion"
+                suggestion_category="Suggestion",
+                suggestion_type=investment_type
             )
     
     def categorize_item(self, category_label):
@@ -1012,7 +1037,7 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
     @action(detail=False, methods=["GET"])
     def get_suggestions(self, request):
         user = request.user
-        suggestions = FinancialSuggestion.objects.filter(user=user, status="NEW", suggestion_category="Suggestion").order_by("-created_at")
+        suggestions = FinancialSuggestion.objects.filter(user=user, status="NEW", suggestion_category="Suggestion").select_related("suggestion_type").order_by("-created_at")
         serializer = FinancialSuggestionSerializer(suggestions, many=True)
         return Response(serializer.data)
     
@@ -1028,22 +1053,42 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
         """
         Generate new financial suggestions for the user.
         """
+        from data.utils.user_classification import classify_user
         user = request.user
+        user_category = classify_user(user)
         self.generate_suggestions(user)
-        return Response({"message": "New financial suggestions have been generated!"})
+        return Response({"message": "New financial suggestions have been generated!", "user_category": user_category if user_category else "No Classification"})
     
     @action(detail=True, methods=["POST"])
     def accept_suggestion(self, request, pk=None):
-        suggestion = FinancialSuggestion.objects.get(id=pk, user=request.user)
+        suggestion = get_object_or_404(FinancialSuggestion, id=pk, user=request.user)  # Handle missing suggestion
+
+        # Update suggestion status
         suggestion.status = "ACCEPTED"
         suggestion.user_feedback = True
         suggestion.save()
+
+        # Increment the total accepted count in SuggestionType
+        if suggestion.suggestion_type:
+            suggestion_type = suggestion.suggestion_type
+            suggestion_type.total_accepted = F('total_accepted') + 1  # Use F() expression for atomic updates
+            suggestion_type.save(update_fields=['total_accepted'])  # Save only the updated field
+
         return Response({"message": "Suggestion accepted successfully."})
-    
+
     @action(detail=True, methods=["POST"])
     def dismiss_suggestion(self, request, pk=None):
-        suggestion = FinancialSuggestion.objects.get(id=pk, user=request.user)
+        suggestion = get_object_or_404(FinancialSuggestion, id=pk, user=request.user)  # Handle missing suggestion
+
+        # Update suggestion status
         suggestion.status = "DISMISSED"
         suggestion.user_feedback = False
         suggestion.save()
+
+        # Increment the total declined count in SuggestionType
+        if suggestion.suggestion_type:
+            suggestion_type = suggestion.suggestion_type
+            suggestion_type.total_declined = F('total_declined') + 1  # Use F() expression for atomic updates
+            suggestion_type.save(update_fields=['total_declined'])  # Save only the updated field
+
         return Response({"message": "Suggestion dismissed successfully."})

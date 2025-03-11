@@ -489,6 +489,7 @@ const LoanCalculator: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
           {/* Left Card - Calculated Loans */}
           {loans.length > 0 ? (
+            <FeatureTooltip content="View your calculated loans and save them for future reference.">
             <Card className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <CardTitle className="text-xl font-semibold text-center">
@@ -565,12 +566,14 @@ const LoanCalculator: React.FC = () => {
                 </Carousel>
               </CardContent>
             </Card>
+            </FeatureTooltip>
           ) : (
             <LoanPlaceholder type="calculated-loan" />
           )}
 
           {/* Right Card - Active Loans */}
           {activeLoans.length > 0 ? (
+            <FeatureTooltip content="View your active loans and manage them.">
             <Card className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <CardTitle className="text-xl font-semibold text-center">
@@ -640,6 +643,7 @@ const LoanCalculator: React.FC = () => {
                 </Carousel>
               </CardContent>
             </Card>
+            </FeatureTooltip>
           ) : (
             <LoanPlaceholder type="active-loan" />
           )}

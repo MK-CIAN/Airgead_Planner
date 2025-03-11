@@ -25,6 +25,7 @@ import {
   Newspaper,
   TrendingDown,
   Calculator,
+  FileChartPie,
   LogOut,
 } from "lucide-react";
 import TooltipToggle from "./UserServices/TooltipToggle";
@@ -82,6 +83,7 @@ export default function Navigation({ content }: { content: React.ReactNode }) {
     { path: "/news", label: "News For You", icon: Newspaper },
     { path: "/loans", label: "Loan Repayment Calculator", icon: TrendingDown, subPaths: ["/loans/loan-details/"] },
     { path: "/income", label: "Income Tax Calculator", icon: Calculator },
+    { path: "/financial-suggestions", label: "Financial Insights", icon: FileChartPie },
     { custom: true, label: "Logout", icon: LogOut, onClick: logoutUser },
   ];  
 

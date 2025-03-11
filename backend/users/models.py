@@ -44,6 +44,7 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+    
 
 # Signal to send email when password reset token is created
 @receiver(reset_password_token_created)
