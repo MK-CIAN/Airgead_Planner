@@ -14,6 +14,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { X } from "lucide-react";
 
 interface BudgetData {
   id: number;
@@ -55,30 +56,37 @@ const BudgetRadarChart: React.FC<BudgetRadarChartProps> = ({ budgetData }) => {
         </CardDescription>
       </CardHeader>
       <CardContent className="pb-0">
-        <ChartContainer
-          config={chartConfig}
-          className="mx-auto aspect-square max-h-[350px]"
-        >
-          <RadarChart
-            data={filteredData}
-            outerRadius="70%" // Adjusted radius to provide space for labels
-            margin={{ top: 10, bottom: 10, left: 10, right: 10 }} // Add padding
+      {filteredData.length < 3 ? (
+          <div className="flex flex-col items-center justify-center min-h-[250px] text-center text-gray-600">
+            <X className="w-24 h-24 text-red-500 mb-3" />
+            <p className="font-medium">You need at least 3 expense/debt items in your budget to see the expenditure spread.</p>
+          </div>
+        ) : (
+          <ChartContainer
+            config={chartConfig}
+            className="mx-auto aspect-square max-h-[350px]"
           >
-            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <PolarAngleAxis
-              dataKey="label"
-              tick={{ fontSize: 12, fill: "hsl(0, 0%, 0%)" }} // Increase tick font size and color
-            />
-            <PolarGrid stroke="hsla(194 100% 0% / 0.42)" strokeWidth={1.5} />
-            <Radar
-              dataKey="value"
-              stroke="hsl(150, 70%, 35%)" // Green border
-              fill="hsl(120, 60%, 60%)" // Green fill
-              fillOpacity={0.5}
-              strokeWidth={2} // Bold border
-            />
-          </RadarChart>
-        </ChartContainer>
+            <RadarChart
+              data={filteredData}
+              outerRadius="70%" // Adjusted radius to provide space for labels
+              margin={{ top: 10, bottom: 10, left: 10, right: 10 }} // Add padding
+            >
+              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+              <PolarAngleAxis
+                dataKey="label"
+                tick={{ fontSize: 12, fill: "hsl(0, 0%, 0%)" }} // Increase tick font size and color
+              />
+              <PolarGrid stroke="hsla(194 100% 0% / 0.42)" strokeWidth={1.5} />
+              <Radar
+                dataKey="value"
+                stroke="hsl(150, 70%, 35%)" // Green border
+                fill="hsl(120, 60%, 60%)" // Green fill
+                fillOpacity={0.5}
+                strokeWidth={2} // Bold border
+              />
+            </RadarChart>
+          </ChartContainer>
+        )}
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
