@@ -22,7 +22,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "../ui/carousel";
-import FinancialSuggestions from "../FinancialSuggestions";
+import FinancialSuggestions from "../FinancialInsights";
 import FeatureTooltip from "../ui/featureTooltip";
 
 interface BudgetData {

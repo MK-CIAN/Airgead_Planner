@@ -18,7 +18,7 @@ import CustomBudgetDetails from './components/Budgets/CustomBudgetDetails'
 import SavingsGoalDetails from './components/Savings/SavingGoalDetails'
 import Navigation from './components/Navigation'
 import { Toaster } from './components/ui/toaster';
-import FinancialSuggestions from './components/FinancialSuggestions'
+import FinancialSuggestions from './components/FinancialInsights'
 import LoanDetails from './components/Loans/LoanDetails'
 import StockSimLanding from './components/StockSimLanding'
 

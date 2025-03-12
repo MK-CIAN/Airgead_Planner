@@ -20,15 +20,15 @@ def get_user_data(user):
         spending_rate = float(expenses) / float(income)
         debt_ratio = float(debt) / float(income)
 
-        print(f"DEBUG: Budget for {user.username} -> Income: {income}, Savings: {savings}, Expenses: {expenses}, Debt: {debt}")  # 🚀 Print financial data
-        print(f"DEBUG: Computed Ratios -> Savings Rate: {savings_rate:.2f}, Spending Rate: {spending_rate:.2f}, Debt Ratio: {debt_ratio:.2f}")  # 🚀 Print ratios
+        print(f"DEBUG: Budget for {user.username} -> Income: {income}, Savings: {savings}, Expenses: {expenses}, Debt: {debt}")
+        print(f"DEBUG: Computed Ratios -> Savings Rate: {savings_rate:.2f}, Spending Rate: {spending_rate:.2f}, Debt Ratio: {debt_ratio:.2f}") 
 
         data.append([savings_rate, spending_rate, debt_ratio])
 
     if not data:
-        print(f"DEBUG: No budget data found for {user.username}")  # 🚀 Catch empty budgets
+        print(f"DEBUG: No budget data found for {user.username}")
     
-    return np.mean(data, axis=0) if data else np.array([0.1, 0.5, 0.1])  # ✅ Ensure default is "Balanced"
+    return np.mean(data, axis=0) if data else np.array([0.1, 0.5, 0.1])
 
 
 def train_knn_model():
@@ -60,11 +60,11 @@ def classify_user(user):
     if np.all(user_data == 0) or np.all(user_data < 0.05):  # Adjust threshold if needed
         return "No Classification"
 
-    print(f"DEBUG: User Data for {user.username} -> {user_data}")  # 🚀 Print user data before prediction
+    print(f"DEBUG: User Data for {user.username} -> {user_data}")
 
     category = knn.predict(user_data)[0]
 
-    print(f"DEBUG: Predicted Category -> {category}")  # 🚀 Print predicted category
+    print(f"DEBUG: Predicted Category -> {category}")
 
     profile, created = UserProfile.objects.get_or_create(user=user)
     profile.category = category
