@@ -83,7 +83,7 @@ const TestBudgetChart: React.FC<BudgetChartProps> = ({
 
   // Prepare chart data
   const chartData = useMemo(() => {
-    const totalRemaining = Math.max(totals.income - totals.expensesAndDebt, 0);
+    const totalRemaining = totals.income - totals.expensesAndDebt;
     const filteredData = data
       .filter((item) => item.type !== "income") // Exclude direct income from chart
       .map((item) => ({
@@ -95,9 +95,9 @@ const TestBudgetChart: React.FC<BudgetChartProps> = ({
     return [
       ...filteredData,
       {
-        value: totalRemaining,
-        name: "Remaining Income",
-        fill: "rgba(6,170,19,0.85)", // Green for remaining balance
+        value: Math.abs(totalRemaining),
+        name: totalRemaining < 0 ? "Over Budget" : "Remaining Income",
+        fill: totalRemaining < 0 ? "rgba(255, 13, 0, 0.85)" : "rgba(6,170,19,0.85)",
       },
     ];
   }, [data, totals.income, totals.expensesAndDebt]);
@@ -109,19 +109,20 @@ const TestBudgetChart: React.FC<BudgetChartProps> = ({
   
     const { cx, cy } = viewBox;
     const fontSize = Math.max(chartSize.width * 0.08, 16);
-    const totalRemaining = Math.max(totals.income - totals.expensesAndDebt, 0);
+    const totalRemaining = totals.income - totals.expensesAndDebt;
   
     return (
       <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" className="fill-foreground text-center">
-        <tspan x={cx} y={cy - fontSize * 0.2} className="font-bold" style={{ fontSize: `${fontSize}px` }}>
+        <tspan x={cx} y={cy - fontSize * 0.2} className="font-bold" style={{ fontSize: `${fontSize}px`, fill: totalRemaining < 0 ? "red" : "black" }}>
           €{totalRemaining.toFixed(2)}
         </tspan>
         <tspan x={cx} y={cy + fontSize * 0.5} className="fill-muted-foreground" style={{ fontSize: `${fontSize * 0.5}px` }}>
-          Remaining Amount
+          {totalRemaining < 0 ? "Over Budget" : "Remaining Amount"}
         </tspan>
       </text>
     );
   };
+  
   
 
   // Chart Component

@@ -155,7 +155,7 @@ const ClassificationCard: React.FC<ClassificationCardProps> = ({
           {/* Budget Trend Chart */}
           <div className="mt-4 w-full">
             <h3 className="text-lg font-semibold text-center mb-2">
-              Financial Trends Over Time
+              Your Budgeting Trends Over Time
             </h3>
             {loading ? (
               <p className="text-center">Loading chart...</p>
