@@ -914,7 +914,8 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
                             f"Consider allocating €{suggested_contribution:.2f} towards it this month."
                         ),
                         suggestion_category="Suggestion",
-                        suggestion_type=savings_type
+                        suggestion_type=savings_type,
+                        savings_goal=goal
                     )
                     
         # Suggesting Extra Loan Payement
@@ -934,7 +935,8 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
                             f"to bring your balance down to €{new_balance:.2f} faster."
                         ),
                         suggestion_category="Suggestion",
-                        suggestion_type=loan_type
+                        suggestion_type=loan_type,
+                        loan_id=loan
                     )
                     
         # Identifying High Spending Categories
@@ -1049,15 +1051,25 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
         return Response(serializer.data)
     
     @action(detail=False, methods=["GET"])
-    def generate(self, request):
+    def classify(self, request):
         """
-        Generate new financial suggestions for the user.
+        Classify the user without generating financial suggestions.
         """
         from data.utils.user_classification import classify_user
         user = request.user
         user_category = classify_user(user)
+        return Response({"user_category": user_category if user_category else "No Classification"})
+
+    
+    @action(detail=False, methods=["GET"])
+    def generate(self, request):
+        """
+        Generate new financial suggestions for the user (without classifying).
+        """
+        user = request.user
         self.generate_suggestions(user)
-        return Response({"message": "New financial suggestions have been generated!", "user_category": user_category if user_category else "No Classification"})
+        return Response({"message": "New financial suggestions have been generated!"})
+
     
     @action(detail=True, methods=["POST"])
     def accept_suggestion(self, request, pk=None):

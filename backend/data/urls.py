@@ -24,6 +24,7 @@ urlpatterns = router.urls + [
     path('financial-suggestions/get-suggestions', FinancialSuggestionViewSet.as_view({'get': 'get_suggestions'}), name="financial-suggestions"),
     path('financial-suggestions/get-analyzation', FinancialSuggestionViewSet.as_view({'get': 'get_analyzation'}), name="financial-analyzation"),
     path("financial-suggestions/generate/", FinancialSuggestionViewSet.as_view({'get': 'generate'}), name="generate-suggestions"),
+    path("financial-suggestions/classify/", FinancialSuggestionViewSet.as_view({'get': 'classify'}), name="classify-user"),
     path('financial-suggestions/<int:pk>/accept/', FinancialSuggestionViewSet.as_view({'post': 'accept_suggestion'}), name="accept-suggestion"),
     path('financial-suggestions/<int:pk>/dismiss/', FinancialSuggestionViewSet.as_view({'post': 'dismiss_suggestion'}), name="dismiss-suggestion"),
     path('financial-suggestions/analyze/', FinancialSuggestionViewSet.as_view({'get': 'analyze_spending'}), name="analyze-spending"),

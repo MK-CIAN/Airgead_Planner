@@ -1,18 +1,20 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import Axios from "./Axios";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
+import { Lightbulb, ChartColumn, RefreshCcw, Check, X } from "lucide-react";
 import ClassificationCard from "./Placeholders/ClassificationPlaceholder";
+import SuggestedAction from "./SuggestedAction";
 
 interface Suggestion {
   id: number;
   suggestion_text: string;
   created_at: string;
   acceptance_rate: number;
+  savings_goal?: number;
+  loan_id?: number;
 }
 
 const FinancialInsights: React.FC = () => {
@@ -24,6 +26,8 @@ const FinancialInsights: React.FC = () => {
   const [viewMode, setViewMode] = useState<"suggestions" | "analyzations">(
     "suggestions"
   );
+  const [selectedSuggestion, setSelectedSuggestion] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     fetchUserCategory();
@@ -31,16 +35,16 @@ const FinancialInsights: React.FC = () => {
   }, []);
 
   const fetchUserCategory = () => {
-    Axios.get(`/data/financial-suggestions/generate/`)
+    Axios.get(`/data/financial-suggestions/classify/`)
       .then((response) => {
-        setUserCategory(response.data.user_category || "Balanced");  // Default to "Balanced"
+        setUserCategory(response.data.user_category || "Balanced");
       })
       .catch((err) => {
         console.error("Error fetching user category:", err);
-        setUserCategory("No Classification"); // Show "No Classification" on failure
+        setUserCategory("No Classification");
       });
   };
-
+  
   const fetchSuggestions = () => {
     setLoading(true);
     Axios.get(`/data/financial-suggestions/get-suggestions`)
@@ -85,24 +89,37 @@ const FinancialInsights: React.FC = () => {
       .catch((err) => console.error("Error analyzing spending:", err));
   };
 
-  const handleAccept = (id: number) => {
-    Axios.post(`/data/financial-suggestions/${id}/accept/`)
+  const handleAccept = (suggestion: any) => {
+    console.log("Clicked Accept - Suggestion Data:", suggestion);
+  
+    if (!suggestion.id) {
+      console.error("Suggestion ID is missing:", suggestion);
+      return;
+    }
+  
+    // First, send the accept request to the backend
+    Axios.post(`/data/financial-suggestions/${suggestion.id}/accept/`)
       .then(() => {
-        toast({
-          title: "Suggestion accepted, removing from list.",
-          description: "Thanks for your feedback!",
-        });
+        toast({ title: "Suggestion accepted!", description: "Thank you for your feedback.", variant: "successfull" });
+  
+        // savings or loan suggestion, open the drawer
+        if (suggestion.savings_goal || suggestion.loan_id) {
+          setSelectedSuggestion(suggestion);
+          setIsModalOpen(true);
+        }
+
         fetchSuggestions();
       })
       .catch((err) => console.error("Error accepting suggestion:", err));
   };
-
+  
   const handleDismiss = (id: number) => {
     Axios.post(`/data/financial-suggestions/${id}/dismiss/`)
       .then(() => {
         toast({
           title: "Suggestion dismissed, removing from list.",
           description: "Thanks for your feedback!",
+          variant: "successfull",
         });
         fetchSuggestions();
       })
@@ -129,7 +146,7 @@ const FinancialInsights: React.FC = () => {
                 }`}
                 onClick={() => setViewMode("suggestions")}
               >
-                💡 Suggestions
+                <Lightbulb className="w-16 h-16"></Lightbulb>Suggestions
               </Button>
               <Button
                 className={`px-4 py-2 rounded border transition-all ${
@@ -137,7 +154,7 @@ const FinancialInsights: React.FC = () => {
                 }`}
                 onClick={() => setViewMode("analyzations")}
               >
-                📊 Analyzations
+                <ChartColumn></ChartColumn>Analyzations
               </Button>
             </div>
   
@@ -156,7 +173,7 @@ const FinancialInsights: React.FC = () => {
                       onClick={handleGenerateSuggestions}
                       className="border-green-500 bg-white text-black hover:bg-green-600 hover:text-white"
                     >
-                      🔄 Generate Suggestions
+                      <RefreshCcw></RefreshCcw>Generate Suggestions
                     </Button>
                   </motion.div>
                 )}
@@ -173,7 +190,7 @@ const FinancialInsights: React.FC = () => {
                       onClick={handleAnalyzeSpending}
                       className="border-green-500 bg-white text-black hover:bg-green-600 hover:text-white"
                     >
-                      📊 Analyze Spending
+                      <RefreshCcw></RefreshCcw>Analyze Spending
                     </Button>
                   </motion.div>
                 )}
@@ -191,14 +208,14 @@ const FinancialInsights: React.FC = () => {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Card className="shadow-md border border-gray-200 p-4">
+                  <Card className="shadow-md border border-gray-200 p-4 flex flex-col h-full">
                     <CardHeader>
                       <h3 className="text-lg font-semibold">
                         {viewMode === "suggestions" ? "Suggested Action" : "Analysis Result"}
                       </h3>
                     </CardHeader>
-                    <CardContent>
-                    <p className="text-sm text-gray-500">
+                    <CardContent className="flex flex-col flex-grow">
+                    <p className="text-sm text-gray-500 mb-2 ">
                       {s.acceptance_rate > 0 ? (
                         `${s.acceptance_rate.toFixed(1)}% of users accepted this type of suggestion.`
                       ) : (
@@ -207,18 +224,20 @@ const FinancialInsights: React.FC = () => {
                     </p>
                       <p className="text-sm">{s.suggestion_text}</p>
                       {viewMode === "suggestions" && (
-                        <div className="flex justify-end space-x-2 mt-4">
+                        <div className="flex flex-wrap justify-center mt-2 gap-2 mt-auto">
                           <Button
+                            className="bg-green-500 hover:bg-green-600 text-white"
                             variant="default"
-                            onClick={() => handleAccept(s.id)}
+                            onClick={() => handleAccept(s)}
                           >
-                            ✔ Accept
+                            <Check></Check>Accept
                           </Button>
                           <Button
+                            className="bg-red-600 text-white"
                             variant="destructive"
                             onClick={() => handleDismiss(s.id)}
                           >
-                            ✖ Dismiss
+                            <X></X>Dismiss
                           </Button>
                         </div>
                       )}
@@ -230,6 +249,12 @@ const FinancialInsights: React.FC = () => {
           </div>
         </Card>
       </div>
+
+      <SuggestedAction
+      isOpen={isModalOpen}
+      onClose={() => setIsModalOpen(false)}
+      suggestion={selectedSuggestion}
+    />
     </div>
   );    
 };

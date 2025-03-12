@@ -183,12 +183,11 @@ class FinancialArticleSerializer(serializers.ModelSerializer):
             "id", "article_id", "title", "link", "description", "source_name", "pub_date", "image_url", "keywords"]
         
 class FinancialSuggestionSerializer(serializers.ModelSerializer):
-    suggestion_category = serializers.CharField(source="suggestion_type.category")  # Fetch category name
     acceptance_rate = serializers.SerializerMethodField()  # Fetch category-wide acceptance rate
 
     class Meta:
         model = FinancialSuggestion
-        fields = ["id", "suggestion_text", "created_at", "status", "suggestion_category", "acceptance_rate"]
+        fields = ["id", "suggestion_text", "created_at", "status", "suggestion_category", "acceptance_rate", "savings_goal", "loan_id"]
 
     def get_acceptance_rate(self, obj):
         if obj.suggestion_type:

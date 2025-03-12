@@ -470,6 +470,8 @@ class FinancialSuggestion(models.Model):
     user_feedback = models.BooleanField(null=True, blank=True)
     suggestion_category = models.CharField(max_length=12, choices=CATEGORY_CHOICES, default="SUGGESTION")
     suggestion_type = models.ForeignKey(SuggestionType, on_delete=models.CASCADE, null=True)
+    savings_goal = models.ForeignKey('SavingsGoal', null=True, blank=True, on_delete=models.SET_NULL)
+    loan_id = models.ForeignKey('ActiveLoan', null=True, blank=True, on_delete=models.SET_NULL)
     
     class Meta:
         db_table = "financial_suggestions"
