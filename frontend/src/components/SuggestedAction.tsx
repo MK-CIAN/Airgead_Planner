@@ -47,30 +47,6 @@ const SuggestedAction: React.FC<SuggestedActionProps> = ({
     }
   };
 
-  // Add an item to the budget
-  const handleAddBudgetItem = async () => {
-    const budgetId = await fetchCurrentBudget();
-    if (!budgetId) {
-      console.error("No budget available.");
-      return;
-    }
-
-    try {
-      await Axios.post(`data/budget/${budgetId}/items/`, {
-        amount: amount.toString(),
-        category: suggestion.savings_goal ? "Savings" : "Debt Payment",
-        transaction_type: "expense",
-      });
-
-      toast({
-        title: "Expense recorded!",
-        description: `€${amount} added to your monthly budget.`,
-      });
-    } catch (error) {
-      console.error("Error adding budget item:", error);
-    }
-  };
-
   // Fetch the savings goal details
   const fetchSavingsGoal = async (goalId: number) => {
     try {

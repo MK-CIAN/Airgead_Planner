@@ -132,7 +132,6 @@ export default function Navigation({ content }: { content: React.ReactNode }) {
       if (basePath === "/budget/monthly-budget") {
         breadcrumbs.push({ label: "Monthly Budget", path: basePath });
       } else if (basePath.startsWith("/budget/custom-budget/")) {
-        const id = basePath.split("/budget/custom-budget/")[1];
         breadcrumbs.push({ label: "Custom Budget", path: "" });
       }
     }
@@ -141,7 +140,6 @@ export default function Navigation({ content }: { content: React.ReactNode }) {
       breadcrumbs.push({ label: "Loans", path: "/loans" });
   
       if (basePath.startsWith("/loans/loan-details/")) {
-        const id = basePath.split("/loans/loan-details/")[1];
         breadcrumbs.push({ label: "Loan Details", path: "" });
       }
     }
@@ -150,7 +148,6 @@ export default function Navigation({ content }: { content: React.ReactNode }) {
       breadcrumbs.push({ label: "Savings", path: "/savings" });
   
       if (/^\/savings\/\d+$/.test(basePath)) {
-        const id = basePath.split("/savings/")[1];
         breadcrumbs.push({ label: "Savings Goal", path: "/savings" });
       }
     }

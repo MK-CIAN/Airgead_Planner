@@ -4,8 +4,6 @@ import { PiggyBank, ShoppingCart, Scale, AlertCircle } from "lucide-react"; // I
 import Axios from "../Axios";
 import {
   ChartContainer,
-  ChartTooltip,
-  ChartLegend,
   ChartLegendContent,
   ChartTooltipContent,
 } from "@/components/ui/chart";
@@ -142,76 +140,94 @@ const ClassificationCard: React.FC<ClassificationCardProps> = ({
 
   return (
     <div className="flex justify-center mb-6">
-      <Card className="w-full max-w-lg p-6 flex flex-col justify-center items-center text-center border border-gray-300 shadow-md">
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold">{details.title}</CardTitle>
+      <Card className="w-full max-w-lg p-4 md:p-6 flex flex-col items-center text-center border border-gray-300 shadow-md">
+        <CardHeader className="w-full">
+          <CardTitle className="text-xl font-semibold">
+            {details.title}
+          </CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col justify-center items-center">
+        <CardContent className="w-full flex flex-col items-center">
           <div className="w-16 h-16 flex items-center justify-center rounded-full mb-4">
             {details.icon}
           </div>
-          <p className="text-muted-foreground mb-4">{details.description}</p>
+          <p className="text-muted-foreground mb-4 w-full">
+            {details.description}
+          </p>
 
           {/* Budget Trend Chart */}
-          <div className="mt-4 w-full">
+          <div className="mt-4 w-full max-w-full">
             <h3 className="text-lg font-semibold text-center mb-2">
               Your Budgeting Trends Over Time
             </h3>
             {loading ? (
               <p className="text-center">Loading chart...</p>
+            ) : chartData.filter((d) => d.income || d.expenses || d.debt)
+                .length < 2 ? (
+              <p className="text-center text-muted-foreground">
+                Not enough budget data available to show trends.
+              </p>
             ) : (
-              <ChartContainer
-                config={{
-                  income: { label: "Income", color: "#22c55e" },
-                  expenses: { label: "Expenses", color: "#3b82f6" },
-                  debt: { label: "Debt", color: "#ef4444" },
-                  disposable: { label: "Disposable Income", color: "#facc15" },
-                }}
-                className="w-full h-64"
-              >
-                <AreaChart
-                  data={chartData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+              <div className="w-full max-w-full overflow-hidden">
+                <ChartContainer
+                  config={{
+                    income: { label: "Income", color: "#22c55e" },
+                    expenses: { label: "Expenses", color: "#3b82f6" },
+                    debt: { label: "Debt", color: "#ef4444" },
+                    disposable: {
+                      label: "Disposable Income",
+                      color: "#facc15",
+                    },
+                  }}
+                  className="w-full h-64"
                 >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="month"
-                    tickFormatter={(value) => value.slice(5, 7) + "/" + value.slice(2, 4)}
-                  />
-                  <YAxis />
-                  <Tooltip content={<ChartTooltipContent indicator="dot" />} />
-                  <Legend content={<ChartLegendContent />} />
-                  <Area
-                    type="natural"
-                    dataKey="income"
-                    fill="#22c55e"
-                    fillOpacity={0.3}
-                    stroke="#22c55e"
-                  />
-                  <Area
-                    type="natural"
-                    dataKey="expenses"
-                    fill="#3b82f6"
-                    fillOpacity={0.3}
-                    stroke="#3b82f6"
-                  />
-                  <Area
-                    type="natural"
-                    dataKey="debt"
-                    fill="#ef4444"
-                    fillOpacity={0.3}
-                    stroke="#ef4444"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="disposable"
-                    fill="#facc15"
-                    fillOpacity={0.2}
-                    stroke="#facc15"
-                    strokeDasharray="4 4"
-                  />
-                </AreaChart>
-              </ChartContainer>
+                  <AreaChart
+                    data={chartData}
+                    margin={{ top: 20, right: 30, left: 0, bottom: 20 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="month"
+                      tickFormatter={(value) =>
+                        value.slice(5, 7) + "/" + value.slice(2, 4)
+                      }
+                    />
+                    <YAxis />
+                    <Tooltip
+                      content={<ChartTooltipContent indicator="dot" />}
+                    />
+                    <Legend content={<ChartLegendContent />} />
+                    <Area
+                      type="natural"
+                      dataKey="income"
+                      fill="#22c55e"
+                      fillOpacity={0.3}
+                      stroke="#22c55e"
+                    />
+                    <Area
+                      type="natural"
+                      dataKey="expenses"
+                      fill="#3b82f6"
+                      fillOpacity={0.3}
+                      stroke="#3b82f6"
+                    />
+                    <Area
+                      type="natural"
+                      dataKey="debt"
+                      fill="#ef4444"
+                      fillOpacity={0.3}
+                      stroke="#ef4444"
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="disposable"
+                      fill="#facc15"
+                      fillOpacity={0.2}
+                      stroke="#facc15"
+                      strokeDasharray="4 4"
+                    />
+                  </AreaChart>
+                </ChartContainer>
+              </div>
             )}
           </div>
         </CardContent>

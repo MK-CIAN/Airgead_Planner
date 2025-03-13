@@ -984,13 +984,19 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
     @action(detail=False, methods=["GET"])
     def analyze_spending(self, request):
         user = request.user
-        self.delete_redundant_suggestions(user, suggestion_category="Analyzation")
+        suggestions = FinancialSuggestion.objects.filter(
+            user=user, 
+            status="NEW", 
+            suggestion_category="Analyzation"
+        ).order_by("-created_at")
+
+        # Fetch latest budget for numeric analysis
         current_month = datetime.now().strftime('%Y-%m-01')
         latest_budget = MonthlyBudget.objects.filter(user=user, month=current_month).first()
-
+        
         if not latest_budget:
             latest_budget = MonthlyBudget.objects.filter(user=user).order_by("-month").first()
-
+        
         if not latest_budget:
             return Response({"error": "No budget data found."}, status=400)
 
@@ -1007,34 +1013,15 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
         wants_pct = (wants_total / income_total * 100) if income_total else 0
         savings_pct = (savings_debt_total / income_total * 100) if income_total else 0
 
-        # Generating Suggestions
-        suggestions = []
-        if needs_pct > 50:
-            suggestions.append(f"You're spending {needs_pct:.1f}% on essential needs, exceeding the recommended 50%. Consider reducing costs on rent, utilities, or groceries.")
-        else:
-            suggestions.append(f"You're spending {needs_pct:.1f}% on essential needs, which is within the recommended 50%. Keep it up!")
-            
-        if wants_pct > 30:
-            suggestions.append(f"You're spending {wants_pct:.1f}% on wants, exceeding the 30% guideline. Consider cutting back on entertainment or dining out.")
-        else:
-            suggestions.append(f"You're spending {wants_pct:.1f}% on wants, this is within the 30% guideline. Well Done!")
-        if savings_pct < 20:
-            suggestions.append(f"You're saving only {savings_pct:.1f}% of your income. Aim to save at least 20% to improve your financial health.")
+        # Serialize suggestions
+        serialized_suggestions = FinancialSuggestionSerializer(suggestions, many=True).data
 
-        # Suggest Categorization for Unclassified Items
-        uncategorized_items = [item.category for item in items if self.categorize_item(item.category) == "uncategorized"]
-        if uncategorized_items:
-            suggestions.append(f"Consider categorizing these items for better analysis: {', '.join(uncategorized_items)}.")
-
-        # Storing Suggestions in Database
-        for suggestion_text in suggestions:
-            FinancialSuggestion.objects.create(
-                user=user,
-                suggestion_text=suggestion_text,
-                suggestion_category="Analyzation"
-            )
-
-        return Response({"message": "Spending analysis complete!", "suggestions": suggestions})
+        return Response({
+            "needs_percentage": round(needs_pct, 1),
+            "wants_percentage": round(wants_pct, 1),
+            "savings_percentage": round(savings_pct, 1),
+            "suggestions": serialized_suggestions
+        })
 
     @action(detail=False, methods=["GET"])
     def get_suggestions(self, request):

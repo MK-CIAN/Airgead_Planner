@@ -7,7 +7,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -18,7 +17,6 @@ import BudgetPlaceholder from "./Placeholders/BudgetPlaceholder";
 import SavingsPlaceholder from "./Placeholders/SavingsPlaceholder";
 import NewsPlaceholder from "./Placeholders/NewsPlaceholder";
 import StocksimPlaceholder from "./Placeholders/StocksimPlaceholder";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import FeatureTooltip from "./ui/featureTooltip";
 
 interface BudgetData {
