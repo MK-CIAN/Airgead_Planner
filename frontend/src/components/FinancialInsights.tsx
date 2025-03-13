@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Axios from "./Axios";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
@@ -8,6 +13,7 @@ import { Lightbulb, ChartColumn, RefreshCcw, Check, X } from "lucide-react";
 import ClassificationCard from "./Placeholders/ClassificationPlaceholder";
 import SuggestedAction from "./SuggestedAction";
 import AnalyzationChart from "./charts/AnalyzationChart";
+import FeatureTooltip from "./ui/featureTooltip";
 
 interface Suggestion {
   id: number;
@@ -34,6 +40,7 @@ const FinancialInsights: React.FC = () => {
   const [needsPct, setNeedsPct] = useState<number | null>(null);
   const [wantsPct, setWantsPct] = useState<number | null>(null);
   const [savingsPct, setSavingsPct] = useState<number | null>(null);
+  const [analysisRequested, setAnalysisRequested] = useState<boolean>(false);
 
   useEffect(() => {
     fetchUserCategory();
@@ -66,19 +73,35 @@ const FinancialInsights: React.FC = () => {
 
   const fetchAnalyzations = () => {
     setLoading(true);
-    Axios.get(`/data/financial-suggestions/get-analyzation`)
-      .then((response) => {
-        const { needs_percentage, wants_percentage, savings_percentage } =
-          response.data;
 
-        setNeedsPct(needs_percentage);
-        setWantsPct(wants_percentage);
-        setSavingsPct(savings_percentage);
-        setAnalyzations(response.data || []);
+    Axios.get(`/data/financial-suggestions/analyze/`)
+      .then((response) => {
+        if (!response.data) {
+          setNeedsPct(null);
+          setWantsPct(null);
+          setSavingsPct(null);
+          setAnalyzations([]); // Ensure empty array instead of null
+          return;
+        }
+
+        const {
+          needs_percentage,
+          wants_percentage,
+          savings_percentage,
+          suggestions,
+        } = response.data;
+
+        setNeedsPct(needs_percentage ?? null);
+        setWantsPct(wants_percentage ?? null);
+        setSavingsPct(savings_percentage ?? null);
+
+        // Ensure `suggestions` is an array before setting state
+        setAnalyzations(Array.isArray(suggestions) ? suggestions : []);
       })
       .catch((err) => {
         console.error("Error fetching spending analysis:", err);
         setError("Failed to load spending analysis.");
+        setAnalyzations([]); // Ensure it's always an array
       })
       .finally(() => setLoading(false));
   };
@@ -93,10 +116,12 @@ const FinancialInsights: React.FC = () => {
   };
 
   const handleAnalyzeSpending = () => {
+    setAnalysisRequested(true); // Ensure chart appears only after clicking Analyze Spending
+
     Axios.get(`/data/financial-suggestions/analyze/`)
       .then(() => {
         toast({ title: "New analyzations generated!" });
-        fetchAnalyzations();
+        fetchAnalyzations(); // Correctly fetch budget breakdown & suggestions
       })
       .catch((err) => console.error("Error analyzing spending:", err));
   };
@@ -218,13 +243,32 @@ const FinancialInsights: React.FC = () => {
               </AnimatePresence>
             </div>
 
-            {viewMode === "analyzations" && (
-                          <AnalyzationChart 
-                            needs={needsPct ?? 0} 
-                            wants={wantsPct ?? 0} 
-                            savings={savingsPct ?? 0} 
-                          />
-                        )}
+            <FeatureTooltip content="This visualizes your budget based on the 50/30/20 rule.">
+            <div className="flex justify-center space-x-4 mb-6">
+              {viewMode === "analyzations" &&
+                analysisRequested &&
+                needsPct !== null &&
+                wantsPct !== null &&
+                savingsPct !== null && (
+                  <AnalyzationChart
+                    needs={needsPct}
+                    wants={wantsPct}
+                    savings={savingsPct}
+                  />
+                )}
+
+              {viewMode === "analyzations" &&
+                analysisRequested &&
+                needsPct === null &&
+                wantsPct === null &&
+                savingsPct === null && (
+                  <p className="text-center text-gray-500">
+                    No budget data available. Click "Analyze Spending" to
+                    generate data.
+                  </p>
+                )}
+            </div>
+            </FeatureTooltip>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {loading && <p>Loading...</p>}
@@ -243,21 +287,13 @@ const FinancialInsights: React.FC = () => {
                         <h3 className="text-lg font-semibold">
                           {viewMode === "suggestions"
                             ? "Suggested Action"
-                            : "Analysis Result"}
+                            : "Suggested Analyzation"}
                         </h3>
                       </CardHeader>
                       <CardContent className="flex flex-col flex-grow">
-
-                        <p className="text-sm text-gray-500 mb-2 ">
-                          {s.acceptance_rate > 0
-                            ? `${s.acceptance_rate.toFixed(
-                                1
-                              )}% of users accepted this type of suggestion.`
-                            : "No data yet."}
-                        </p>
                         <p className="text-sm">{s.suggestion_text}</p>
                         {viewMode === "suggestions" && (
-                          <div className="flex flex-wrap justify-center mt-2 gap-2 mt-auto">
+                          <div className="flex flex-wrap justify-center mt-2 p-2 gap-2 mt-auto">
                             <Button
                               className="bg-green-500 hover:bg-green-600 text-white"
                               variant="default"
@@ -275,6 +311,19 @@ const FinancialInsights: React.FC = () => {
                           </div>
                         )}
                       </CardContent>
+                      {viewMode === "suggestions" && (
+                        <FeatureTooltip content="This fiqure is gathered directly from other users.">
+                        <CardFooter className="flex items-center justify-center h-10">
+                          <p className="text-sm text-gray-500 text-center">
+                            {s.acceptance_rate > 0
+                              ? `${s.acceptance_rate.toFixed(
+                                  1
+                                )}% of users have a suggestion like this helpful.`
+                              : "No data yet."}
+                          </p>
+                        </CardFooter>
+                        </FeatureTooltip>
+                      )}
                     </Card>
                   </motion.div>
                 )

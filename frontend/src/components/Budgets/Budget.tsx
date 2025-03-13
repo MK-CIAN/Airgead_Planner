@@ -141,10 +141,8 @@ const Budget: React.FC = () => {
     try {
       console.log(`Removing item ${itemId} from budget ${budgetId}`);
   
-      // ✅ Wait for API response before updating UI
       await Axios.delete(`data/budget/${budgetId}/items/${itemId}/`);
   
-      // ✅ Fetch updated budget data instead of relying on local state
       const response = await Axios.get(`data/budget/`, {
         params: { month: currentMonth.format("YYYY-MM-DD") },
       });

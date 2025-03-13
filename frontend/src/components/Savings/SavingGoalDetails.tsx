@@ -73,6 +73,11 @@ const SavingsGoalDetails: React.FC = () => {
   }, [id]);
 
   const handleUpdate = async (updatedGoal: SavingsGoal, newContribution?: SavingsContribution) => {
+    if (!updatedGoal.id) {
+      console.error("Error: Missing Savings Goal ID");
+      return;
+    }
+    
     try {
       const response = await Axios.get(`data/savings/${updatedGoal.id}/`);
       setSavingsGoal({

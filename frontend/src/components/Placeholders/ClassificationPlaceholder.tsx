@@ -17,6 +17,7 @@ import {
   Legend,
 } from "recharts";
 import dayjs from "dayjs";
+import FeatureTooltip from "../ui/featureTooltip";
 
 // Define the possible categories
 type UserCategory = "SAVER" | "SPENDER" | "BALANCED" | "No Classification";
@@ -140,6 +141,7 @@ const ClassificationCard: React.FC<ClassificationCardProps> = ({
 
   return (
     <div className="flex justify-center mb-6">
+      <FeatureTooltip content="We take your budget data and analyze your spending habits to provide a classification of your actions.">
       <Card className="w-full max-w-lg p-4 md:p-6 flex flex-col items-center text-center border border-gray-300 shadow-md">
         <CardHeader className="w-full">
           <CardTitle className="text-xl font-semibold">
@@ -232,6 +234,7 @@ const ClassificationCard: React.FC<ClassificationCardProps> = ({
           </div>
         </CardContent>
       </Card>
+      </FeatureTooltip>
     </div>
   );
 };

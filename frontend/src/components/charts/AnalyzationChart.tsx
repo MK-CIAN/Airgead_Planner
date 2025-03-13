@@ -19,23 +19,23 @@ interface AnalyzationChartProps {
   
 // Utility for dynamic chart sizing
 const getChartSize = (containerWidth: number) => {
-  const size = Math.min(containerWidth * 0.9, 500); // Scale chart dynamically
+  const size = Math.min(containerWidth * 0.7, 400); // Scale chart dynamically
   return { width: size, height: size };
 };
 
 // Colors for each budget section
 const budgetColors = {
-  needs: "#ff6666", // Red for needs
-  wants: "#ffcc66", // Orange for wants
-  savings: "#66ccff", // Blue for savings
-  leftover: "#66ff66", // Green for leftover
+  needs: "rgba(255, 13, 0, 0.85)", // Red for needs
+  wants: "rgb(255, 204, 102)", // Orange for wants
+  savings: "rgb(0, 170, 255)", // Blue for savings
+  leftover:"rgba(6,170,19,0.85)", // Green for leftover
 };
 
 // Budget guideline markers (50% / 30% / 20%)
 const guidelineMarkers = [
-  { name: "Needs (50%)", value: 50, color: "rgba(255,102,102,0.3)" },
-  { name: "Wants (30%)", value: 30, color: "rgba(255,204,102,0.3)" },
-  { name: "Savings (20%)", value: 20, color: "rgba(102,204,255,0.3)" },
+  { name: "Needs Guideline(50%)", value: 50, color: "rgb(255, 0, 0)" },
+  { name: "Wants Guideline(30%)", value: 30, color: "rgb(255, 204, 102)" },
+  { name: "Savings Guideline (20%)", value: 20, color: "rgb(0, 170, 255)" },
 ];
 
 // Props interface
@@ -83,17 +83,17 @@ const AnalyzationChart: React.FC<AnalyzationChartProps> = ({ needs, wants, savin
   const CenterLabel = (props: { viewBox?: any }) => {
     const { viewBox } = props;
     if (!viewBox || typeof viewBox.cx !== "number" || typeof viewBox.cy !== "number") return null;
-
+  
     const { cx, cy } = viewBox;
-    const fontSize = Math.max(chartSize.width * 0.08, 16);
-
+    const fontSize = Math.max(chartSize.width * 0.07, 14); // Adjust text size dynamically
+  
     return (
       <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" className="fill-foreground text-center">
         <tspan x={cx} y={cy - fontSize * 0.2} className="font-bold" style={{ fontSize: `${fontSize}px` }}>
-          {totalUsed > 100 ? "Over Budget" : `${leftover.toFixed(1)}% Left`}
+          Your Budget
         </tspan>
         <tspan x={cx} y={cy + fontSize * 0.5} className="fill-muted-foreground" style={{ fontSize: `${fontSize * 0.5}px` }}>
-          {totalUsed > 100 ? "Exceeds 100%" : "Remaining Budget"}
+          Broken Down by Category
         </tspan>
       </text>
     );
@@ -141,7 +141,7 @@ const AnalyzationChart: React.FC<AnalyzationChartProps> = ({ needs, wants, savin
               stroke="#ffffff"
               strokeWidth={1}
             >
-              <Label content={(props) => <CenterLabel {...props} />} />
+                <Label content={(props) => <CenterLabel {...props} />} />
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.fill} />
               ))}
@@ -167,7 +167,8 @@ const AnalyzationChart: React.FC<AnalyzationChartProps> = ({ needs, wants, savin
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="leading-none text-muted-foreground">
-          Needs: {needs.toFixed(1)}% | Wants: {wants.toFixed(1)}% | Savings: {savings.toFixed(1)}% | Leftover: {leftover.toFixed(1)}%
+        <p className="p-2">Needs: {needs.toFixed(1)}% | Wants: {wants.toFixed(1)}% | Savings: {savings.toFixed(1)}% | Leftover: {leftover.toFixed(1)}%</p>
+        <p>*Some Values May be Off Due to Incorrect Categorisation of Items*</p>
         </div>
       </CardFooter>
     </Card>

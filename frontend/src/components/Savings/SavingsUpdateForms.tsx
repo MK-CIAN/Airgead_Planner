@@ -72,12 +72,18 @@ const UpdateSavingsForm: React.FC<UpdateSavingsFormProps> = ({
         }
       );
 
-      // Update savings goal immediately
-      onUpdate(response.data, {
-        id: response.data.contribution.id,
-        amount: response.data.contribution.amount,
-        contribution_date: response.data.contribution.contribution_date,
-      });
+      // Update savings goal state immediately
+      onUpdate(
+        {
+          ...savingsGoal,
+          current_amount: savingsGoal.current_amount + parsedContribution,
+        },
+        {
+          id: response.data.contribution.id,
+          amount: response.data.contribution.amount,
+          contribution_date: response.data.contribution.contribution_date,
+        }
+      );
 
       toast({
         title: `€${parsedContribution.toFixed(2)} Added!`,
@@ -86,7 +92,6 @@ const UpdateSavingsForm: React.FC<UpdateSavingsFormProps> = ({
       });
 
       setContribution(""); // Clear the input field
-
     } catch (error) {
       console.error("Error adding contribution:", error);
       toast({
