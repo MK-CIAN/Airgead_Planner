@@ -91,7 +91,11 @@ const LoanDetails: React.FC<LoanDetailsProps> = () => {
       amount: parseFloat(paymentAmount),
     })
       .then((response) => {
-        toast({title: "Payment Successful!", description: paymentAmount + " Euro Contributed to Your Loan", variant: "successfull"});
+        toast({
+          title: "Payment Successful!",
+          description: paymentAmount + " Euro Contributed to Your Loan",
+          variant: "successfull",
+        });
 
         // Update state with new balance and new payment history
         setLoan((prevLoan) =>
@@ -102,27 +106,65 @@ const LoanDetails: React.FC<LoanDetailsProps> = () => {
         setPaymentHistory([...paymentHistory, response.data.payment]);
         setPaymentAmount("");
       })
-      .catch((error) => console.error("Error making payment:", error))
-      toast({title: "Payment Unsuccessfull", description: "Error While Attempting to Contribute", variant: "destructive"});;
+      .catch((error) => console.error("Error making payment:", error));
+    toast({
+      title: "Payment Unsuccessfull",
+      description: "Error While Attempting to Contribute",
+      variant: "destructive",
+    });
   };
 
   const formattedPayments = loan
-  ? paymentHistory.reduce<{ date: string; balance: number }[]>((acc, payment, index) => {
-      const previousBalance = index === 0 ? loan.originalBalance : acc[index - 1].balance;
-      const newBalance = previousBalance - payment.amount;
+    ? (() => {
+        let remainingBalance = loan.originalBalance; // Starting with the original balance
+        const sortedPayments = [...paymentHistory].sort(
+          (a, b) =>
+            new Date(a.payment_date).getTime() -
+            new Date(b.payment_date).getTime()
+        );
 
-      acc.push({
-        date: payment.payment_date, // Adjust as needed
-        balance: newBalance >= 0 ? newBalance : 0, // Avoid negative balances
-      });
+        let paymentsProcessed: { date: string; balance: number }[] = [];
 
-      return acc;
-    }, [])
-  : [];
+        // Applying actual payments first
+        sortedPayments.forEach((payment) => {
+          remainingBalance -= payment.amount;
+          remainingBalance = Math.max(remainingBalance, 0);
+          paymentsProcessed.push({
+            date: payment.payment_date,
+            balance: remainingBalance,
+          });
+        });
 
-// Debugging: Check the formatted payments
-console.log("Formatted Payments:", formattedPayments);
+        // Generating repayment schedule based on the last remaining balance
+        let currentBalance = remainingBalance;
+        let repaymentSchedule: { date: string; balance: number }[] = [];
 
+        for (let i = 0; i < loan.termLength; i++) {
+          const dueDate = new Date(loan.createdAt);
+          dueDate.setMonth(dueDate.getMonth() + i);
+
+          if (paymentsProcessed.find((p) => p.date === dueDate.toISOString())) {
+            // Skipping months where an actual payment was made
+            continue;
+          }
+
+          currentBalance -= loan.monthlyPayment;
+          currentBalance = Math.max(currentBalance, 0); // Ensuring it doesn't go negative
+
+          repaymentSchedule.push({
+            date: dueDate.toISOString(),
+            balance: currentBalance,
+          });
+
+          if (currentBalance <= 0) break; // Stopping once fully paid
+        }
+
+        return [...paymentsProcessed, ...repaymentSchedule];
+      })()
+    : [];
+
+  // Debug
+  console.log("Formatted Payments:", formattedPayments);
 
   return loan ? (
     <div className="max-w-4xl mx-auto p-6">
@@ -154,41 +196,42 @@ console.log("Formatted Payments:", formattedPayments);
             <strong>Payment Due Date:</strong> {loan.paymentDueDate}
           </p>
 
-          
           <FeatureTooltip content="See your loan and interest visualized over time.">
-          {/* Loan Chart */}
-          <ActiveLoanChart
-            repaymentSchedule={generateRepaymentSchedule(
-              loan.originalBalance,
-              loan.interestRate,
-              loan.termLength
-            )}
-            loanBalance={loan.balance}
-            originalBalance={loan.originalBalance}
-            interestRate={loan.interestRate}
-            termLength={loan.termLength}
-            totalInterest={loan.totalInterest}
-            isEditing={false}
-            isActiveLoan={true}
-            actualPayments={formattedPayments}
-            createdAt={loan.createdAt} // Ensure this matches your API response field
-          />
+            {/* Loan Chart */}
+            <ActiveLoanChart
+              repaymentSchedule={generateRepaymentSchedule(
+                loan.originalBalance,
+                loan.interestRate,
+                loan.termLength
+              )}
+              loanBalance={loan.balance}
+              originalBalance={loan.originalBalance}
+              interestRate={loan.interestRate}
+              termLength={loan.termLength}
+              totalInterest={loan.totalInterest}
+              isEditing={false}
+              isActiveLoan={true}
+              actualPayments={formattedPayments}
+              createdAt={loan.createdAt}
+            />
           </FeatureTooltip>
-
 
           {/* Payment Input */}
           <div className="mt-6">
             <FeatureTooltip content="Make a payment to reduce your loan balance.">
-            <Input
-              type="number"
-              placeholder="Enter payment amount"
-              value={paymentAmount}
-              onChange={(e) => setPaymentAmount(e.target.value)}
-              className="mb-4"
-            />
-            <Button onClick={handlePayment} className="bg-green-500 text-white">
-              Make Payment
-            </Button>
+              <Input
+                type="number"
+                placeholder="Enter payment amount"
+                value={paymentAmount}
+                onChange={(e) => setPaymentAmount(e.target.value)}
+                className="mb-4"
+              />
+              <Button
+                onClick={handlePayment}
+                className="bg-green-500 text-white"
+              >
+                Make Payment
+              </Button>
             </FeatureTooltip>
           </div>
 

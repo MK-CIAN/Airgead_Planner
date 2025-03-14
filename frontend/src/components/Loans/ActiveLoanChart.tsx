@@ -11,7 +11,15 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Legend, Line } from "recharts";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Legend,
+  Tooltip,
+} from "recharts";
 import DonutChart from "../charts/DonutChart";
 import {
   Carousel,
@@ -30,10 +38,8 @@ interface LoanChartProps {
   interestRate: number;
   isEditing: boolean;
   customRepaymentSchedule?: number[];
-  customLoanBalance?: number;
-  customTotalInterest?: number;
   isActiveLoan?: boolean;
-  actualPayments?: { date: string; balance: number }[];
+  actualPayments?: { date: string; balance: number }[]; // Precomputed payments
   createdAt?: string;
 }
 
@@ -56,45 +62,27 @@ const ActiveLoanChart: React.FC<LoanChartProps> = ({
   repaymentSchedule,
   totalInterest,
   loanBalance,
+  originalBalance,
   termLength,
   isEditing,
   customRepaymentSchedule,
   actualPayments,
-  createdAt,
 }) => {
-  const startDate = createdAt ? new Date(createdAt) : new Date();
+  const chartData = actualPayments?.map((payment, index) => ({
+    date: payment.date,
+    originalRepayment: repaymentSchedule?.[index] ?? null,
+    customRepayment: customRepaymentSchedule?.[index] ?? null,
+    actualPayment: payment.balance,
+  })) || [];
 
-  const generateDateLabels = (start: Date, length: number) => {
-    const dates = [];
-    for (let i = 0; i < length; i++) {
-      const date = new Date(start);
-      date.setMonth(start.getMonth() + i);
-      dates.push(date.toLocaleDateString('default', { month: 'long', year: 'numeric' }));
-    }
-    return dates;
-  };
-
-  const dateLabels = generateDateLabels(startDate, termLength);
-
-  const chartData = dateLabels.map((date, index) => {
-    const actualPaymentData = actualPayments?.find(
-      (payment) => new Date(payment.date).toLocaleDateString('default', { month: 'long', year: 'numeric' }) === date
-    );
-
-    return {
-      date,
-      originalRepayment: repaymentSchedule?.[index] || null,
-      customRepayment: customRepaymentSchedule?.[index] || null,
-      actualPayment: actualPaymentData ? actualPaymentData.balance : null,
-    };
-  });
+  console.log(chartData);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Loan Repayment Visualization</CardTitle>
         <CardDescription>
-          Compare your repayment schedule before and after custom adjustments.
+          Track your progress against the scheduled repayment plan.
         </CardDescription>
       </CardHeader>
 
@@ -122,10 +110,7 @@ const ActiveLoanChart: React.FC<LoanChartProps> = ({
                     tickMargin={10}
                     tickFormatter={(value) => `€${value.toLocaleString()}`}
                   />
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent />}
-                  />
+                  <Tooltip content={<ChartTooltipContent />} />
 
                   <defs>
                     <linearGradient
@@ -160,6 +145,7 @@ const ActiveLoanChart: React.FC<LoanChartProps> = ({
                     </linearGradient>
                   </defs>
 
+                  {/* Original Repayment Line */}
                   <Area
                     dataKey="originalRepayment"
                     type="monotone"
@@ -168,6 +154,8 @@ const ActiveLoanChart: React.FC<LoanChartProps> = ({
                     name="Original Loan Balance"
                     strokeWidth={2}
                   />
+
+                  {/* Custom Repayment Line (Only if editing) */}
                   {isEditing && (
                     <Area
                       dataKey="customRepayment"
@@ -178,17 +166,19 @@ const ActiveLoanChart: React.FC<LoanChartProps> = ({
                       strokeWidth={2}
                     />
                   )}
+
+                  {/* User Actual Payments Progress Line */}
                   {actualPayments && actualPayments.length > 0 && (
-                    <Line
-                      type="monotone"
+                    <Area
                       dataKey="actualPayment"
+                      type="monotone"
+                      fill="url(#fillActual)"
                       stroke="hsl(120, 70%, 40%)"
                       name="Actual Payments"
                       strokeWidth={2}
-                      dot={{ r: 4 }}
-                      activeDot={{ r: 6 }}
                     />
                   )}
+
                   <Legend />
                 </AreaChart>
               </ChartContainer>
@@ -196,7 +186,11 @@ const ActiveLoanChart: React.FC<LoanChartProps> = ({
 
             <CarouselItem>
               <div className="flex justify-center w-full">
-                <DonutChart principal={loanBalance} interest={totalInterest} expanded={isEditing} />
+                <DonutChart
+                  principal={loanBalance}
+                  interest={totalInterest}
+                  expanded={isEditing}
+                />
               </div>
             </CarouselItem>
           </CarouselContent>
