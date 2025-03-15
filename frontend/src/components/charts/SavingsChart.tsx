@@ -72,9 +72,6 @@ const SavingsChart: React.FC<SavingsChartProps> = ({ progress }) => {
                   const cy =
                     "cy" in viewBox ? viewBox.cy : chartSize.height / 2;
 
-                  const fontSize = Math.max(chartSize.width * 0.1, 16); // Dynamically scale font size
-                  const labelOffset = fontSize * 0.5; // Adjust vertical spacing
-
                   return (
                     <text x={cx} y={cy ?? chartSize.height / 2} textAnchor="middle" dominantBaseline="middle">
                       {/* Ensure `cy` has a fallback before calculations */}

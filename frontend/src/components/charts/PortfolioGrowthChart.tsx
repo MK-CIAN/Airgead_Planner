@@ -9,8 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { TrendingDown, TrendingUp } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface PortfolioHistoryEntry {
   timestamp: string;
@@ -32,7 +31,6 @@ const PortfolioGrowthChart: React.FC<PortfolioGrowthChartProps> = ({
   showCardContainer = true,
 }) => {
   const [history, setHistory] = useState<PortfolioHistoryEntry[]>([]);
-  const initialBalance = 10000;
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -72,16 +70,6 @@ const PortfolioGrowthChart: React.FC<PortfolioGrowthChartProps> = ({
       total_value: parseFloat(entry.total_value),
     }))
     .sort((a, b) => a.rawTimestamp - b.rawTimestamp);
-
-  const firstEntry =
-    formattedData.length > 0 ? formattedData[0].total_value : initialBalance;
-  const latestEntry =
-    formattedData.length > 0
-      ? formattedData[formattedData.length - 1].total_value
-      : initialBalance;
-
-  const portfolioChange = latestEntry - firstEntry;
-  const percentageChange = ((portfolioChange / firstEntry) * 100).toFixed(2);
 
   // **Check if screen is mobile-sized**
   const isMobile = window.innerWidth < 768;

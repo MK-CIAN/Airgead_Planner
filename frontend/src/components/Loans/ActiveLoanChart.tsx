@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/card";
 import {
   ChartContainer,
-  ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import {
@@ -62,8 +61,6 @@ const ActiveLoanChart: React.FC<LoanChartProps> = ({
   repaymentSchedule,
   totalInterest,
   loanBalance,
-  originalBalance,
-  termLength,
   isEditing,
   customRepaymentSchedule,
   actualPayments,

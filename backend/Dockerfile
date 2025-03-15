@@ -23,6 +23,7 @@ RUN pip install django-rest-passwordreset
 RUN pip install django-q2
 RUN pip install yfinance
 RUN pip install scikit-learn
+RUN pip install celery redis
 
 RUN echo "conda activate airgead_geo" >> ~/.bashrc
 SHELL ["/bin/bash", "--login", "-c"]

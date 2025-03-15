@@ -75,7 +75,6 @@ const AuthPage = () => {
   const {
     handleSubmit: handleRegister,
     register: registerRegister,
-    formState: { errors: registerErrors },
   } = useForm<RegisterForm>({ resolver: yupResolver(registerSchema) });
 
   // Sentences for Typewriter Effect

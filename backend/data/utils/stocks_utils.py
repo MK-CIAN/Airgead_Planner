@@ -8,10 +8,14 @@ from django.core.cache import cache
 from decouple import config
 from ..models import StockData, StockRealTimeData
 from django_q.tasks import async_task, schedule
-import yfinance as yf
 
 # Set up logging
 logger = logging.getLogger(__name__)
+
+def get_yfinance():
+    import yfinance as yf  # Import only when needed
+    return yf
+
 
 # Expanded stock list (FAANG + Tesla, Microsoft, Nvidia)
 STOCK_TICKERS = ['META', 'AMZN', 'AAPL', 'NFLX', 'GOOGL', 'TSLA', 'MSFT', 'NVDA']
@@ -26,6 +30,7 @@ def fetch_historical_stock_data():
     """
     Fetch and store the last 5 years of historical stock & cryptocurrency data using yfinance.
     """
+    yf = get_yfinance()
     logger.info("Fetching historical stock & crypto data...")
 
     all_tickers = STOCK_TICKERS + CRYPTO_TICKERS  # ✅ Combine stock and crypto tickers
@@ -66,6 +71,7 @@ def fetch_historical_stock_data():
 
 
 def fetch_realtime_stock_data():
+    yf = get_yfinance()
     logger.info("Fetching latest stock & crypto prices...")
     now = make_aware(datetime.now())
 
