@@ -45,13 +45,13 @@ else:
 #'NAME': config("POSTGRES_DB"),
 #'USER': config("POSTGRES_USER"),
 #'PASSWORD': config("POSTGRES_PASSWORD"),
-IS_LOCAL = False
+IS_LOCAL = True
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config("POSTGRES_DB"),
-        'USER': config("POSTGRES_USER"),
-        'PASSWORD': config("POSTGRES_PASSWORD"),
+        'NAME': "postgres",
+        'USER': "admin",
+        'PASSWORD': "password123",
         'HOST': "localhost" if IS_LOCAL else "postgres",  # Use 'postgis' as host in Docker
         'PORT': POSTGRES_PORT if IS_LOCAL else "5432",
         'OPTIONS': {
@@ -60,25 +60,26 @@ DATABASES = {
     }
 }
 
+TEMPLATES = [{
+    "BACKEND": "django.template.backends.django.DjangoTemplates",
+    "DIRS": [os.path.join(BASE_DIR, "templates")],  # Ensure Django searches in the right directory
+    "APP_DIRS": True,
+    "OPTIONS": {
+        "context_processors": [
+            "django.template.context_processors.debug",
+            "django.template.context_processors.request",
+            "django.contrib.auth.context_processors.auth",
+            "django.contrib.messages.context_processors.messages",
+        ],
+    },
+}]
+
 # =======================
 # 🔹 DEBUG & SECURITY SETTINGS
 # =======================
 if DEPLOY_SECURE:
     DEBUG = False
-    TEMPLATES = [{
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "debug": False,
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-        },
-    }]
+
     ALLOWED_HOSTS = ['airgeadplanner.com', 'www.airgeadplanner.com']
     CSRF_TRUSTED_ORIGINS = ['https://airgeadplanner.com']
     CORS_ALLOWED_ORIGINS = ['https://airgeadplanner.com']
@@ -90,20 +91,6 @@ if DEPLOY_SECURE:
     MEDIA_ROOT = '/app/media'
 else:
     DEBUG = True
-    TEMPLATES = [{
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "debug": True,
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-        },
-    }]
     ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0", "airgeadplanner"]
     CORS_ALLOW_ALL_ORIGINS = True  # Allow all CORS during development
     

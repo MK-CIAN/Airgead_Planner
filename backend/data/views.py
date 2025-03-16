@@ -822,7 +822,8 @@ class RecommendedArticlesView(APIView):
         recommended_article_ids = recommend_articles(user)
 
         # Fetch articles matching the recommended IDs
-        articles = FinancialArticle.objects.filter(id__in=recommended_article_ids)
+        articles = list(FinancialArticle.objects.filter(id__in=recommended_article_ids))
+        articles.sort(key=lambda x: recommended_article_ids.index(x.id))
         serializer = FinancialArticleSerializer(articles, many=True)
         return Response(serializer.data)
     

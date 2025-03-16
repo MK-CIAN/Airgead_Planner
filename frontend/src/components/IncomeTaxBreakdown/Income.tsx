@@ -589,7 +589,7 @@ const IncomeTaxCalculator: React.FC = () => {
 
                     <Button
                       onClick={saveBreakdown}
-                      className="mt-4 w-full bg-green-500 text-white"
+                      className="mt-4 w-full bg-green-500 hover:bg-green-600 text-white"
                     >
                       {isSaving ? "Saving..." : "Save Breakdown"}
                     </Button>

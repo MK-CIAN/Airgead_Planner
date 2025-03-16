@@ -1,4 +1,4 @@
-from ..models import FinancialArticle, UserInterest
+from ..models import FinancialArticle, UserArticleInteraction, UserInterest, UserProfile
 from decouple import config
 import requests
 import re
@@ -11,33 +11,57 @@ DEFAULT_COUNTRY = config("DEFAULT_COUNTRY")
 DEFAULT_CATEGORY = config("DEFAULT_CATEGORY")
 KEYWORD_QUERY = config("KEYWORD_QUERY")
 
+# Expanded MAIN_KEYWORDS with related financial terms
 MAIN_KEYWORDS = {
-    # Debt-related
-    "credit", "student", "car", "medical", "loans", "debt",
-    
-    # Savings and Goals
-    "emergency", "home", "retirement", "holiday", "investments", "car", "savings", "goal",
-    
-    # Transportation
-    "bike", "car", "transit", "walk", "rideshare", "travel",
-    
-    # Investing Interests
-    "stocks", "bonds", "realestate", "crypto", "etfs", "index", "investment", "finance",
-    
-    # General Financial Keywords
-    "market", "money", "taxes", "economy", "insurance", "budget", "wealth", "income"
+    "credit": {"credit", "credit card", "card debt", "credit score"},
+    "student": {"student", "student loans", "education debt"},
+    "car": {"car", "auto loan", "vehicle finance", "loans"},
+    "medical": {"medical", "medical debt", "healthcare costs"},
+    "loans": {"loans", "borrowing", "lending", "personal loan", "mortgage"},
+    "debt": {"debt", "liability", "financial obligation"},
+    "emergency": {"emergency", "rainy day fund", "safety net"},
+    "home": {"home", "real estate", "mortgage", "property"},
+    "retirement": {"retirement", "pension", "401k", "superannuation"},
+    "holiday": {"holiday", "vacation", "travel fund"},
+    "investments": {"investments", "portfolio", "dividends", "stocks"},
+    "savings": {"savings", "saving account", "budgeting"},
+    "goal": {"goal", "financial planning", "wealth accumulation"},
+    "bike": {"bike", "cycling", "bicycle finance", "bicycle"},
+    "transit": {"transit", "public transport", "bus", "train", "metro"},
+    "walk": {"walk", "walking", "pedestrian"},
+    "rideshare": {"rideshare", "uber", "lyft", "carpool"},
+    "stocks": {"stocks", "shares", "equities", "stock market"},
+    "bonds": {"bonds", "fixed income", "treasury bonds"},
+    "crypto": {"crypto", "cryptocurrency", "bitcoin", "ethereum"},
+    "realestate": {"realestate", "real estate", "property investment"},
+    "etfs": {"etfs", "exchange traded funds", "index funds"},
+    "index": {"index", "market index", "s&p 500", "nasdaq"},
+    "investment": {"investment", "capital allocation", "financial growth"},
+    "finance": {"finance", "financial markets", "economic policy"},
+    "market": {"market", "economic trends", "business cycle"},
+    "money": {"money", "cash", "currency"},
+    "taxes": {"taxes", "taxation", "income tax", "capital gains tax"},
+    "economy": {"economy", "macroeconomics", "global finance", "trade", "tariff", "tariff"},
+    "insurance": {"insurance", "coverage", "risk management"},
+    "budget": {"budget", "financial planning", "expense tracking"},
+    "wealth": {"wealth", "asset management", "net worth"},
+    "income": {"income", "earnings", "salary", "passive income"},
+}
+
+CATEGORY_KEYWORDS = {
+    "SAVER": "investment OR stocks OR bonds OR retirement",
+    "SPENDER": "budgeting OR expenses OR debt OR finance",
+    "BALANCED": "economy OR money OR finance OR wealth"
 }
 
 def fetch_and_store_financial_news():
-    # Parameters for the API request
     params = {
         "apikey": API_KEY,
         "q": KEYWORD_QUERY,
         "country": DEFAULT_COUNTRY,
         "category": DEFAULT_CATEGORY,
     }
- 
-    # Fetch news articles from the API
+
     try:
         response = requests.get(BASE_URL, params=params)
         response.raise_for_status()
@@ -51,19 +75,16 @@ def fetch_and_store_financial_news():
             pub_date = article.get("pubDate")
             if pub_date:
                 try:
-                    # Convert to timezone-aware datetime
                     pub_date = make_aware(datetime.strptime(pub_date, "%Y-%m-%d %H:%M:%S"))
                 except ValueError:
-                    pub_date = None  # Handle invalid date format gracefully
+                    pub_date = None  
 
-            # Limiting the length of the title, description, and source name
             title = (article.get("title") or "")[:500] 
             description = (article.get("description") or "")[:1000]
             source_name = (article.get("source_name") or "")[:255]
 
-            # Extract keywords from title and description
             keywords = extract_keywords(title, description)
-            # Store the article in the database
+
             FinancialArticle.objects.update_or_create(
                 article_id=article.get("article_id"),
                 defaults={
@@ -81,48 +102,116 @@ def fetch_and_store_financial_news():
     except requests.exceptions.RequestException as e:
        return {"status": "error", "message": f"Error fetching news articles: {str(e)}"}
 
-
-# Helper function to extract and prioritize keywords from the article title and description
 def extract_keywords(title, description):
+    """Extract keywords that match predefined financial terms in MAIN_KEYWORDS."""
     if not title and not description:
         return []
 
-    # Combine title and description for keyword extraction
-    combined_text = f"{title} {description}"
+    combined_text = f"{title} {description}".lower()
+    words = re.findall(r"\b\w+\b", combined_text)
 
-    # Convert text to lowercase and extract words using regex, filtering out useless words and then adding useful words to array
-    words = re.findall(r"\b\w+\b", combined_text.lower())
-    stopwords = {"the", "is", "was", "for", "and", "to", "a", "of", "in", "on", "at", "with", "by", "as"}
-    keywords = [word for word in words if word not in stopwords and len(word) > 3]
+    extracted_keywords = set()
 
-    # Splitting keywords into main and other keywords
-    main_keywords = [word for word in keywords if word in MAIN_KEYWORDS]
-    other_keywords = [word for word in keywords if word not in MAIN_KEYWORDS]
+    for main_key, subwords in MAIN_KEYWORDS.items():
+        if any(word in subwords for word in words):
+            extracted_keywords.add(main_key)
 
-    # Prioritizing the main keywords and combining with other keywords
-    prioritized_keywords = main_keywords + other_keywords
-    # Limit to top 5 keywords
-    return prioritized_keywords[:5]  
+    return list(extracted_keywords)[:5]  
+
+def expand_user_interests(user_interests):
+    """Expand user interests to include related financial terms."""
+    expanded_keywords = set()
+    
+    for interest in user_interests:
+        if interest in MAIN_KEYWORDS:
+            expanded_keywords.update(MAIN_KEYWORDS[interest])  
+        expanded_keywords.add(interest)  
+
+    return expanded_keywords
 
 def recommend_articles(user):
+    user_profile = UserProfile.objects.get(user=user)
     user_interests = UserInterest.objects.filter(user=user).first()
-    if not user_interests or not user_interests.interests:
+    if not user_interests:
         return []
-    
-    user_keywords = set(user_interests.interests)
-    articles = FinancialArticle.objects.all()
 
+    # Expand user interests to include related financial terms
+    user_keywords = expand_user_interests(set(user_interests.interests))
+
+    articles = FinancialArticle.objects.all()
     recommendations = []
+
+    print(f"\nDEBUG: Expanded User Interests for {user.username}: {user_keywords}\n")
+
     for article in articles:
         article_keywords = set(article.keywords or [])
         similarity = jaccard_similarity(user_keywords, article_keywords)
-        recommendations.append({"article_id": article.id, "similarity": similarity})
 
-    recommendations.sort(key=lambda x: x["similarity"], reverse=True)
-    return [rec["article_id"] for rec in recommendations[:5]]
+        print(f"Article: {article.title}")
+        print(f"   - Keywords: {article_keywords}")
+        print(f"   - Jaccard Similarity: {similarity:.3f}")
 
-# Jaccard similarity function, comparing two sets of keywords for similarity
+        # Apply category weighting
+        category_weight = 0
+        if user_profile.category == "SPENDER" and any(k in {"budget", "saving", "debt"} for k in article_keywords):
+            category_weight = 0.3
+        elif user_profile.category == "SAVER" and any(k in {"investment", "retirement", "wealth"} for k in article_keywords):
+            category_weight = 0.3
+        elif user_profile.category == "BALANCED":
+            category_weight = 0.1
+
+        # Interaction-based scoring (clicks and read time)
+        interaction = UserArticleInteraction.objects.filter(user=user, article=article).first()
+        interaction_score = 0
+        if interaction:
+            if interaction.clicked:
+                interaction_score += 0.4  
+            if interaction.read_time > 30:
+                interaction_score += 0.6  
+
+        # Final Score Calculation
+        final_score = round(similarity * 0.5 + category_weight * 0.3 + interaction_score * 0.2, 3)
+        print(f"   - Final Score: {final_score}\n")
+
+        recommendations.append({
+            "article_id": article.id, 
+            "score": final_score, 
+            "keyword_count": len(article.keywords or []), 
+            "has_keywords": len(article.keywords or []) > 0  
+        })
+
+    # Sort by highest score first, then by keyword count
+    recommendations.sort(key=lambda x: (x["score"], x["keyword_count"]), reverse=True)
+
+    # Only return articles with scores > 0 first
+    filtered_articles = [rec for rec in recommendations if rec["score"] > 0]
+
+    # If at least 5 high-scoring articles exist, return them
+    if len(filtered_articles) >= 5:
+        return [rec["article_id"] for rec in filtered_articles[:5]]
+
+    # Fallback: Append keyword-dense articles until we reach 5 articles
+    print("\nAppending top keyword-dense articles to fill recommendations.")
+
+    keyword_ranked_articles = sorted(
+        [rec for rec in recommendations if rec["has_keywords"] and rec not in filtered_articles],  
+        key=lambda rec: rec["keyword_count"], 
+        reverse=True
+    )
+
+    # Filling up to 5 articles, prioritizing scores first, then adding keyword-rich ones
+    combined_recommendations = filtered_articles + keyword_ranked_articles[:(5 - len(filtered_articles))]
+
+    return [rec["article_id"] for rec in combined_recommendations]
+
+
 def jaccard_similarity(set1, set2):
+    if not set1 or not set2:
+        return 0  
+
     intersection = len(set1 & set2)
     union = len(set1 | set2)
-    return intersection / union if union != 0 else 0
+
+    if intersection > 0:
+        return round((intersection / union) + (0.1 * intersection), 3)
+    return 0

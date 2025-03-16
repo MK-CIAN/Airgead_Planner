@@ -417,6 +417,12 @@ class FinancialArticle(models.Model):
     def __str__(self):
         return self.title
     
+class UserArticleInteraction(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    article = models.ForeignKey(FinancialArticle, on_delete=models.CASCADE)
+    clicked = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
 class UserInterest(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, 

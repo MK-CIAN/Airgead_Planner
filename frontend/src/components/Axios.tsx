@@ -1,7 +1,7 @@
 import axios from "axios";
 
 //Creating an Axios instance with the base URL to simplify requests
-const myURL = "https://airgeadplanner.com/api/";
+const myURL = "http://127.0.0.1:8000/api/";
 //"http://127.0.0.1:8001/api/"
 //"https://airgeadplanner.com/api/"
 //"http://127.0.0.1:8000/api/"
@@ -28,15 +28,25 @@ Axios.interceptors.request.use(
 )
 
 Axios.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    if (error.response && error.response.status === 401) {
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Check if the response is a 401 Unauthorized
+    if (error.response && error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true; // Prevents infinite loops
+
+      // Remove expired token
       localStorage.removeItem("Token");
+
+      // Optionally, redirect user to login page
+      window.location.href = "/"; // Adjust as needed
+
+      return Axios(originalRequest); // Retry request after clearing token
     }
+
     return Promise.reject(error);
   }
-)
+);
 
 export default Axios;

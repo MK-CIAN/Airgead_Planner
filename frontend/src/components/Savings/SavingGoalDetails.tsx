@@ -72,12 +72,15 @@ const SavingsGoalDetails: React.FC = () => {
       );
   }, [id]);
 
-  const handleUpdate = async (updatedGoal: SavingsGoal, newContribution?: SavingsContribution) => {
+  const handleUpdate = async (
+    updatedGoal: SavingsGoal,
+    newContribution?: SavingsContribution
+  ) => {
     if (!updatedGoal.id) {
       console.error("Error: Missing Savings Goal ID");
       return;
     }
-    
+
     try {
       const response = await Axios.get(`data/savings/${updatedGoal.id}/`);
       setSavingsGoal({
@@ -87,7 +90,10 @@ const SavingsGoalDetails: React.FC = () => {
       });
 
       if (newContribution) {
-        setContributionHistory((prevHistory) => [...prevHistory, newContribution]);
+        setContributionHistory((prevHistory) => [
+          ...prevHistory,
+          newContribution,
+        ]);
       }
     } catch (error) {
       console.error("Error fetching updated savings goal:", error);
@@ -143,121 +149,125 @@ const SavingsGoalDetails: React.FC = () => {
       </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Chart and Summary */}
-        <FeatureTooltip content="Your saving goal progress visualised.">
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Progress and Image</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Carousel>
-              <CarouselContent>
-                {/* Chart Slide */}
-                <CarouselItem>
-                  <SavingsChart progress={Math.min(progress, 100)} />
-                  <Typography className="text-center mt-4">
-                    {`€${savingsGoal.current_amount.toFixed(
-                      2
-                    )} / €${savingsGoal.target_amount.toFixed(2)}`}
-                  </Typography>
-                </CarouselItem>
-
-                {/* Image Slide */}
-                {savingsGoal.image_url && (
+        {/* Progress and Image */}
+        <FeatureTooltip content="Your saving goal progress visualized.">
+          <Card className="col-span-1">
+            <CardHeader>
+              <CardTitle>Progress and Image</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Carousel>
+                <CarouselContent>
                   <CarouselItem>
-                    <ProgressiveImageReveal
-                      imageUrl={savingsGoal.image_url}
-                      progress={Math.min(progress, 100)} // Ensure progress doesn't exceed 100%
-                    />
-                    <div className="flex items-center gap-2 font-medium leading-none">
-                      Continuously Add to Your Savings Goal to Reveal the Image
-                    </div>
+                    <SavingsChart progress={Math.min(progress, 100)} />
+                    <Typography className="text-center mt-4">
+                      {`€${savingsGoal.current_amount.toFixed(
+                        2
+                      )} / €${savingsGoal.target_amount.toFixed(2)}`}
+                    </Typography>
                   </CarouselItem>
-                )}
-              </CarouselContent>
-              <CarouselPrevious className="absolute left-[-25px] top-1/2 transform -translate-y-1/2" />
-              <CarouselNext className="absolute right-[-25px] top-1/2 transform -translate-y-1/2" />
-            </Carousel>
-          </CardContent>
-        </Card>
+
+                  {savingsGoal.image_url && (
+                    <CarouselItem>
+                      <ProgressiveImageReveal
+                        imageUrl={savingsGoal.image_url}
+                        progress={Math.min(progress, 100)}
+                      />
+                      <div className="text-center mt-2 font-medium">
+                        Add to Your Savings Goal to Reveal the Image
+                      </div>
+                    </CarouselItem>
+                  )}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
+            </CardContent>
+          </Card>
         </FeatureTooltip>
 
-        {/* Contribution Form */}
-        <FeatureTooltip content="Add a contribution to your saving goal.">
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Add Contribution</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <UpdateSavingsForm
-              savingsGoal={savingsGoal}
-              onUpdate={handleUpdate}
-            />
-          </CardContent>
-        </Card>
-        </FeatureTooltip>
+        {/* Contribution Form and Upload */}
+        <div className="grid grid-cols-1 gap-6">
+          <FeatureTooltip content="Add a contribution to your saving goal.">
+            <Card>
+              <CardHeader>
+                <CardTitle>Add Contribution</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <UpdateSavingsForm
+                  savingsGoal={savingsGoal}
+                  onUpdate={handleUpdate}
+                />
+              </CardContent>
+            </Card>
+          </FeatureTooltip>
+
+          <FeatureTooltip content="Upload an image to your saving goal.">
+            <Card>
+              <CardHeader>
+                <CardTitle>Upload Image</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleImageUpload} className="space-y-4">
+                  <Button
+                    asChild
+                    disabled={uploading}
+                    className="relative cursor-pointer w-full bg-green-500 hover:bg-green-600"
+                  >
+                    <label>
+                      {uploading
+                        ? "Uploading..."
+                        : image
+                        ? "Selected: " + image.name
+                        : "Choose Image"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setImage(e.target.files?.[0] || null)}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      />
+                    </label>
+                  </Button>
+
+                  {image && (
+                    <Button
+                      type="submit"
+                      disabled={uploading}
+                      className="w-full  bg-green-500 hover:bg-green-600"
+                    >
+                      {uploading ? "Uploading..." : "Upload Image"}
+                    </Button>
+                  )}
+                </form>
+              </CardContent>
+            </Card>
+          </FeatureTooltip>
+        </div>
       </div>
 
-      {/* Image Upload */}
-      <FeatureTooltip content="Upload an image to your saving goal to visualise your goal better.">
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>Upload Image</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleImageUpload} className="space-y-4">
-            <div>
-              <Label htmlFor="image">Select Image</Label>
-              <Input
-                id="image"
-                type="file"
-                accept="image/*"
-                onChange={(e) => setImage(e.target.files?.[0] || null)}
-              />
-            </div>
-            <Button type="submit" disabled={!image || uploading}>
-              {uploading ? "Uploading..." : "Upload Image"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-      </FeatureTooltip>
-
-      {/* Contributors Section */}
-      <div className="text-right mt-4">
-      <FeatureTooltip content="Have a shared goal with friends? Add them to contribute to your goal.">
-        <ShowFriends
-          entityId={id}
-          entityType="savingsGoal"
-          triggerElement={
-            <Button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2">
-              Add Friends
-            </Button>
-          }
-        />
-      </FeatureTooltip>
-      </div>
-
-      {/* Contribution History */}
+      {/* Contribution History - Scrollable */}
       <FeatureTooltip content="Track your contribution history.">
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>Contribution History</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {contributionHistory.length > 0 ? (
-            <ul>
-              {contributionHistory.map((contribution) => (
-                <li key={contribution.id} className="border-b py-2">
-                  €{Number(contribution.amount).toFixed(2)} on {new Date(contribution.contribution_date).toLocaleDateString()}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>No contributions yet.</p>
-          )}
-        </CardContent>
-      </Card>
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Contribution History</CardTitle>
+          </CardHeader>
+          <CardContent className="h-48 overflow-y-auto">
+            {contributionHistory.length > 0 ? (
+              <ul>
+                {contributionHistory.map((contribution) => (
+                  <li key={contribution.id} className="border-b py-2">
+                    €{Number(contribution.amount).toFixed(2)} on{" "}
+                    {new Date(
+                      contribution.contribution_date
+                    ).toLocaleDateString()}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No contributions yet.</p>
+            )}
+          </CardContent>
+        </Card>
       </FeatureTooltip>
 
       {/* Chat Room */}
