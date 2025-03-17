@@ -45,7 +45,7 @@ const PasswordResetRequest = () => {
       toast({
         title: "Success",
         description: "Check your email for the password reset link.",
-        variant: "default",
+        variant: "successfull",
       });
 
       setTimeout(() => navigate("/"), 3000);

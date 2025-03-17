@@ -65,7 +65,7 @@ const PasswordReset = () => {
       toast({
         title: "Success",
         description: "Your password was updated. Redirecting to login...",
-        variant: "default",
+        variant: "successfull",
       });
 
       setTimeout(() => {

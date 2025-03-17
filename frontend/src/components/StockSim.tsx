@@ -227,6 +227,7 @@ const StockSim: React.FC = () => {
       fetchYearlyData(ticker);
     }
   };
+  
   return (
     <div className="p-6">
       <h1 className="text-center text-3xl font-bold">Stock Market Simulator</h1>

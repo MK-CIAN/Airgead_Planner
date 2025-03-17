@@ -93,6 +93,12 @@ class CustomBudgetViewSet(viewsets.ModelViewSet):
         return CustomBudget.objects.filter(
             models.Q(user=self.request.user) | models.Q(contributors=self.request.user)
         ).distinct()
+        
+    def get_serializer_context(self):
+        """Pass the request context to the serializer (Needed for `is_owner` field)"""
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
 
     def perform_create(self, serializer):
         """
@@ -165,7 +171,48 @@ class CustomBudgetViewSet(viewsets.ModelViewSet):
             return Response({"message": "Invitation sent successfully."}, status=status.HTTP_200_OK)
         except CustomUser.DoesNotExist:
             return Response({"error": "Friend not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+    @action(detail=True, methods=['post'], url_path='leave-budget')
+    def leave_budget(self, request, pk=None):
+        """
+        Allows a user to leave a custom budget, removing them from contributors.
+        """
+        budget = self.get_object()
+        user = request.user
 
+        # Prevent the owner from leaving
+        if user == budget.user:
+            return Response({"error": "Budget owners cannot leave their own budget. Delete it instead."}, status=403)
+
+        try:
+            budget.contributors.remove(user)
+            return Response({"message": "Successfully left the budget."}, status=200)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
+
+    @action(detail=True, methods=['delete'], url_path='delete-budget')
+    def delete_budget(self, request, pk=None):
+        """
+        Allows the budget owner to delete the entire budget.
+        """
+        budget = self.get_object()
+        user = request.user
+
+        if user != budget.user:
+            return Response({"error": "Only the budget owner can delete this budget."}, status=403)
+
+        try:
+            with transaction.atomic():
+                # Delete all budget-related items
+                budget.items.all().delete()
+                
+                # Remove all contributors and delete the budget
+                budget.contributors.clear()
+                budget.delete()
+
+            return Response({"message": "Budget and all associated data deleted."}, status=200)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
 
 # Savings Goal Viewset
 class SavingsGoalViewSet(viewsets.ModelViewSet):

@@ -37,13 +37,19 @@ class CustomBudgetSerializer(serializers.ModelSerializer):
         required=False
     )
     items = BudgetItemSerializer(many=True, read_only=True)  # Include items in the response
+    is_owner = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomBudget
         fields = [
-            'id', 'name', 'start_date', 'end_date', 'user', 'contributors', 'items'
+            'id', 'name', 'start_date', 'end_date', 'user', 'contributors', 'items', 'is_owner'
         ]
         read_only_fields = ['user']
+        
+    def get_is_owner(self, obj):
+        """Returns True if the logged-in user is the owner of the budget"""
+        request = self.context.get('request')
+        return request.user == obj.user if request else False
 
 class SavingsContributionSerializer(serializers.ModelSerializer):
     class Meta:
