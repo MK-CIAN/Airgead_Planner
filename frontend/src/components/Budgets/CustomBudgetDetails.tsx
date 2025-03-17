@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Axios from "../Axios";
-import CustomBudgetForm from "../forms/CustomBudgetForm";
+import CustomBudgetForm from "../forms/BudgetForm";
 import { Typography } from "@mui/material";
 import { useParams } from "react-router-dom";
 import ShowFriends from "../UserServices/ShowFriends";
@@ -142,11 +142,11 @@ const CustomBudgetDetails: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mt-3 sm:mt-5">
         {/* Add Items Form */}
         <FeatureTooltip content="Add new budget items">
-          <Card className="bg-gray-50 p-2 sm:p-4 rounded-md">
+          <Card className="p-2 sm:p-4 rounded-md">
             <Typography variant="h6" className="mb-2 sm:mb-4 text-sm sm:text-base">
               Add Budget Item
             </Typography>
-            <CustomBudgetForm onAddBudgetItem={handleAddBudgetItem} />
+            <CustomBudgetForm onAddBudget={handleAddBudgetItem} />
           </Card>
         </FeatureTooltip>
   

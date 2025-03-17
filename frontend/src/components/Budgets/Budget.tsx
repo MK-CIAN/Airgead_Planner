@@ -202,7 +202,7 @@ const Budget: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mt-3 sm:mt-5">
         {/* Budget Form */}
         <FeatureTooltip content="Add new budget items">
-          <Card className="bg-gray-50 p-2 sm:p-4 rounded-md">
+          <Card className="p-2 sm:p-4 rounded-md">
             <BudgetForm onAddBudget={handleAddBudgetItem} />
           </Card>
         </FeatureTooltip>

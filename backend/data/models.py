@@ -194,7 +194,6 @@ class SavingsGoal(models.Model):
     current_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     start_date = models.DateField(null=True, blank=True)
     target_date = models.DateField(null=True, blank=True)
-    monthly_contribution = models.DecimalField(max_digits=10, decimal_places=2)
     contributors = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="contributed_savings", blank=True
     )

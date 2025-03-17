@@ -102,7 +102,7 @@ const SavingsForm: React.FC<SavingsFormProps> = ({ onAddSavingsGoal }) => {
         />
       </div>
 
-      <div>
+      {/*<div>
         <Label htmlFor="monthly_contribution">Monthly Contribution</Label>
         <Controller
           name="monthly_contribution"
@@ -157,6 +157,7 @@ const SavingsForm: React.FC<SavingsFormProps> = ({ onAddSavingsGoal }) => {
           )}
         />
       </div>
+      */}
 
       <Button type="submit" className="w-full bg-green-500 text-white">
         Add Savings Goal

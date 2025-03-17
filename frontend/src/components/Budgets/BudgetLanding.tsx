@@ -363,7 +363,7 @@ const MainBudgetPage: React.FC = () => {
                                   navigate(`custom-budget/${budget.id}`)
                                 }
                               >
-                                Enter League
+                                View Budget
                               </Button>
                               {budget.is_owner ? (
                                 <Button

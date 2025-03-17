@@ -75,7 +75,6 @@ class SavingsGoalSerializer(serializers.ModelSerializer):
             'current_amount',
             'start_date',
             'target_date',
-            'monthly_contribution',
             'contributors',
             'image',
             'image_url',  # Include the image URL
