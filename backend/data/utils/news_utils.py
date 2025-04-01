@@ -61,15 +61,13 @@ def fetch_and_store_financial_news():
         "country": DEFAULT_COUNTRY,
         "category": DEFAULT_CATEGORY,
     }
-
     try:
         response = requests.get(BASE_URL, params=params)
         response.raise_for_status()
         data = response.json()
-
         if data.get("status") != "success":
             raise ValueError("Failed to fetch news articles.")
-
+        # Storing fetched articles in the database
         articles = data.get("results", [])
         for article in articles:
             pub_date = article.get("pubDate")
@@ -77,14 +75,12 @@ def fetch_and_store_financial_news():
                 try:
                     pub_date = make_aware(datetime.strptime(pub_date, "%Y-%m-%d %H:%M:%S"))
                 except ValueError:
-                    pub_date = None  
-
+                    pub_date = None  # Skip invalid dates
             title = (article.get("title") or "")[:500] 
             description = (article.get("description") or "")[:1000]
             source_name = (article.get("source_name") or "")[:255]
-
             keywords = extract_keywords(title, description)
-
+            # Storing article in the database
             FinancialArticle.objects.update_or_create(
                 article_id=article.get("article_id"),
                 defaults={
@@ -98,12 +94,11 @@ def fetch_and_store_financial_news():
                 },
             )
         return {"status": "success", "message": f"Successfully fetched and stored {len(articles)} articles."}
-
     except requests.exceptions.RequestException as e:
        return {"status": "error", "message": f"Error fetching news articles: {str(e)}"}
 
 def extract_keywords(title, description):
-    """Extract keywords that match predefined financial terms in MAIN_KEYWORDS."""
+    # Extract keywords that matchh the predefined financial terms in MAIN_KEYWORDS.
     if not title and not description:
         return []
 
@@ -119,7 +114,7 @@ def extract_keywords(title, description):
     return list(extracted_keywords)[:5]  
 
 def expand_user_interests(user_interests):
-    """Expand user interests to include related financial terms."""
+    #Expanding user interests to include related financial terms.
     expanded_keywords = set()
     
     for interest in user_interests:
@@ -134,10 +129,8 @@ def recommend_articles(user):
     user_interests = UserInterest.objects.filter(user=user).first()
     if not user_interests:
         return []
-
-    # Expand user interests to include related financial terms
+    # Expanding user interests to include related financial terms
     user_keywords = expand_user_interests(set(user_interests.interests))
-
     articles = FinancialArticle.objects.all()
     recommendations = []
 
@@ -147,11 +140,7 @@ def recommend_articles(user):
         article_keywords = set(article.keywords or [])
         similarity = jaccard_similarity(user_keywords, article_keywords)
 
-        print(f"Article: {article.title}")
-        print(f"   - Keywords: {article_keywords}")
-        print(f"   - Jaccard Similarity: {similarity:.3f}")
-
-        # Apply category weighting
+        # Applying category weighting
         category_weight = 0
         if user_profile.category == "SPENDER" and any(k in {"budget", "saving", "debt"} for k in article_keywords):
             category_weight = 0.3
@@ -160,18 +149,8 @@ def recommend_articles(user):
         elif user_profile.category == "BALANCED":
             category_weight = 0.1
 
-        # Interaction-based scoring (clicks and read time)
-        interaction = UserArticleInteraction.objects.filter(user=user, article=article).first()
-        interaction_score = 0
-        if interaction:
-            if interaction.clicked:
-                interaction_score += 0.4  
-            if interaction.read_time > 30:
-                interaction_score += 0.6  
-
         # Final Score Calculation
-        final_score = round(similarity * 0.5 + category_weight * 0.3 + interaction_score * 0.2, 3)
-        print(f"   - Final Score: {final_score}\n")
+        final_score = round(similarity * 0.5 + category_weight * 0.3, 3)
 
         recommendations.append({
             "article_id": article.id, 
@@ -179,29 +158,23 @@ def recommend_articles(user):
             "keyword_count": len(article.keywords or []), 
             "has_keywords": len(article.keywords or []) > 0  
         })
-
-    # Sort by highest score first, then by keyword count
+    # Sorting by highest score first, then by keyword count
     recommendations.sort(key=lambda x: (x["score"], x["keyword_count"]), reverse=True)
 
-    # Only return articles with scores > 0 first
+    # Only returning articles with scores > 0 first
     filtered_articles = [rec for rec in recommendations if rec["score"] > 0]
 
     # If at least 5 high-scoring articles exist, return them
     if len(filtered_articles) >= 5:
         return [rec["article_id"] for rec in filtered_articles[:5]]
-
-    # Fallback: Append keyword-dense articles until we reach 5 articles
-    print("\nAppending top keyword-dense articles to fill recommendations.")
-
+    
     keyword_ranked_articles = sorted(
         [rec for rec in recommendations if rec["has_keywords"] and rec not in filtered_articles],  
         key=lambda rec: rec["keyword_count"], 
         reverse=True
     )
-
     # Filling up to 5 articles, prioritizing scores first, then adding keyword-rich ones
     combined_recommendations = filtered_articles + keyword_ranked_articles[:(5 - len(filtered_articles))]
-
     return [rec["article_id"] for rec in combined_recommendations]
 
 

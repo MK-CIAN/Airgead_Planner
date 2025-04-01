@@ -90,19 +90,19 @@ const LoanCalculator: React.FC = () => {
     let currentBalance = balance;
     let totalInterestPaid = 0;
 
-    // Calculate repayment schedule
+    // Calculating repayment schedule
     for (let i = 0; i < termLength; i++) {
       const interestForMonth = currentBalance * monthlyRate;
       const principalPayment = monthlyPayment - interestForMonth;
       totalInterestPaid += interestForMonth;
       currentBalance -= principalPayment;
 
-      // Add current balance to schedule
+      // Adding current balance to schedule
       schedule.push(currentBalance > 0 ? currentBalance : 0);
       if (currentBalance <= 0) break;
     }
 
-    // Return the repayment schedule and total interest paid
+    // Returning the repayment schedule and total interest paid
     return { schedule, totalInterestPaid };
   };
 
@@ -140,14 +140,11 @@ const LoanCalculator: React.FC = () => {
       Axios.get(`data/active-loan/`)
       .then((response) => {
         const fetchedActiveLoans = response.data.map((loan: any) => {
-          // Convert due date to a dayjs object
           const firstPaymentDate = dayjs(loan.payment_due_date);
           const today = dayjs();
-  
-          // Calculate months passed
+
           const monthsElapsed = today.diff(firstPaymentDate, "month");
   
-          // Remaining months calculation
           const remainingMonths = Math.max(loan.term_length - monthsElapsed, 0);
   
           return {
@@ -230,7 +227,7 @@ const LoanCalculator: React.FC = () => {
 
   const handleSaveActiveLoan = (data: {
     name: string;
-    balance: number;
+    balance: number | string;
     interestRate: number;
     termLength: number;
     paymentDueDate: string;
@@ -243,33 +240,52 @@ const LoanCalculator: React.FC = () => {
       });
       return;
     }
-
-    // Calculate monthly payment
+  
+    // Ensure balance is parsed correctly
+    const parsedBalance = parseFloat(data.balance as string) || 0;
     const monthlyRate = data.interestRate / 100 / 12;
     const monthlyPayment =
-      (data.balance *
-        monthlyRate *
-        Math.pow(1 + monthlyRate, data.termLength)) /
+      (parsedBalance * monthlyRate * Math.pow(1 + monthlyRate, data.termLength)) /
       (Math.pow(1 + monthlyRate, data.termLength) - 1);
-
-    const totalInterest = monthlyPayment * data.termLength - data.balance;
-
-    // Convert to snake_case for API compatibility
+  
+    const totalInterest = monthlyPayment * data.termLength - parsedBalance;
+  
+    // Format data for API (convert all relevant fields to numbers)
     const formattedLoan = {
       name: data.name,
-      balance: data.balance,
+      balance: parsedBalance, // Ensure balance is stored as a number
       interest_rate: data.interestRate,
       term_length: data.termLength,
       monthly_payment: parseFloat(monthlyPayment.toFixed(2)),
       total_interest: parseFloat(totalInterest.toFixed(2)),
       payment_due_date: data.paymentDueDate,
     };
-
+  
     // Send request to backend
     Axios.post("data/active-loan/", formattedLoan)
       .then((response) => {
-        setActiveLoans([...activeLoans, response.data]);
-        setShowActiveLoanForm(false); // Only reset the form when successfully saved
+        // Ensure the response data is properly formatted before updating state
+        const newLoan = {
+          id: response.data.id,
+          name: response.data.name,
+          balance: parseFloat(response.data.balance) || 0,  // Ensure number type
+          originalBalance: parseFloat(response.data.original_balance) || 0,
+          interestRate: parseFloat(response.data.interest_rate) || 0,
+          termLength: parseInt(response.data.term_length, 10) || 0,
+          monthlyPayment: parseFloat(response.data.monthly_payment) || 0,
+          totalInterest: parseFloat(response.data.total_interest) || 0,
+          paymentDueDate: response.data.payment_due_date,
+          remainingMonths: Math.max(
+            parseInt(response.data.term_length, 10) -
+              dayjs().diff(dayjs(response.data.payment_due_date), "month"),
+            0
+          ),
+        };
+  
+        // Update state with properly parsed loan data
+        setActiveLoans((prevLoans) => [...prevLoans, newLoan]);
+        setShowActiveLoanForm(false); // Hide the form only after success
+  
         toast({
           title: "Active Loan Added",
           description: "Your loan has been successfully added.",
@@ -285,6 +301,7 @@ const LoanCalculator: React.FC = () => {
         });
       });
   };
+  
 
   // Function to remove loan
   const handleRemoveLoan = (id: string) => {
@@ -431,7 +448,7 @@ const LoanCalculator: React.FC = () => {
                     {loan.name}
                   </h2>
                   <p className="mb-2">
-                    Initial Balance: €{loan.balance.toFixed(2)}
+                    Initial Balance: €{!isNaN(loan.balance) ? loan.balance.toFixed(2) : "N/A"}
                   </p>
                   <p className="mb-2">Interest Rate: {loan.interestRate}%</p>
                   <p className="mb-2">
@@ -506,7 +523,7 @@ const LoanCalculator: React.FC = () => {
                             <h2 className="text-xl font-bold text-center mb-4">
                               {loan.name}
                             </h2>
-                            <p>Initial Balance: €{loan.balance.toFixed(2)}</p>
+                            <p>Initial Balance: €{!isNaN(loan.balance) ? loan.balance.toFixed(2) : "N/A"}</p>
                             <p>Interest Rate: {loan.interestRate}%</p>
                             <p>
                               Monthly Payment: €{loan.monthlyPayment.toFixed(2)}
@@ -590,7 +607,7 @@ const LoanCalculator: React.FC = () => {
                             <h2 className="text-xl font-bold text-center mb-4">
                               {loan.name}
                             </h2>
-                            <p>Balance: €{loan.balance.toFixed(2)}</p>
+                            <p>Balance: €{!isNaN(loan.balance) ? loan.balance.toFixed(2) : "N/A"}</p>
                             <p>Interest Rate: {loan.interestRate}%</p>
                             <p>
                               Monthly Payment: €{loan.monthlyPayment.toFixed(2)}

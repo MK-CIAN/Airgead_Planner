@@ -104,7 +104,7 @@ class Notification(models.Model):
         ("friend_request", "Friend Request"),
         ("budget_invite", "Budget Invite"),
         ("savings_invite", "Savings Invite"),
-        ("stock_league_invite", "Stock League Invite"),  # ✅ New type for stock leagues
+        ("stock_league_invite", "Stock League Invite"),
     ])
     message = models.TextField()
     is_read = models.BooleanField(default=False)
@@ -112,7 +112,7 @@ class Notification(models.Model):
     
     budget = models.ForeignKey(CustomBudget, on_delete=models.CASCADE, null=True, blank=True)
     savings_goal = models.ForeignKey(SavingsGoal, on_delete=models.CASCADE, null=True, blank=True)
-    stock_league = models.ForeignKey(StockLeague, on_delete=models.CASCADE, null=True, blank=True)  # ✅ New field for stock leagues
+    stock_league = models.ForeignKey(StockLeague, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return f"Notification for {self.user.username}: {self.type}"

@@ -1,5 +1,4 @@
 import axios from "axios";
-
 //Creating an Axios instance with the base URL to simplify requests
 const myURL = "http://127.0.0.1:8000/api/";
 //"http://127.0.0.1:8001/api/"

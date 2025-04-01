@@ -3,8 +3,8 @@ import { useParams } from "react-router-dom";
 import Axios from "../Axios";
 import { Typography } from "@mui/material";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+//import { Input } from "@/components/ui/input";
+//import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Carousel,
@@ -269,6 +269,20 @@ const SavingsGoalDetails: React.FC = () => {
           </CardContent>
         </Card>
       </FeatureTooltip>
+
+      <div className="text-right mt-4">
+        <FeatureTooltip content="Have a shared goal with friends? Add them to contribute to your goal.">
+          <ShowFriends
+            entityId={id}
+            entityType="savingsGoal"
+            triggerElement={
+              <Button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2">
+                Add Friends
+              </Button>
+            }
+          />
+        </FeatureTooltip>
+      </div>
 
       {/* Chat Room */}
       <div className="mt-6">

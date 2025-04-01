@@ -283,7 +283,7 @@ const Budget: React.FC = () => {
         </FeatureTooltip>
       </div>
   
-      {/* Budget Charts with improved carousel sizing */}
+      {/* Budget Charts */}
       <div className="mt-3 sm:mt-5 flex justify-center">
         <FeatureTooltip content="Visualizations of your budget data and expenditures spread">
           <Carousel className="w-full max-w-[90vw] sm:max-w-[80vw] md:max-w-[70vw] relative">

@@ -31,7 +31,6 @@ class SavingsGoalViewSetTest(TestCase):
             name="New Car Fund",
             target_amount=10000.00,
             current_amount=500.00,
-            monthly_contribution=200.00
         )
 
         self.savings_goal_list_url = reverse("savings-list")
@@ -49,7 +48,6 @@ class SavingsGoalViewSetTest(TestCase):
         data = {
             "name": "Vacation Fund",
             "target_amount": 5000.00,
-            "monthly_contribution": 250.00
         }
         response = self.client.post(self.savings_goal_list_url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

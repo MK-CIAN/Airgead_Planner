@@ -23,29 +23,21 @@ CRYPTO_TICKERS = ['BTC-USD', 'ETH-USD', 'DOGE-USD']
 
 BATCH_SIZE = 5
 
-# Define the cutoff date (last 5 years from today)
-#CUTOFF_DATE = make_aware(datetime.now() - timedelta(days=5 * 365))
-
 def fetch_historical_stock_data():
-    """
-    Fetch and store the last 5 years of historical stock & cryptocurrency data using yfinance.
-    """
+    # Fetch and store the last 5 years of historical stock & cryptocurrency data using yfinance.
     yf = get_yfinance()
     logger.info("Fetching historical stock & crypto data...")
-
-    all_tickers = STOCK_TICKERS + CRYPTO_TICKERS  # ✅ Combine stock and crypto tickers
+    all_tickers = STOCK_TICKERS + CRYPTO_TICKERS 
 
     for ticker in all_tickers:
         stock = yf.Ticker(ticker)
-
-        # ✅ Fetch last 5 years of daily historical data
+        # Fetching last 5 years of daily historical data
         data = stock.history(period="5y", interval="1d")
-
         if data.empty:
             logger.warning(f"No historical data available for {ticker}.")
             continue
-
-        # ✅ Process and store each day's stock/crypto data
+        
+        # Processing and storing each day's stock/crypto data
         for date, row in data.iterrows():
             stock_date = date.to_pydatetime()
 
@@ -64,9 +56,7 @@ def fetch_historical_stock_data():
                     'volume': int(row['Volume']),
                 }
             )
-
         logger.info(f"Historical data fetched for {ticker}")
-
     logger.info("Historical stock & crypto data update complete.")
 
 
@@ -78,28 +68,23 @@ def fetch_realtime_stock_data():
     # Fetching stock prices in batches
     for i in range(0, len(STOCK_TICKERS), BATCH_SIZE):
         batch_tickers = STOCK_TICKERS[i:i + BATCH_SIZE]
-        
         # Skipping request if all batch tickers are cached
         if all(cache.get(f"stock_price_{ticker}") for ticker in batch_tickers):
             logger.info(f"Using cached data for batch: {batch_tickers}")
             continue  
-
         try:
             for ticker in batch_tickers:
                 cache_key = f"stock_price_{ticker}"
                 cached_price = cache.get(cache_key)
-
                 if cached_price:
                     logger.info(f"Using cached data for {ticker}: {cached_price}")
                     continue  # Skip API call if data exists in cache
 
                 stock = yf.Ticker(ticker)
                 current_price = stock.info.get("currentPrice", None)
-
                 if current_price is None:
                     logger.warning(f"No current price data for {ticker}. Market may be closed.")
                     continue
-
                 # Store in database
                 StockRealTimeData.objects.update_or_create(
                     ticker=ticker,
@@ -112,15 +97,11 @@ def fetch_realtime_stock_data():
                         'volume': stock.info.get("volume", 0),
                     }
                 )
-
                 # Cache stock price for 30 minutes
                 cache.set(cache_key, current_price, timeout=1800)
-
                 logger.info(f"Saved real-time stock data for {ticker} at {now} - Price: {current_price}")
-
-                # Introduce a small random delay between requests
+                # Introducing a small random delay between requests
                 time.sleep(random.uniform(2, 5))
-
         except Exception as e:
             logger.error(f"Error fetching stock data: {e}")
             time.sleep(10)  # Short wait before retrying the next batch

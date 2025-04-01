@@ -75,6 +75,7 @@ const AuthPage = () => {
   const {
     handleSubmit: handleRegister,
     register: registerRegister,
+    formState: { errors: registerErrors },
   } = useForm<RegisterForm>({ resolver: yupResolver(registerSchema) });
 
   // Sentences for Typewriter Effect
@@ -177,16 +178,38 @@ const AuthPage = () => {
     } catch (error: any) {
       console.error("Registration Error:", error.response?.data || error);
 
-      // Handle specific API errors
-      const errorDetail =
-        error.response?.data?.detail ||
-        "Registration failed. Please check your inputs.";
-      setErrorMessage(errorDetail);
+      // Extract backend validation errors
+      if (error.response?.data) {
+        const backendErrors = error.response.data;
+        
+        // Format the error message from backend response
+        let errorMessages = [];
+        
+        // Check for specific field errors
+        for (const field in backendErrors) {
+          if (Array.isArray(backendErrors[field])) {
+            errorMessages.push(`${field}: ${backendErrors[field].join(', ')}`);
+          } else if (typeof backendErrors[field] === 'string') {
+            errorMessages.push(`${field}: ${backendErrors[field]}`);
+          }
+        }
+        
+        // If there are specific field errors, display them
+        if (errorMessages.length > 0) {
+          const formattedMessage = errorMessages.join('\n');
+          setErrorMessage(formattedMessage);
+        } else {
+          // Fallback to general error message
+          setErrorMessage("Registration failed. Please check your inputs.");
+        }
+      } else {
+        setErrorMessage("Registration failed. Please check your inputs.");
+      }
 
       // Show toast notification for errors
       toast({
         title: "Registration Error",
-        description: errorDetail,
+        description: errorMessage || "Registration failed. Please try again.",
         variant: "destructive",
       });
     }
@@ -238,8 +261,8 @@ const AuthPage = () => {
         </CardHeader>
         <CardContent>
           {errorMessage && (
-            <Alert variant="destructive">
-              <AlertDescription>{errorMessage}</AlertDescription>
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription className="whitespace-pre-line">{errorMessage}</AlertDescription>
             </Alert>
           )}
 
@@ -295,34 +318,74 @@ const AuthPage = () => {
               onSubmit={handleRegister(registerSubmission)}
               className="space-y-4"
             >
-              <Label htmlFor="email">Email</Label>
-              <Input
-                type="email"
-                id="email"
-                {...registerRegister("email")}
-                required
-              />
-              <Label htmlFor="username">Username</Label>
-              <Input
-                type="text"
-                id="username"
-                {...registerRegister("username")}
-                required
-              />
-              <Label htmlFor="password">Password</Label>
-              <Input
-                type="password"
-                id="password"
-                {...registerRegister("password")}
-                required
-              />
-              <Label htmlFor="password2">Confirm Password</Label>
-              <Input
-                type="password"
-                id="password2"
-                {...registerRegister("password2")}
-                required
-              />
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  type="email"
+                  id="email"
+                  {...registerRegister("email")}
+                  className={`border ${
+                    registerErrors.email ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+                {registerErrors.email && (
+                  <p className="text-red-500 text-sm">
+                    {registerErrors.email.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  type="text"
+                  id="username"
+                  {...registerRegister("username")}
+                  className={`border ${
+                    registerErrors.username ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+                {registerErrors.username && (
+                  <p className="text-red-500 text-sm">
+                    {registerErrors.username.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  type="password"
+                  id="password"
+                  {...registerRegister("password")}
+                  className={`border ${
+                    registerErrors.password ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+                {registerErrors.password && (
+                  <p className="text-red-500 text-sm">
+                    {registerErrors.password.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="password2">Confirm Password</Label>
+                <Input
+                  type="password"
+                  id="password2"
+                  {...registerRegister("password2")}
+                  className={`border ${
+                    registerErrors.password2 ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+                {registerErrors.password2 && (
+                  <p className="text-red-500 text-sm">
+                    {registerErrors.password2.message}
+                  </p>
+                )}
+              </div>
+
               <Button
                 type="submit"
                 className="w-full bg-green-500 hover:bg-green-600 text-white"

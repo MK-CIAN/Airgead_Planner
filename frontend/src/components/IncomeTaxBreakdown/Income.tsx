@@ -101,18 +101,14 @@ const IncomeTaxCalculator: React.FC = () => {
       toast({title: "Please Provide Valid Inputs!", variant: "destructive"});
       return;
     }
-
-    // Calculate taxable income
+    // Calculating the taxable income
     const taxableIncome = salary - pensionContribution;
-
-    // Tax credit based on marital status
-    const taxCredit = maritalStatus === "married" ? 8000 : 4000;
-
+    // Tax credit allowance - Standard Amount
+    const taxCredit = 4000;
     // Calculate income tax
     const standardRateCutoff = 44000;
     const standardRate = 0.2;
     const higherRate = 0.4;
-
     let incomeTax = 0;
     if (taxableIncome <= standardRateCutoff) {
       incomeTax = taxableIncome * standardRate;
@@ -121,30 +117,23 @@ const IncomeTaxCalculator: React.FC = () => {
         standardRateCutoff * standardRate +
         (taxableIncome - standardRateCutoff) * higherRate;
     }
-
-    // Apply tax credit
+    // Applying the tax credit
     const net_tax = incomeTax - taxCredit;
-
-    // Calculate USC
+    // Calculating USC
     let usc = 0;
     if (salary > 13000) {
       usc += Math.min(12012, salary) * 0.005;
       if (salary > 12012) usc += Math.min(15370, salary - 12012) * 0.02;
       if (salary > 27382) usc += (salary - 27382) * 0.03;
     }
-
-    // Calculate PRSI
+    // Calculating PRSI owed
     const prsi = salary * 0.041;
-
     // Total deductions
     const totalDeductions = net_tax + usc + prsi;
-
     // Net salary
     const netSalary = salary - totalDeductions - pensionContribution;
-
     const netMonthly = netSalary / 12;
     const netWeekly = netSalary / 52;
-
     // Prepare the breakdown object
     const calculatedBreakdown: IncomeTaxBreakdown = {
       id: savedBreakdowns.length + 1,

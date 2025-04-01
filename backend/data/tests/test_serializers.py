@@ -75,7 +75,6 @@ class SavingsGoalSerializerTest(TestCase):
             name="Car Fund",
             target_amount=Decimal("10000.00"),
             current_amount=Decimal("2000.00"),
-            monthly_contribution=Decimal("500.00")
         )
 
     def test_readonly_user_field(self):

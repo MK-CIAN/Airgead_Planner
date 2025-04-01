@@ -22,10 +22,8 @@ class MonthlyBudgetViewSet(viewsets.ModelViewSet):
     serializer_class = MonthlyBudgetSerializer
     lookup_field = "pk"
 
-    def get_queryset(self):
-        """
-        Fetch budgets only belonging to the logged-in user
-        """
+    def get_queryset(self): 
+        # Fetching budgets only belonging to the logged-in user
         month = self.request.query_params.get('month')
         queryset = MonthlyBudget.objects.filter(user=self.request.user)
         if month:
@@ -33,34 +31,29 @@ class MonthlyBudgetViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        """
-        Ensure only one budget exists per user per month.
-        """
+        # Ensuring only one budget exists per user per month.
         month = serializer.validated_data.get('month')
-        # Check if a budget already exists for this user and month
+        # Checking if a budget already exists for this user and month
         existing_budget = MonthlyBudget.objects.filter(user=self.request.user, month=month).first()
 
         if existing_budget:
             serializer.instance = existing_budget
-            self.request._request.status_code = status.HTTP_200_OK  # Ensure correct status
+            self.request._request.status_code = status.HTTP_200_OK
             return Response(MonthlyBudgetSerializer(existing_budget).data, status=status.HTTP_200_OK)
         
         # If no budget exists, create a new one
         serializer.save(user=self.request.user)
 
-
     @action(detail=True, methods=['post'], url_path='items')
     def add_item(self, request, pk=None):
-        """
-        Add an item to a specific monthly budget
-        """
+        # Add an item to a specific monthly budget
         budget = get_object_or_404(MonthlyBudget, id=pk, user=request.user)
 
-        print("Received data for new item:", request.data)  # DEBUG LOG
+        print("Received data for new item:", request.data)
 
         serializer = MonthlyBudgetItemSerializer(data=request.data)
         if serializer.is_valid():
-            saved_item = serializer.save(budget=budget)  # Link item to budget
+            saved_item = serializer.save(budget=budget)  # Linking item to budget
             print(f"Item successfully added to budget {pk}: {saved_item.id}")
             return Response(MonthlyBudgetItemSerializer(saved_item).data, status=status.HTTP_201_CREATED)
 
@@ -237,19 +230,18 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['POST'])
     def add_contribution(self, request, pk=None):
-        """Handles making a contribution towards a savings goal"""
+        # Contribution towards a savings goal
         savings_goal = get_object_or_404(SavingsGoal, id=pk, user=request.user)
-
         try:
             contribution_amount = Decimal(request.data.get('amount', 0))
 
-            # Create a contribution entry
+            # Creating a contribution entry
             contribution = SavingsContribution.objects.create(savings_goal=savings_goal, amount=contribution_amount)
 
-            # Update the savings goal current amount
+            # Updating the savings goal current amount
             savings_goal.current_amount += contribution_amount
             if savings_goal.current_amount >= savings_goal.target_amount:
-                savings_goal.current_amount = savings_goal.target_amount  # Ensure it doesn't exceed the goal
+                savings_goal.current_amount = savings_goal.target_amount  # Making sure it doesn't exceed the goal
             savings_goal.save()
 
             return Response({
@@ -352,7 +344,7 @@ class ActiveLoanViewSet(viewsets.ModelViewSet):
         
     @action(detail=True, methods=['GET'])
     def payments(self, request, pk=None):
-        """Fetch payment history for a specific active loan."""
+        #Fetching payment history for a specific active loan.
         loan = get_object_or_404(ActiveLoan, id=pk, user=request.user)
         payments = LoanPayment.objects.filter(loan=loan)
         serializer = LoanPaymentSerializer(payments, many=True)
@@ -360,19 +352,14 @@ class ActiveLoanViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['POST'])
     def make_payment(self, request, pk=None):
-        """
-        Handles making a payment towards an active loan
-        """
+        # Handling making a payment towards an active loan
         loan = get_object_or_404(ActiveLoan, id=pk, user=request.user)
-        
         try:
             payment_amount = Decimal(request.data.get('amount', 0))
             if payment_amount <= 0:
                 return Response({"error": "Payment amount must be greater than zero"}, status=status.HTTP_400_BAD_REQUEST)
-
             # Create a payment entry
             payment = LoanPayment.objects.create(loan=loan, amount=payment_amount)
-
             # Update the loan balance
             loan.update_remaining_balance(payment_amount)
 
@@ -397,8 +384,6 @@ class ActiveLoanViewSet(viewsets.ModelViewSet):
         loan.delete()
 
         return Response({"message": "Loan and associated payments deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
-
-
 
 class IncomeTaxViewSet(viewsets.ModelViewSet):
     serializer_class = IncomeTaxSerializer
@@ -469,7 +454,6 @@ class PortfolioViewSet(viewsets.ViewSet):
         return latest_stock.close_price if latest_stock else 0
 
     def list(self, request):
-        print(f"Fetching Portfolio... User: {request.user.id}, Time: {datetime.now()}")
         portfolio_type = request.query_params.get('portfolio_type', 'personal')
         league_id = request.query_params.get('league_id')
 
@@ -478,15 +462,11 @@ class PortfolioViewSet(viewsets.ViewSet):
                 user=request.user, league_id=league_id, portfolio_type=Portfolio.LEAGUE,
                 defaults={"balance": 10000.00, "totalbalance": 10000.00},  # Default starting balance
             )
-            if created:
-                print(f"Portfolio created for user {request.user.username} in league {league_id}")
         else:
             portfolio, created = Portfolio.objects.get_or_create(
                 user=request.user, portfolio_type=Portfolio.PERSONAL,
                 defaults={"balance": 10000.00, "totalbalance": 10000.00},  # Default starting balance
             )
-            if created:
-                print(f"Personal portfolio created for user {request.user.username}")
 
         if not portfolio:
             return Response({"error": "Portfolio not found"}, status=404)
@@ -553,7 +533,6 @@ class PortfolioViewSet(viewsets.ViewSet):
     
     def _buy_stock(self, portfolio, ticker, quantity, price_per_share):
         total_cost = Decimal(quantity) * Decimal(price_per_share)
-
         if portfolio.balance < total_cost:
             return Response({"error": "Insufficient balance"}, status=400)
 
@@ -563,23 +542,21 @@ class PortfolioViewSet(viewsets.ViewSet):
         holding, created = StockHolding.objects.get_or_create(
             portfolio=portfolio, ticker=ticker, defaults={"quantity": Decimal(0)}
         )
-        holding.quantity += Decimal(quantity)  # ✅ Supports fractional shares
+        holding.quantity += Decimal(quantity)
         holding.save()
 
         transaction = Transaction.objects.create(
             portfolio=portfolio,
             ticker=ticker,
             transaction_type="BUY",
-            quantity=Decimal(quantity),  # ✅ Supports fractional shares
+            quantity=Decimal(quantity),
             price_per_share=Decimal(price_per_share),
         )
-
         self._update_portfolio_history(portfolio, "BUY", ticker, quantity)
-
         return Response(TransactionSerializer(transaction).data)
 
     def _sell_stock(self, portfolio, ticker, quantity, price_per_share):
-        quantity = Decimal(quantity)  # ✅ Keep as Decimal
+        quantity = Decimal(quantity)
         price_per_share = Decimal(price_per_share)
         total_earnings = quantity * price_per_share
 
@@ -678,7 +655,7 @@ class PortfolioHistoryView(APIView):
         portfolio_type = request.query_params.get("portfolio_type", "personal")
         league_id = request.query_params.get("league_id", None)
 
-        # ✅ Fetch the correct portfolio based on type
+        # Fetching the correct portfolio based on type
         if portfolio_type == "league" and league_id:
             portfolio = Portfolio.objects.filter(user=user, league_id=league_id, portfolio_type=Portfolio.LEAGUE).first()
         else:
@@ -689,18 +666,18 @@ class PortfolioHistoryView(APIView):
 
         today = datetime.now().date()
 
-        # ✅ Get today's portfolio history entry for the correct portfolio
+        # Getting today's portfolio history entry for the correct portfolio
         today_entry = PortfolioHistory.objects.filter(portfolio=portfolio, timestamp__date=today).first()
 
-        # ✅ Calculate current portfolio value
+        # Calculate=ing current portfolio value
         current_value = self._calculate_portfolio_value(user, portfolio_type, league_id)
 
-        # ✅ Update or create today's entry
+        # Updating or create today's entry
         if today_entry:
             today_entry.total_value = current_value
-            today_entry.cash_balance = portfolio.balance  # ✅ Ensure single portfolio
+            today_entry.cash_balance = portfolio.balance 
             today_entry.transaction_label = "Portfolio Updated with Current PricesTEST"
-            today_entry.timestamp = datetime.now()  # Update timestamp to latest
+            today_entry.timestamp = datetime.now()
             today_entry.save()
         
         history = PortfolioHistory.objects.filter(portfolio=portfolio).order_by("-timestamp")
@@ -709,16 +686,15 @@ class PortfolioHistoryView(APIView):
         for entry in history:
             entry_date = entry.timestamp.date()
             if entry_date not in latest_per_day:
-                latest_per_day[entry_date] = entry  # Keep only the latest entry per day
+                latest_per_day[entry_date] = entry
 
-        # ✅ Serialize and return only the latest entry per day
+        # Serialize and return only the latest entry per day
         serializer = PortfolioHistorySerializer(list(latest_per_day.values()), many=True)
         return Response(serializer.data)
 
     def _generate_date_range(self, start_date, end_date):
-        """
-        Generate a list of dates from start_date to end_date (inclusive).
-        """
+        
+        # Generating a list of dates from start_date to end_date (inclusive).
         delta = timedelta(days=1)
         current_date = start_date
         dates = []
@@ -938,7 +914,6 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
         ).aggregate(Sum("amount"))["amount__sum"] or Decimal("0")
 
         budget_surplus = income_total - (expense_total + debt_total)
-        print("TESTING", budget_surplus)
         
         savings_type = SuggestionType.objects.get_or_create(category="SAVINGS")[0]
         loan_type = SuggestionType.objects.get_or_create(category="LOANS")[0]
@@ -946,7 +921,7 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
         investment_type = SuggestionType.objects.get_or_create(category="INVESTMENT")[0]
         highspending_type = SuggestionType.objects.get_or_create(category="HIGH_SPENDING_ALERTS")[0]
         
-        # Suggesting Savings Goals Contrib
+        # Suggesting Savings Goals Contribution
         savings_goals = SavingsGoal.objects.filter(user=user, current_amount__lt=F('target_amount'))  # Exclude completed goals
 
         if savings_goals.exists() and budget_surplus > 100:
@@ -1038,7 +1013,7 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
             suggestion_category="Analyzation"
         ).order_by("-created_at")
 
-        # Fetch latest budget for numeric analysis
+        # Fetching latest budget for numeric analysis
         current_month = datetime.now().strftime('%Y-%m-01')
         latest_budget = MonthlyBudget.objects.filter(user=user, month=current_month).first()
         

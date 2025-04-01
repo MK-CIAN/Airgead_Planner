@@ -4,11 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
-// Utility function to get today's date in the right format
-const getTodayDate = () => {
-  const today = new Date();
-  return today.toISOString().split("T")[0];
-};
 
 interface SavingsFormProps {
   onAddSavingsGoal: (newGoal: {
@@ -101,63 +96,6 @@ const SavingsForm: React.FC<SavingsFormProps> = ({ onAddSavingsGoal }) => {
           )}
         />
       </div>
-
-      {/*<div>
-        <Label htmlFor="monthly_contribution">Monthly Contribution</Label>
-        <Controller
-          name="monthly_contribution"
-          control={control}
-          defaultValue={0}
-          render={({ field }) => (
-            <Input
-              {...field}
-              id="monthly_contribution"
-              type="number"
-              placeholder="Enter monthly contribution"
-              required
-              className="w-full"
-            />
-          )}
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="start_date">Start Date</Label>
-        <Controller
-          name="start_date"
-          control={control}
-          defaultValue={getTodayDate()}
-          render={({ field }) => (
-            <Input
-              {...field}
-              id="start_date"
-              type="date"
-              value={field.value || ""}
-              required
-              className="w-full"
-            />
-          )}
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="target_date">Target Date</Label>
-        <Controller
-          name="target_date"
-          control={control}
-          defaultValue=""
-          render={({ field }) => (
-            <Input
-              {...field}
-              id="target_date"
-              type="date"
-              value={field.value || ""}
-              className="w-full"
-            />
-          )}
-        />
-      </div>
-      */}
 
       <Button type="submit" className="w-full bg-green-500 text-white">
         Add Savings Goal

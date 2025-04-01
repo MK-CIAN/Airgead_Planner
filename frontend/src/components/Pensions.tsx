@@ -81,17 +81,13 @@ const PensionPlanner: React.FC = () => {
 
     // Convert ROI to decimal
     const rateOfReturn = Number(roi) / 100;
-
     // Corrected Future Value Calculation
     const futureValue =
       annualContribution * (((1 + rateOfReturn) ** years - 1) / rateOfReturn);
-
     // Total contributions over time
     const totalContributions = annualContribution * years;
-
     // Total growth
     const totalGrowth = futureValue - totalContributions;
-
     // Projection object
     const calculatedProjection: PensionProjection = {
       id: savedProjections.length + 1,

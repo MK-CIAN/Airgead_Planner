@@ -29,12 +29,12 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
     const fetchFriendsAndContributors = async () => {
       try {
         const friendsResponse = await Axios.get(`/friends/`);
-    
+        // Validating API response
         if (!Array.isArray(friendsResponse.data)) {
           console.error("Unexpected API response:", friendsResponse.data);
           return;
         }
-
+        // Fetching contributors
         let contributorsUrl = "";
         if (entityType === "budget") {
           contributorsUrl = `/data/custom-budget/${entityId}/`;
@@ -50,16 +50,14 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
           : [];
 
         setContributors(contributorsList);
-
         // Fetch pending invites
         const pendingResponse = await Axios.get(`/notifications/pending-invites`, {
           params: { entity_id: entityId, entity_type: entityType },
         });
-
         const pendingIds = pendingResponse.data.map((invite: any) => invite.friend_id);
         setPendingInvites(pendingIds);
 
-        // Update friend statuses
+        // Update friend status based on contributors and pending invites
         const friendsWithStatus: Friend[] = friendsResponse.data.map((friend: Friend) => ({
           ...friend,
           status: contributorsList.includes(friend.id)
