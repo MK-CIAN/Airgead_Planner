@@ -70,7 +70,7 @@ const SearchUsers: React.FC = () => {
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="ghost">
-          <Search className="w-5 h-5" />
+          <Search className="w-5 h-5" aria-label="Search"/>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-4">

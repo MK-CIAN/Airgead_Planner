@@ -210,7 +210,7 @@ export default function Navigation({ content }: { content: React.ReactNode }) {
         {/* Sidebar Header with Logo and Title */}
         <div className="flex items-center space-x-4 p-4 bg-green-600 text-white">
           <img src="/static/harpIcon.png" alt="Logo" className="w-8 h-8" />
-          <span className="text-lg font-bold">Airgead Planner</span>
+          <span className="text-xl font-bold">Airgead Planner</span>
         </div>
 
         <nav className="flex flex-col space-y-2 p-4">
@@ -221,7 +221,7 @@ export default function Navigation({ content }: { content: React.ReactNode }) {
                 className="flex items-center p-2 rounded hover:bg-green-600"
                 onClick={item.onClick}
               >
-                <item.icon className="mr-2 w-6 h-6 text-green-500" />
+                <item.icon className="mr-2 w-6 h-6 text-green-500" aria-hidden="true"/>
                 {item.label}
               </button>
             ) : (
@@ -234,7 +234,7 @@ export default function Navigation({ content }: { content: React.ReactNode }) {
                 }`}
                 key={item.path}
               >
-                <item.icon className="mr-2 w-6 h-6 text-green-500" />
+                <item.icon className="mr-2 w-6 h-6 text-green-500" aria-hidden="true"/>
                 {item.label}
               </Link>
             )
@@ -243,7 +243,7 @@ export default function Navigation({ content }: { content: React.ReactNode }) {
       </Sidebar>
       <SidebarInset>
         <header className="flex h-16 items-center px-4">
-          <SidebarTrigger className="mr-2" />
+          <SidebarTrigger className="mr-2"/>
           <Separator orientation="vertical" className="h-6" />
           <Breadcrumb>
             <BreadcrumbList>
@@ -279,7 +279,7 @@ export default function Navigation({ content }: { content: React.ReactNode }) {
             </div>
           </div>
         </header>
-        <main className="p-4">{content}</main>
+        <main className="p-4" aria-label="Page content">{content}</main>
       </SidebarInset>
     </SidebarProvider>
   );

@@ -96,7 +96,7 @@ const Notifications: React.FC = () => {
               {notifications.length}
             </Badge>
           )}
-          <Bell className="w-5 h-5" />
+          <Bell className="w-5 h-5" aria-label="Notifications"/>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-4">

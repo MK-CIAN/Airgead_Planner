@@ -157,7 +157,7 @@ const AuthPage = () => {
     }
   };
 
-  // Register Submission
+  // Registering Submission
   const registerSubmission: SubmitHandler<RegisterForm> = async (data) => {
     setErrorMessage(null);
     try {
@@ -167,25 +167,42 @@ const AuthPage = () => {
         password: data.password,
         password2: data.password2,
       });
-
+  
       toast({
         title: "Registration Successful!",
-        description: "You can now log in to your account.",
+        description: "Logging you in now...",
         variant: "successfull",
       });
-
-      setIsLogin(true);
+  
+      // Automatically logging the user in
+      const loginResponse = await Axios.post("login/", {
+        email: data.email,
+        password: data.password,
+      });
+  
+      const token = loginResponse.data.token;
+      localStorage.setItem("Token", token);
+  
+      // Fetching user interests to determine next page
+      const interestResponse = await Axios.get("data/interests/", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      const interests = interestResponse.data.interests;
+  
+      if (!interests || interests.length === 0) {
+        navigate("/userinterests");
+      } else {
+        navigate("/home");
+      }
+  
     } catch (error: any) {
-      console.error("Registration Error:", error.response?.data || error);
-
-      // Extract backend validation errors
+      console.error("Registration/Login Error:", error.response?.data || error);
+  
+      // Handle specific API errors
       if (error.response?.data) {
         const backendErrors = error.response.data;
-        
-        // Format the error message from backend response
         let errorMessages = [];
-        
-        // Check for specific field errors
         for (const field in backendErrors) {
           if (Array.isArray(backendErrors[field])) {
             errorMessages.push(`${field}: ${backendErrors[field].join(', ')}`);
@@ -193,20 +210,13 @@ const AuthPage = () => {
             errorMessages.push(`${field}: ${backendErrors[field]}`);
           }
         }
-        
-        // If there are specific field errors, display them
-        if (errorMessages.length > 0) {
-          const formattedMessage = errorMessages.join('\n');
-          setErrorMessage(formattedMessage);
-        } else {
-          // Fallback to general error message
-          setErrorMessage("Registration failed. Please check your inputs.");
-        }
+  
+        const formattedMessage = errorMessages.join('\n');
+        setErrorMessage(formattedMessage || "Registration failed. Please check your inputs.");
       } else {
         setErrorMessage("Registration failed. Please check your inputs.");
       }
-
-      // Show toast notification for errors
+  
       toast({
         title: "Registration Error",
         description: errorMessage || "Registration failed. Please try again.",
@@ -214,6 +224,7 @@ const AuthPage = () => {
       });
     }
   };
+  
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-background text-foreground">
@@ -291,6 +302,7 @@ const AuthPage = () => {
                 <Input
                   type="password"
                   id="password"
+                  autoComplete="current-password"
                   {...registerLogin("password")}
                   className={`border ${
                     loginErrors.password ? "border-red-500" : "border-gray-300"
@@ -356,7 +368,8 @@ const AuthPage = () => {
                 <Label htmlFor="password">Password</Label>
                 <Input
                   type="password"
-                  id="password"
+                  id="register-password"
+                  autoComplete="new-password"
                   {...registerRegister("password")}
                   className={`border ${
                     registerErrors.password ? "border-red-500" : "border-gray-300"
@@ -373,7 +386,8 @@ const AuthPage = () => {
                 <Label htmlFor="password2">Confirm Password</Label>
                 <Input
                   type="password"
-                  id="password2"
+                  id="register-password2"
+                  autoComplete="new-password"
                   {...registerRegister("password2")}
                   className={`border ${
                     registerErrors.password2 ? "border-red-500" : "border-gray-300"

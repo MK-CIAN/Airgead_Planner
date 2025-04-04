@@ -1,21 +1,21 @@
 import { test, expect } from '@playwright/test';
 
 test('Authenticate and save session', async ({ page }) => {
-  await page.goto('http://localhost:5173/'); // Adjust if needed
+  await page.goto('http://localhost:5173/');
 
-  // ✅ Wait for the login form
-  await page.waitForSelector('form', { timeout: 10000 });
+  // Wait for email input
+  await page.waitForSelector('input[id="email"]', { timeout: 10000 });
 
-  // ✅ Fill in login form using more specific selectors
-  await page.getByLabel('Email').fill('cian.mck01@gmail.com');
-  await page.getByRole('textbox', { name: 'Password' }).fill('Kilkenny1!');  // 🔥 Updated selector
+  // Fill out login form
+  await page.locator('input[id="email"]').fill('cian.mck01@gmail.com');
+  await page.locator('input[id="password"]').fill('Kilkenny1!');
 
-  // ✅ Click the login button
-  await page.getByRole('button', { name: 'Login' }).click();
+  // Click the Login button more reliably
+  await page.locator('form button:has-text("Login")').click();
 
-  // ✅ Wait for navigation to home page
-  await page.waitForURL('http://localhost:5173/home', { timeout: 15000 });
+  // Wait for either route to appear
+  await page.waitForURL(/localhost:5173\/(home|userinterests)/, { timeout: 15000 });
 
-  // ✅ Save authentication state
+  // Save auth state
   await page.context().storageState({ path: 'tests/auth.json' });
 });
