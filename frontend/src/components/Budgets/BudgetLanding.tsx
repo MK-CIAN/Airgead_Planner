@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import Axios from "../Axios";
+import Axios from "../Services/Axios";
 import { useNavigate } from "react-router-dom";
 import dayjs, { Dayjs } from "dayjs";
-import BudgetChart from "../charts/BudgetChart";
+import BudgetChart from "./BudgetChart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

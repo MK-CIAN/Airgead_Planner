@@ -12,7 +12,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Legend } from "recharts";
-import DonutChart from "./DonutChart";
+import DonutChart from "./InterestRateChart";
 import {
   Carousel,
   CarouselContent,

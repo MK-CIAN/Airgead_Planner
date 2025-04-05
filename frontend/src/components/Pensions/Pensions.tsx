@@ -9,12 +9,12 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
-import Axios from "./Axios";
+import Axios from "../Services/Axios";
 import { toast } from "@/hooks/use-toast";
-import { PensionGrowthChart } from "./charts/PensionGrowthChart";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import PensionPlaceholder from "./Placeholders/PensionPlaceholder";
-import FeatureTooltip from "./ui/featureTooltip";
+import { PensionGrowthChart } from "./PensionGrowthChart";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import PensionPlaceholder from "../Placeholders/PensionPlaceholder";
+import FeatureTooltip from "../ui/featureTooltip";
 
 interface PensionProjection {
   id: number;

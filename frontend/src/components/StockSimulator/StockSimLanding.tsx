@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import Axios from "./Axios";
+import Axios from "../Services/Axios";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import { toast } from "@/hooks/use-toast";
-import StockSimPlaceholder from "./Placeholders/StocksimPlaceholder";
+import StockSimPlaceholder from "../Placeholders/StocksimPlaceholder";
 
 interface League {
   id: string;

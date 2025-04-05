@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import Axios from "./Axios";
-import StockChart from "./charts/StockChart";
+import Axios from "../Services/Axios";
+import StockChart from "./StockChart";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -8,8 +8,8 @@ import { useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 import Portfolio from "./Portfolio";
 import { TrendingDown, TrendingUp } from "lucide-react";
-import ShowFriends from "./UserServices/ShowFriends";
-import ChatRoom from "./UserServices/ChatRoom";
+import ShowFriends from "../UserServices/ShowFriends";
+import ChatRoom from "../UserServices/ChatRoom";
 import {
   Table,
   TableBody,
@@ -17,8 +17,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "./ui/table";
-import FeatureTooltip from "./ui/featureTooltip";
+} from "../ui/table";
+import FeatureTooltip from "../ui/featureTooltip";
 
 interface StockData {
   previous_close: any;

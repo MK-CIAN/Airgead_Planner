@@ -13,9 +13,9 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import Notification from "./Notifications"; // Assume a replacement exists
+import Notification from "../UserServices/Notifications"; // Assume a replacement exists
 import Axios from "./Axios";
-import Search from "./UserServices/Search";
+import Search from "../UserServices/Search";
 import {
   Home,
   PieChart,
@@ -28,7 +28,7 @@ import {
   FileChartPie,
   LogOut,
 } from "lucide-react";
-import TooltipToggle from "./UserServices/TooltipToggle";
+import TooltipToggle from "../UserServices/TooltipToggle";
 
 type DrawerItem = {
   path?: string;
@@ -213,37 +213,45 @@ export default function Navigation({ content }: { content: React.ReactNode }) {
           <span className="text-xl font-bold">Airgead Planner</span>
         </div>
 
-        <nav className="flex flex-col space-y-2 p-4">
-          {drawerItems.map((item) =>
-            item.custom ? (
-              <button
-                key={item.label}
-                className="flex items-center p-2 rounded hover:bg-green-600"
-                onClick={item.onClick}
-              >
-                <item.icon className="mr-2 w-6 h-6 text-green-500" aria-hidden="true"/>
-                {item.label}
-              </button>
-            ) : (
-              <Link
-                to={item.path || "#"}
-                className={`flex items-center p-2 rounded ${
-                  isActive(item)
-                    ? "bg-green-700 text-white"
-                    : "hover:bg-green-600"
-                }`}
-                key={item.path}
-              >
-                <item.icon className="mr-2 w-6 h-6 text-green-500" aria-hidden="true"/>
-                {item.label}
-              </Link>
-            )
-          )}
+        <nav className="flex flex-col justify-between flex-1 p-4">
+          {/* Main menu items */}
+          <div className="flex flex-col space-y-2">
+            {drawerItems
+              .filter((item) => item.label !== "Logout")
+              .map((item) => (
+                <Link
+                  to={item.path || "#"}
+                  className={`flex items-center p-2 rounded ${
+                    isActive(item)
+                      ? "bg-green-700 text-white"
+                      : "hover:bg-green-600"
+                  }`}
+                  key={item.path}
+                >
+                  <item.icon
+                    className="mr-2 w-6 h-6 text-green-500"
+                    aria-hidden="true"
+                  />
+                  {item.label}
+                </Link>
+              ))}
+          </div>
+
+          {/* Logout at the bottom */}
+          <div className="flex flex-col space-y-2">
+            <button
+              className="flex items-center p-2 rounded hover:bg-red-600 text-red-500 hover:text-white transition-colors"
+              onClick={logoutUser}
+            >
+              <LogOut className="mr-2 w-6 h-6" aria-hidden="true" />
+              Logout
+            </button>
+          </div>
         </nav>
       </Sidebar>
       <SidebarInset>
         <header className="flex h-16 items-center px-4">
-          <SidebarTrigger className="mr-2"/>
+          <SidebarTrigger className="mr-2" />
           <Separator orientation="vertical" className="h-6" />
           <Breadcrumb>
             <BreadcrumbList>
@@ -279,7 +287,9 @@ export default function Navigation({ content }: { content: React.ReactNode }) {
             </div>
           </div>
         </header>
-        <main className="p-4" aria-label="Page content">{content}</main>
+        <main className="p-4" aria-label="Page content">
+          {content}
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );

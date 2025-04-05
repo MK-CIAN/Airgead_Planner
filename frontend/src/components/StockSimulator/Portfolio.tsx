@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import Axios from "./Axios";
+import Axios from "../Services/Axios";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import PortfolioGrowthChart from "./charts/PortfolioGrowthChart";
+import PortfolioGrowthChart from "./PortfolioGrowthChart";
 import { toast } from "@/hooks/use-toast";
 import {
   Select,
@@ -12,8 +12,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
-import FeatureTooltip from "./ui/featureTooltip";
+} from "../ui/select";
+import FeatureTooltip from "../ui/featureTooltip";
 
 interface Portfolio {
   balance: number;

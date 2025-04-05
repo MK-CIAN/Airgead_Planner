@@ -11,8 +11,8 @@ import {
   TableHeader,
 } from "@/components/ui/table";
 import IncomeComparison from "./IncomeComparisons";
-import IncomeBreakdownChart from "../charts/IncomeBreakdownChart";
-import Axios from "../Axios";
+import IncomeBreakdownChart from "./IncomeBreakdownChart";
+import Axios from "../Services/Axios";
 import {
   Select,
   SelectItem,

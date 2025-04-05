@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import Axios from "../Axios";
-import CustomBudgetForm from "../forms/BudgetForm";
+import Axios from "../Services/Axios";
+import CustomBudgetForm from "./BudgetForm";
 import { Typography } from "@mui/material";
 import { useParams } from "react-router-dom";
 import ShowFriends from "../UserServices/ShowFriends";
 import "../../App.css";
 import ChatRoom from "../UserServices/ChatRoom";
-import TestBudgetChart from "../charts/BudgetChart";
+import TestBudgetChart from "./BudgetChart";
 import {
   Table,
   TableBody,

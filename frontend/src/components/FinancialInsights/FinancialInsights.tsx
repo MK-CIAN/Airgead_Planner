@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Axios from "./Axios";
+import Axios from "../Services/Axios";
 import {
   Card,
   CardContent,
@@ -10,10 +10,10 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
 import { Lightbulb, ChartColumn, RefreshCcw, Check, X } from "lucide-react";
-import ClassificationCard from "./Placeholders/ClassificationPlaceholder";
+import ClassificationCard from "../Placeholders/ClassificationPlaceholder";
 import SuggestedAction from "./SuggestedAction";
-import AnalyzationChart from "./charts/AnalyzationChart";
-import FeatureTooltip from "./ui/featureTooltip";
+import AnalyzationChart from "./AnalyzationChart";
+import FeatureTooltip from "../ui/featureTooltip";
 
 interface Suggestion {
   id: number;

@@ -19,7 +19,7 @@ import {
   Legend,
   Tooltip,
 } from "recharts";
-import DonutChart from "../charts/DonutChart";
+import DonutChart from "./InterestRateChart";
 import {
   Carousel,
   CarouselContent,
@@ -192,8 +192,7 @@ const ActiveLoanChart: React.FC<LoanChartProps> = ({
             </CarouselItem>
           </CarouselContent>
 
-          <CarouselPrevious />
-          <CarouselNext />
+          <CarouselPrevious className="bg-green-500 hidden sm:flex absolute" /><CarouselNext className="bg-green-500 hidden sm:flex absolute" />
         </Carousel>
       </CardContent>
     </Card>

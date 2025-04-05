@@ -3,7 +3,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Bell, Check, X } from "lucide-react"; // Using Lucide icons for better integration
-import Axios from "./Axios";
+import Axios from "../Services/Axios";
 import { toast } from "@/hooks/use-toast";
 
 interface Notification {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import Axios from "./Axios";
-import { HoverEffect } from "./ui/hover-effect";
-import NewsPlaceholder from "./Placeholders/NewsPlaceholder"; // Import the placeholder
+import Axios from "../Services/Axios";
+import { HoverEffect } from "../ui/hover-effect";
+import NewsPlaceholder from "../Placeholders/NewsPlaceholder"; // Import the placeholder
 
 // Article interface
 interface Article {

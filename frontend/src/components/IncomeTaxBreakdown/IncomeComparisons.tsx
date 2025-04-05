@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableRow } from "../ui/table";
-import { IndexFundGrowthChart } from "../charts/IndexFundGrowthChart";
+import { IndexFundGrowthChart } from "./IndexFundGrowthChart";
 
 interface TimelineEntry {
   title: string;

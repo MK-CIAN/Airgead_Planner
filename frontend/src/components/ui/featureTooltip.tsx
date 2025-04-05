@@ -1,6 +1,6 @@
 import { ReactNode, useState, useEffect } from "react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import Axios from "@/components/Axios"; // Import Axios for API requests
+import Axios from "@/components/Services/Axios"; // Import Axios for API requests
 
 interface FeatureTooltipProps {
   content: string;

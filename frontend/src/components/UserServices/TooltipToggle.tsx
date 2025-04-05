@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Switch } from "@/components/ui/switch";
-import Axios from "@/components/Axios";
+import Axios from "@/components/Services/Axios";
 
 const TooltipToggle = () => {
   const [tooltipsEnabled, setTooltipsEnabled] = useState<boolean | null>(null); // Start as null

@@ -3,7 +3,7 @@ import { motion } from "framer-motion"; // For animations
 import { Card, CardContent } from "@/components/ui/card"; // Using shadcn card component
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import Axios from "../Axios";
+import Axios from "../Services/Axios";
 import { toast } from "@/hooks/use-toast";
 import { TypewriterEffectSmooth } from "../ui/typewriter-effect";
 

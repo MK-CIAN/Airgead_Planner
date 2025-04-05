@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
-import Axios from "../components/Axios";
-import SavingsChart from "./charts/SavingsChart";
-import BudgetChart from "./charts/BudgetChart";
+import Axios from "../Services/Axios";
+import SavingsChart from "../Savings/SavingsChart";
+import BudgetChart from "../Budgets/BudgetChart";
 import {
   Card,
   CardContent,
@@ -11,13 +11,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import dayjs, { Dayjs } from "dayjs";
-import PortfolioGrowthChart from "./charts/PortfolioGrowthChart";
-import { TypewriterEffectSmooth } from "./ui/typewriter-effect";
-import BudgetPlaceholder from "./Placeholders/BudgetPlaceholder";
-import SavingsPlaceholder from "./Placeholders/SavingsPlaceholder";
-import NewsPlaceholder from "./Placeholders/NewsPlaceholder";
-import StocksimPlaceholder from "./Placeholders/StocksimPlaceholder";
-import FeatureTooltip from "./ui/featureTooltip";
+import PortfolioGrowthChart from "../StockSimulator/PortfolioGrowthChart";
+import { TypewriterEffectSmooth } from "../ui/typewriter-effect";
+import BudgetPlaceholder from "../Placeholders/BudgetPlaceholder";
+import SavingsPlaceholder from "../Placeholders/SavingsPlaceholder";
+import NewsPlaceholder from "../Placeholders/NewsPlaceholder";
+import StocksimPlaceholder from "../Placeholders/StocksimPlaceholder";
+import FeatureTooltip from "../ui/featureTooltip";
 
 interface BudgetData {
   id: number;

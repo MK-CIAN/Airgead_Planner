@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import Axios from "../Axios";
-import TestBudgetChart from "../charts/BudgetChart";
+import Axios from "../Services/Axios";
+import TestBudgetChart from "./BudgetChart";
 import BudgetRadarChart from "./BudgetRadarChart";
-import BudgetForm from "../forms/BudgetForm";
+import BudgetForm from "./BudgetForm";
 import { Button } from "@/components/ui/button";
 import { Typography, Icon } from "@mui/material";
 import {
@@ -166,6 +166,11 @@ const Budget: React.FC = () => {
   };
   
 
+  const hasRadarData = budgetData.filter(
+    (item) => item.type === "expense" || item.type === "debt"
+  ).length >= 3;
+
+  
   if (loading) {
     return <Typography align="center">Loading...</Typography>;
   }
@@ -295,8 +300,9 @@ const Budget: React.FC = () => {
                 <BudgetRadarChart budgetData={budgetData} />
               </CarouselItem>
             </CarouselContent>
-            <CarouselPrevious className="hidden sm:flex absolute left-1 lg:left-2" />
-            <CarouselNext className="hidden sm:flex absolute right-1 lg:right-2" />
+            {hasRadarData && (
+              <><CarouselPrevious className="bg-green-500 hidden sm:flex absolute left-1 lg:left-2" /><CarouselNext className="bg-green-500 hidden sm:flex absolute right-1 lg:right-2" /></>
+              )}
           </Carousel>
         </FeatureTooltip>
       </div>

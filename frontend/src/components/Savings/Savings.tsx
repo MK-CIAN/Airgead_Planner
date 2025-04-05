@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import Axios from "../Axios";
-import SavingsChart from "../charts/SavingsChart";
-import SavingsForm from "../forms/SavingsForms";
+import Axios from "../Services/Axios";
+import SavingsChart from "./SavingsChart";
+import SavingsForm from "./SavingsForms";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "../ui/card";

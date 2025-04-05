@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PiggyBank, ShoppingCart, Scale, AlertCircle } from "lucide-react"; // Icons
-import Axios from "../Axios";
+import Axios from "../Services/Axios";
 import {
   ChartContainer,
   ChartLegendContent,

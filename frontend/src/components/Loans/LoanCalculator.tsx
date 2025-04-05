@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import Axios from "./Axios";
-import LoanForm from "./forms/LoanForm";
-import LoanChart from "./charts/LoanChart";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import Axios from "../Services/Axios";
+import LoanForm from "./LoanForm";
+import LoanChart from "./LoanChart";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import dayjs from "dayjs";
-import ActiveLoanForm from "./forms/ActiveLoanForm";
+import ActiveLoanForm from "./ActiveLoanForm";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -15,9 +15,9 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "./ui/carousel";
-import LoanPlaceholder from "./Placeholders/LoanPlaceholder";
-import FeatureTooltip from "./ui/featureTooltip";
+} from "../ui/carousel";
+import LoanPlaceholder from "../Placeholders/LoanPlaceholder";
+import FeatureTooltip from "../ui/featureTooltip";
 
 interface LoanData {
   id: string;

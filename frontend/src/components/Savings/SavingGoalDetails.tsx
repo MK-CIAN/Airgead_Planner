@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import Axios from "../Axios";
+import Axios from "../Services/Axios";
 import { Typography } from "@mui/material";
 import { Button } from "@/components/ui/button";
 //import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import {
   CarouselPrevious,
   CarouselNext,
 } from "@/components/ui/carousel";
-import SavingsChart from "../charts/SavingsChart";
+import SavingsChart from "./SavingsChart";
 import UpdateSavingsForm from "./SavingsUpdateForms";
 import ShowFriends from "../UserServices/ShowFriends";
 import ChatRoom from "../UserServices/ChatRoom";
@@ -179,8 +179,8 @@ const SavingsGoalDetails: React.FC = () => {
                     </CarouselItem>
                   )}
                 </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
+                {savingsGoal.image_url && (
+                  <><CarouselPrevious className="bg-green-500 hidden sm:flex absolute" /><CarouselNext className="bg-green-500 hidden sm:flex absolute" /></>)}
               </Carousel>
             </CardContent>
           </Card>
