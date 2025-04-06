@@ -180,7 +180,11 @@ const SavingsGoalDetails: React.FC = () => {
                   )}
                 </CarouselContent>
                 {savingsGoal.image_url && (
-                  <><CarouselPrevious className="bg-green-500 hidden sm:flex absolute" /><CarouselNext className="bg-green-500 hidden sm:flex absolute" /></>)}
+                  <>
+                    <CarouselPrevious className="bg-green-500 hidden sm:flex absolute" />
+                    <CarouselNext className="bg-green-500 hidden sm:flex absolute" />
+                  </>
+                )}
               </Carousel>
             </CardContent>
           </Card>
@@ -209,35 +213,42 @@ const SavingsGoalDetails: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleImageUpload} className="space-y-4">
-                  <Button
-                    asChild
-                    disabled={uploading}
-                    className="relative cursor-pointer w-full bg-green-500 hover:bg-green-600"
-                  >
-                    <label>
-                      {uploading
-                        ? "Uploading..."
-                        : image
-                        ? "Selected: " + image.name
-                        : "Choose Image"}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => setImage(e.target.files?.[0] || null)}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      />
-                    </label>
-                  </Button>
-
+                  {/* Image preview */}
                   {image && (
-                    <Button
-                      type="submit"
-                      disabled={uploading}
-                      className="w-full  bg-green-500 hover:bg-green-600"
-                    >
-                      {uploading ? "Uploading..." : "Upload Image"}
-                    </Button>
+                    <div className="w-full h-48 rounded-md overflow-hidden border border-gray-300">
+                      <img
+                        src={URL.createObjectURL(image)}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   )}
+
+                  {/* Choose File Button (label triggers input) */}
+                  <div className="relative w-full">
+                    <input
+                      id="fileUpload"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setImage(e.target.files?.[0] || null)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    />
+                    <Button
+                      type="button"
+                      className="w-full bg-white text-gray-800 hover:bg-gray-100 border border-gray-300 relative z-0"
+                    >
+                      {image ? `Change Image: ${image.name}` : "Choose Image"}
+                    </Button>
+                  </div>
+
+                  {/* Upload Button */}
+                  <Button
+                    type="submit"
+                    disabled={uploading || !image}
+                    className="w-full bg-green-500 hover:bg-green-600 text-white"
+                  >
+                    {uploading ? "Uploading..." : "Upload Image"}
+                  </Button>
                 </form>
               </CardContent>
             </Card>
