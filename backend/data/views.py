@@ -840,15 +840,17 @@ class RecommendedArticlesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        # Hardcoding user interests needs to be dynamic later
         user = request.user
-        recommended_article_ids = recommend_articles(user)
+        try:
+            recommended_article_ids = recommend_articles(user)
+            articles = list(FinancialArticle.objects.filter(id__in=recommended_article_ids))
+            articles.sort(key=lambda x: recommended_article_ids.index(x.id))
+            serializer = FinancialArticleSerializer(articles, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            print(f"Error in recommendation: {str(e)}")
+            return Response([], status=status.HTTP_200_OK)
 
-        # Fetch articles matching the recommended IDs
-        articles = list(FinancialArticle.objects.filter(id__in=recommended_article_ids))
-        articles.sort(key=lambda x: recommended_article_ids.index(x.id))
-        serializer = FinancialArticleSerializer(articles, many=True)
-        return Response(serializer.data)
     
 class UserInterestsView(APIView):
     permission_classes = [permissions.IsAuthenticated]

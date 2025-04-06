@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Axios from "../Services/Axios";
-import CustomBudgetForm from "./BudgetForm";
+import BudgetForm from "./BudgetForm";
 import { Typography } from "@mui/material";
 import { useParams } from "react-router-dom";
 import ShowFriends from "../UserServices/ShowFriends";
@@ -141,12 +141,12 @@ const CustomBudgetDetails: React.FC = () => {
       {/* Responsive Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mt-3 sm:mt-5">
         {/* Add Items Form */}
-        <FeatureTooltip content="Add new budget items">
+        <FeatureTooltip content="Add new budget items such as your wages, food or rent.">
           <Card className="p-2 sm:p-4 rounded-md">
             <Typography variant="h6" className="mb-2 sm:mb-4 text-sm sm:text-base">
               Add Budget Item
             </Typography>
-            <CustomBudgetForm onAddBudget={handleAddBudgetItem} />
+            <BudgetForm onAddBudget={handleAddBudgetItem} />
           </Card>
         </FeatureTooltip>
   
@@ -233,7 +233,7 @@ const CustomBudgetDetails: React.FC = () => {
             entityId={id}
             entityType="budget"
             triggerElement={
-              <Button className="bg-green-600 text-white px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm">
+              <Button className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm">
                 Add Friends
               </Button>
             }

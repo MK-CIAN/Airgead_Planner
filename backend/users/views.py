@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework import viewsets, permissions
-from data.models import CustomBudget, Portfolio
+from data.models import CustomBudget, Portfolio, UserProfile
 from .serializers import *
 from .models import *
 from rest_framework.response import Response
@@ -62,6 +62,8 @@ class RegisterViewset(viewsets.ViewSet):
         if serializer.is_valid():
             # Save the new user
             user = serializer.save()
+            
+            UserProfile.objects.create(user=user) 
             # Return the created user details
             return Response({
                 'id': user.id,

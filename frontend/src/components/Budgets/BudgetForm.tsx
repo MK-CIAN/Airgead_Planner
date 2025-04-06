@@ -36,7 +36,6 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget }) => {
 
     console.log("Submitting form data:", formData);
     onAddBudget(formData);
-
     reset({ transaction_type: "" }); 
   };
 
@@ -73,7 +72,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget }) => {
                 {...field}
                 data-testid="budget-category-input"
                 id="category"
-                placeholder="Enter Label"
+                placeholder="Enter Label For Item"
                 required
               />
             )}

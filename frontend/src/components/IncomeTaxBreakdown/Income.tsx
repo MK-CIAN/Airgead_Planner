@@ -246,7 +246,7 @@ const IncomeTaxCalculator: React.FC = () => {
                 onChange={(e) => 
                   setSalary(e.target.value == "" ? "" : Number(e.target.value))
                 }
-                placeholder="Enter your salary"
+                placeholder="Enter your gross salary amount per annum (€)"
                 className="w-full"
               />
             </div>
@@ -259,7 +259,7 @@ const IncomeTaxCalculator: React.FC = () => {
                 onChange={(e) => 
                   setPensionContribution(e.target.value == "" ? "" : Number(e.target.value))
                 }
-                placeholder="Enter your total contributon amount per annum €"
+                placeholder="Enter your pension contribution amount per annum (€)"
                 className="w-full"
               />
             </div>

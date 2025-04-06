@@ -212,6 +212,7 @@ const PensionPlanner: React.FC = () => {
               <Input
                 type="number"
                 value={startingAge}
+                placeholder="What age are you now?"
                 onChange={(e) => {
                   const val = e.target.value;
                   setStartingAge(val === "" ? "" : Number(val));
@@ -223,6 +224,7 @@ const PensionPlanner: React.FC = () => {
               <Input
                 type="number"
                 value={retirementAge}
+                placeholder="What age do you want to retire?"
                 onChange={(e) =>
                   setRetirementAge(
                     e.target.value === "" ? "" : Number(e.target.value)
@@ -235,6 +237,7 @@ const PensionPlanner: React.FC = () => {
               <Input
                 type="number"
                 value={annualSalary}
+                placeholder="What is your annual salary?"
                 onChange={(e) =>
                   setAnnualSalary(
                     e.target.value === "" ? "" : Number(e.target.value)
@@ -247,6 +250,7 @@ const PensionPlanner: React.FC = () => {
               <Input
                 type="number"
                 value={contributionRate}
+                placeholder="What percentage of your salary do you contribute?"
                 onChange={(e) =>
                   setContributionRate(
                     e.target.value === "" ? "" : Number(e.target.value)
@@ -259,6 +263,7 @@ const PensionPlanner: React.FC = () => {
               <Input
                 type="number"
                 value={employerMatch}
+                placeholder="What percentage does your employer match?"
                 onChange={(e) =>
                   setEmployerMatch(
                     e.target.value === "" ? "" : Number(e.target.value)
@@ -271,6 +276,7 @@ const PensionPlanner: React.FC = () => {
               <Input
                 type="number"
                 value={roi}
+                placeholder="Average return rates vary between 5% and 10%"
                 onChange={(e) =>
                   setRoi(e.target.value === "" ? "" : Number(e.target.value))
                 }

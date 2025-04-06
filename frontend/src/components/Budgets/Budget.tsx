@@ -206,7 +206,7 @@ const Budget: React.FC = () => {
       {/* Responsive Layout - side by side on desktop */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mt-3 sm:mt-5">
         {/* Budget Form */}
-        <FeatureTooltip content="Add new budget items">
+        <FeatureTooltip content="Add new budget items such as your wages, food or rent.">
           <Card className="p-2 sm:p-4 rounded-md">
             <BudgetForm onAddBudget={handleAddBudgetItem} />
           </Card>

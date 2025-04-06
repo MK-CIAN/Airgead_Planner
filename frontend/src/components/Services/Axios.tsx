@@ -26,26 +26,24 @@ Axios.interceptors.request.use(
   }
 )
 
+// Axios.js
 Axios.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Check if the response is a 401 Unauthorized
     if (error.response && error.response.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true; // Prevents infinite loops
+      originalRequest._retry = true;
 
-      // Remove expired token
+      // Clear token
       localStorage.removeItem("Token");
 
-      // Optionally, redirect user to login page
-      window.location.href = "/"; // Adjust as needed
-
-      return Axios(originalRequest); // Retry request after clearing token
+      return Promise.reject({ ...error, redirectToLogin: true });
     }
 
     return Promise.reject(error);
   }
 );
+
 
 export default Axios;
