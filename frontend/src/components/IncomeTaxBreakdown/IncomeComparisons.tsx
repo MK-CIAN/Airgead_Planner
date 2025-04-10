@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  useScroll,
-  useTransform,
-  motion,
-} from "framer-motion";
+import { useScroll, useTransform, motion } from "framer-motion";
 import {
   Card,
   CardContent,
@@ -13,6 +9,7 @@ import {
 } from "../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableRow } from "../ui/table";
 import { IndexFundGrowthChart } from "./IndexFundGrowthChart";
+import { Coffee, Clapperboard, UtensilsCrossed, ChartNoAxesCombined } from "lucide-react";
 
 interface TimelineEntry {
   title: string;
@@ -45,6 +42,13 @@ export const IncomeComparison: React.FC<IncomeComparisonProps> = ({ data }) => {
 
   const yearlyDifference = newIncome.net_salary - baseIncome.net_salary;
   const monthlyDifference = newIncome.net_salary - baseIncome.net_salary;
+  const netMonthlyDifference = yearlyDifference / 12;
+  const budget = {
+    meals: netMonthlyDifference * 0.3,
+    coffee: netMonthlyDifference * 0.1,
+    movies: netMonthlyDifference * 0.1,
+    investing: netMonthlyDifference * 0.5,
+  };
 
   // Generate timeline entries dynamically
   const timeline: TimelineEntry[] = [
@@ -179,7 +183,12 @@ export const IncomeComparison: React.FC<IncomeComparisonProps> = ({ data }) => {
               {/* Meals Out */}
               <Card className="mb-4">
                 <CardHeader>
-                  <CardTitle>Meals Out 🍽️</CardTitle>
+                  <CardTitle>
+                    <div className="flex items-center gap-2">
+                      <span>Meals Out</span>
+                      <UtensilsCrossed className="w-8 h-8 text-green-500" />
+                    </div>
+                  </CardTitle>
                   <CardDescription>
                     How many more meals out per month
                   </CardDescription>
@@ -188,12 +197,8 @@ export const IncomeComparison: React.FC<IncomeComparisonProps> = ({ data }) => {
                   <p>
                     Based on an average cost of €80 per meal for two people, you
                     could afford{" "}
-                    <strong>
-                      {Math.floor(
-                        (newIncome.net_salary - baseIncome.net_salary) / 12 / 80
-                      )}
-                    </strong>{" "}
-                    additional meals out per month.
+                    <strong>{Math.floor(budget.meals / 80)}</strong> additional
+                    meals out per month.
                   </p>
                 </CardContent>
               </Card>
@@ -201,7 +206,13 @@ export const IncomeComparison: React.FC<IncomeComparisonProps> = ({ data }) => {
               {/* Coffee */}
               <Card className="mb-4">
                 <CardHeader>
-                  <CardTitle>Coffee ☕️</CardTitle>
+                  <CardTitle>
+                    <div className="flex items-center gap-2">
+                      <span>Coffee</span>
+                      <Coffee className="w-8 h-8 text-green-500" />
+                    </div>
+                  </CardTitle>
+
                   <CardDescription>
                     How many more coffees per week
                   </CardDescription>
@@ -209,11 +220,7 @@ export const IncomeComparison: React.FC<IncomeComparisonProps> = ({ data }) => {
                 <CardContent>
                   <p>
                     Based on an average cost of €4 per coffee, you could afford{" "}
-                    <strong>
-                      {Math.floor(
-                        (newIncome.net_salary - baseIncome.net_salary) / 52 / 4
-                      )}
-                    </strong>{" "}
+                    <strong>{Math.floor((budget.coffee * 12) / 4 / 52)}</strong>{" "}
                     additional coffees per week.
                   </p>
                 </CardContent>
@@ -222,7 +229,12 @@ export const IncomeComparison: React.FC<IncomeComparisonProps> = ({ data }) => {
               {/* Movie Tickets */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Movies 🍿</CardTitle>
+                  <CardTitle>
+                    <div className="flex items-center gap-2">
+                      <span>Movies</span>
+                      <Clapperboard className="w-8 h-8 text-green-500" />
+                    </div>
+                  </CardTitle>
                   <CardDescription>
                     How many movie outings per month
                   </CardDescription>
@@ -231,12 +243,8 @@ export const IncomeComparison: React.FC<IncomeComparisonProps> = ({ data }) => {
                   <p>
                     Based on an average cost of €15 per movie outing (ticket +
                     snacks), you could afford{" "}
-                    <strong>
-                      {Math.floor(
-                        (newIncome.net_salary - baseIncome.net_salary) / 12 / 15
-                      )}
-                    </strong>{" "}
-                    additional movie outings per month.
+                    <strong>{Math.floor(budget.movies / 15)}</strong> additional
+                    movie outings per month.
                   </p>
                 </CardContent>
               </Card>
@@ -252,7 +260,10 @@ export const IncomeComparison: React.FC<IncomeComparisonProps> = ({ data }) => {
           {/* Investment Section */}
           <Card>
             <CardHeader>
-              <CardTitle>S&P 500 Investment Growth</CardTitle>
+              <CardTitle><div className="flex items-center gap-2">
+                      <span>S&P 500 Investment Growth</span>
+                      <ChartNoAxesCombined className="w-8 h-8 text-green-500" />
+                    </div></CardTitle>
               <CardDescription>
                 See how your additional monthly income grows with investment
               </CardDescription>
@@ -260,8 +271,7 @@ export const IncomeComparison: React.FC<IncomeComparisonProps> = ({ data }) => {
             <CardContent>
               {(() => {
                 // Calculate Monthly Investment
-                const monthlyDifference =
-                  (newIncome.net_salary - baseIncome.net_salary) / 12;
+                const monthlyDifference = budget.investing;
                 const annualReturnRate = 0.08; // 8% annual return
                 const years = 5; // Duration of investment in years
 
@@ -343,7 +353,7 @@ export const IncomeComparison: React.FC<IncomeComparisonProps> = ({ data }) => {
     >
       <div className="max-w-7xl mx-auto py-10">
         <h2 className="text-lg md:text-4xl mb-4 text-center text-black dark:text-white">
-          Income Comparison Timeline Test
+          Income Comparison
         </h2>
 
         <p className="text-neutral-700 dark:text-neutral-300 text-sm md:text-base max-w-sm">

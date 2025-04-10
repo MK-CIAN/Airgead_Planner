@@ -123,7 +123,7 @@ export function IndexFundGrowthChart({
         <div className="flex w-full items-start gap-2 text-sm">
           <div className="grid gap-2">
             <div className="flex items-center gap-2 font-medium leading-none">
-              Annual Growth: 8% (Example) 📈
+              Annual Growth: 8% (Example Rate)
             </div>
             <div className="flex items-center gap-2 leading-none text-muted-foreground">
               Simulated over 5 years

@@ -1,5 +1,7 @@
+from venv import logger
 from ..models import FinancialArticle, UserArticleInteraction, UserInterest, UserProfile
 from decouple import config
+import logging
 import requests
 import re
 from datetime import datetime
@@ -41,11 +43,13 @@ MAIN_KEYWORDS = {
     "market": {"market", "economic trends", "business cycle"},
     "money": {"money", "cash", "currency"},
     "taxes": {"taxes", "taxation", "income tax", "capital gains tax"},
-    "economy": {"economy", "macroeconomics", "global finance", "trade", "tariff", "tariff"},
+    "economy": {"economy", "macroeconomics", "global finance", "trade", "tariffs", "tariff", "trade"},
     "insurance": {"insurance", "coverage", "risk management"},
     "budget": {"budget", "financial planning", "expense tracking"},
     "wealth": {"wealth", "asset management", "net worth"},
     "income": {"income", "earnings", "salary", "passive income"},
+    "poltics": {"politics", "government policy", "regulation", "legislation", "trump", "biden", "election"},
+    "inflation": {"inflation", "price increase", "cost of living"},
 }
 
 CATEGORY_KEYWORDS = {
@@ -54,6 +58,10 @@ CATEGORY_KEYWORDS = {
     "BALANCED": "economy OR money OR finance OR wealth"
 }
 
+from datetime import datetime, timedelta
+from django.utils.timezone import now, make_aware
+from data.models import FinancialArticle
+
 def fetch_and_store_financial_news():
     params = {
         "apikey": API_KEY,
@@ -61,41 +69,67 @@ def fetch_and_store_financial_news():
         "country": DEFAULT_COUNTRY,
         "category": DEFAULT_CATEGORY,
     }
+
     try:
         response = requests.get(BASE_URL, params=params)
         response.raise_for_status()
         data = response.json()
+
         if data.get("status") != "success":
             raise ValueError("Failed to fetch news articles.")
-        # Storing fetched articles in the database
+
+        # Delete articles older than 14 days
+        cutoff_date = now() - timedelta(days=14)
+        deleted_count, _ = FinancialArticle.objects.filter(pub_date__lt=cutoff_date).delete()
+
+        logger.info(f"Deleted {deleted_count} outdated articles.")
+
+        # Track added articles
+        added_count = 0
         articles = data.get("results", [])
+
         for article in articles:
-            pub_date = article.get("pubDate")
-            if pub_date:
+            pub_date_raw = article.get("pubDate")
+            pub_date = None
+            if pub_date_raw:
                 try:
-                    pub_date = make_aware(datetime.strptime(pub_date, "%Y-%m-%d %H:%M:%S"))
+                    pub_date = make_aware(datetime.strptime(pub_date_raw, "%Y-%m-%d %H:%M:%S"))
                 except ValueError:
-                    pub_date = None  # Skip invalid dates
-            title = (article.get("title") or "")[:500] 
+                    continue  # Skip invalid date
+
+            article_id = article.get("article_id")
+            title = (article.get("title") or "")[:500]
             description = (article.get("description") or "")[:1000]
             source_name = (article.get("source_name") or "")[:255]
+            link = article.get("link")
+
+            # Skip if article with same article_id or link already exists
+            if FinancialArticle.objects.filter(article_id=article_id).exists() or FinancialArticle.objects.filter(link=link).exists():
+                continue
+
             keywords = extract_keywords(title, description)
-            # Storing article in the database
-            FinancialArticle.objects.update_or_create(
-                article_id=article.get("article_id"),
-                defaults={
-                    "title": title,
-                    "link": article.get("link"),
-                    "description": description,
-                    "source_name": source_name,
-                    "pub_date": pub_date,
-                    "image_url": article.get("image_url"),
-                    "keywords": keywords,
-                },
+
+            FinancialArticle.objects.create(
+                article_id=article_id,
+                title=title,
+                link=link,
+                description=description,
+                source_name=source_name,
+                pub_date=pub_date,
+                image_url=article.get("image_url"),
+                keywords=keywords,
             )
-        return {"status": "success", "message": f"Successfully fetched and stored {len(articles)} articles."}
+
+            added_count += 1
+
+        return {
+            "status": "success",
+            "message": f"Fetched {len(articles)} articles. Added {added_count}, deleted {deleted_count} old ones."
+        }
+
     except requests.exceptions.RequestException as e:
-       return {"status": "error", "message": f"Error fetching news articles: {str(e)}"}
+        return {"status": "error", "message": f"Error fetching news articles: {str(e)}"}
+
 
 def extract_keywords(title, description):
     # Extract keywords that matchh the predefined financial terms in MAIN_KEYWORDS.
@@ -133,8 +167,6 @@ def recommend_articles(user):
     user_keywords = expand_user_interests(set(user_interests.interests))
     articles = FinancialArticle.objects.all()
     recommendations = []
-
-    print(f"\nDEBUG: Expanded User Interests for {user.username}: {user_keywords}\n")
 
     for article in articles:
         article_keywords = set(article.keywords or [])

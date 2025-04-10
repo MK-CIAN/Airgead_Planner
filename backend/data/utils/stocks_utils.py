@@ -20,9 +20,9 @@ def get_yfinance():
 # Expanded stock list (FAANG + Tesla, Microsoft, Nvidia)
 STOCK_TICKERS = ['META', 'AMZN', 'AAPL', 'NFLX', 'GOOGL', 'TSLA', 'MSFT', 'NVDA']
 CRYPTO_TICKERS = ['BTC-USD', 'ETH-USD', 'DOGE-USD']
-
 BATCH_SIZE = 5
 
+# Fetch and store the last 5 years of historical stock & cryptocurrency data
 def fetch_historical_stock_data():
     # Fetch and store the last 5 years of historical stock & cryptocurrency data using yfinance.
     yf = get_yfinance()
@@ -58,6 +58,46 @@ def fetch_historical_stock_data():
             )
         logger.info(f"Historical data fetched for {ticker}")
     logger.info("Historical stock & crypto data update complete.")
+
+# Fetch daily close prices for stocks and cryptocurrencies
+def fetch_daily_close_prices():
+    yf = get_yfinance()
+    logger.info("Fetching daily closing stock & crypto prices...")
+    all_tickers = STOCK_TICKERS + CRYPTO_TICKERS
+    today = datetime.utcnow().date()
+
+    for ticker in all_tickers:
+        try:
+            stock = yf.Ticker(ticker)
+            data = stock.history(period="2d", interval="1d")  # fetch last 2 days just in case
+            if data.empty or 'Close' not in data.columns:
+                logger.warning(f"No daily close data available for {ticker}")
+                continue
+            
+            latest_date, row = data.iloc[-1].name.to_pydatetime(), data.iloc[-1]
+            stock_date = latest_date.replace(tzinfo=None) if is_aware(latest_date) else latest_date
+
+            # Only save today's data
+            if stock_date.date() == today:
+                StockData.objects.update_or_create(
+                    ticker=ticker,
+                    date=stock_date,
+                    defaults={                        
+                        'open_price': float(row['Open']),
+                        'high_price': float(row['High']),
+                        'low_price': float(row['Low']),
+                        'close_price': float(row['Close']),
+                        'adj_close_price': float(row.get('Adj Close', row['Close'])),
+                        'volume': int(row['Volume']),
+                    }
+                )
+                logger.info(f"Stored daily close for {ticker} at {stock_date}")
+        except Exception as e:
+            logger.error(f"Failed to fetch/store daily close price for {ticker}: {e}")
+            time.sleep(5)  # small delay before next try
+
+    logger.info("Daily close price update complete.")
+
 
 
 def fetch_realtime_stock_data():

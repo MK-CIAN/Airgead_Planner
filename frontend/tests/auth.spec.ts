@@ -7,8 +7,8 @@ test('Authenticate and save session', async ({ page }) => {
   await page.waitForSelector('input[id="email"]', { timeout: 10000 });
 
   // Fill out login form
-  await page.locator('input[id="email"]').fill('cian.mck01@gmail.com');
-  await page.locator('input[id="password"]').fill('Kilkenny1!');
+  await page.locator('input[id="email"]').fill('test@email.com');
+  await page.locator('input[id="password"]').fill('testpassword');
 
   // Click the Login button more reliably
   await page.locator('form button:has-text("Login")').click();
