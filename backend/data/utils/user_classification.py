@@ -21,9 +21,6 @@ def get_user_data(user):
         debt_ratio = float(debt) / float(income)
 
         data.append([savings_rate, spending_rate, debt_ratio])
-
-    if not data:
-        print(f"DEBUG: No budget data found for {user.username}")
     
     return np.mean(data, axis=0) if data else np.array([0.1, 0.5, 0.1])
 
@@ -54,11 +51,7 @@ def classify_user(user):
     if np.all(user_data == 0) or np.all(user_data < 0.05):  # Adjust threshold if needed
         return "No Classification"
 
-    print(f"DEBUG: User Data for {user.username} -> {user_data}")
-
     category = knn.predict(user_data)[0]
-
-    print(f"DEBUG: Predicted Category -> {category}")
 
     profile, created = UserProfile.objects.get_or_create(user=user)
     profile.category = category

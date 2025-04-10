@@ -87,7 +87,7 @@ const IncomeTaxCalculator: React.FC = () => {
           total_deductions: parseFloat(income.total_deductions),
           net_salary: parseFloat(income.net_salary),
           net_monthly: parseFloat(income.net_monthly),
-          net_weekly: parseFloat(income.net_weekly)
+          net_weekly: parseFloat(income.net_weekly),
         }));
         setSavedBreakdowns(formattedData);
       })
@@ -98,27 +98,34 @@ const IncomeTaxCalculator: React.FC = () => {
 
   const calculateTaxBreakdown = () => {
     if (salary === "" || pensionContribution === "") {
-      toast({title: "Please Provide Valid Inputs!", variant: "destructive"});
+      toast({ title: "Please Provide Valid Inputs!", variant: "destructive" });
       return;
     }
     // Calculating the taxable income
     const taxableIncome = salary - pensionContribution;
-    // Tax credit allowance - Standard Amount
-    const taxCredit = 4000;
     // Calculate income tax
     const standardRateCutoff = 44000;
     const standardRate = 0.2;
     const higherRate = 0.4;
     let incomeTax = 0;
-    if (taxableIncome <= standardRateCutoff) {
-      incomeTax = taxableIncome * standardRate;
-    } else {
-      incomeTax =
-        standardRateCutoff * standardRate +
-        (taxableIncome - standardRateCutoff) * higherRate;
+    let taxCredit = 0;
+    let net_tax = 0;
+
+    if (taxableIncome >= 20000) {
+      // Apply tax bands
+      if (taxableIncome <= standardRateCutoff) {
+        incomeTax = taxableIncome * standardRate;
+      } else {
+        incomeTax =
+          standardRateCutoff * standardRate +
+          (taxableIncome - standardRateCutoff) * higherRate;
+      }
+      // Apply credit only if income tax exists
+      taxCredit = 4000;
+      net_tax = incomeTax - taxCredit;
+      if (net_tax < 0) net_tax = 0; // Ensure net_tax doesn’t go negative
     }
-    // Applying the tax credit
-    const net_tax = incomeTax - taxCredit;
+
     // Calculating USC
     let usc = 0;
     if (salary > 13000) {
@@ -127,7 +134,22 @@ const IncomeTaxCalculator: React.FC = () => {
       if (salary > 27382) usc += (salary - 27382) * 0.03;
     }
     // Calculating PRSI owed
-    const prsi = salary * 0.041;
+    const weeklyIncome = salary / 52;
+    let prsi = 0;
+
+    if (weeklyIncome > 424) {
+      // No credit, full PRSI
+      prsi = salary * 0.041;
+    } else if (weeklyIncome > 352.01) {
+      // Tapered credit appling
+      const creditPerWeek = 12 - (weeklyIncome - 352.01) / 6;
+      const annualCredit = Math.max(0, Math.min(12, creditPerWeek)) * 52;
+      prsi = salary * 0.041 - annualCredit;
+    } else {
+      // No PRSI if earning <= €352/week
+      prsi = 0;
+    }
+
     // Total deductions
     const totalDeductions = net_tax + usc + prsi;
     // Net salary
@@ -191,11 +213,17 @@ const IncomeTaxCalculator: React.FC = () => {
         setSavedBreakdowns((prevBreakdowns) =>
           prevBreakdowns.filter((breakdown) => breakdown.id !== id)
         );
-        toast({title:"Salary removed successfully!", variant: "successfull"});
+        toast({
+          title: "Salary removed successfully!",
+          variant: "successfull",
+        });
       })
       .catch((error) => {
         console.error("Error removing salary:", error);
-        toast({title:"Failed to remove the salary. Please try again.", variant: "destructive"});
+        toast({
+          title: "Failed to remove the salary. Please try again.",
+          variant: "destructive",
+        });
       });
   };
 
@@ -224,441 +252,446 @@ const IncomeTaxCalculator: React.FC = () => {
       <h1 className="text-2xl font-bold mb-6 text-center">
         Income Tax Calculator
       </h1>
-  
+
       {/* Responsive Grid for Inputs and Saved Salaries */}
       <div className="grid gap-6 md:grid-cols-2 items-start">
-        
         {/* Input Section */}
         <FeatureTooltip content="Calculate different income levels to see the effect on tax and net pay.">
-        <Card className="hover:shadow-md transition-shadow">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-center">
-              Calculate Tax Breakdown
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <Label htmlFor="salary">Enter Salary</Label>
-              <Input
-                id="salary"
-                type="number"
-                value={salary}
-                onChange={(e) => 
-                  setSalary(e.target.value == "" ? "" : Number(e.target.value))
-                }
-                placeholder="Enter your gross salary amount per annum (€)"
-                className="w-full"
-              />
-            </div>
-            <div className="space-y-4 mt-4">
-              <Label htmlFor="pension">Enter Pension Contribution</Label>
-              <Input
-                id="pension"
-                type="number"
-                value={pensionContribution}
-                onChange={(e) => 
-                  setPensionContribution(e.target.value == "" ? "" : Number(e.target.value))
-                }
-                placeholder="Enter your pension contribution amount per annum (€)"
-                className="w-full"
-              />
-            </div>
-            <div className="space-y-4 mt-4">
-              <Label htmlFor="marital-status">Marital Status</Label>
-              <select
-                id="marital-status"
-                value={maritalStatus}
-                onChange={(e) => setMaritalStatus(e.target.value)}
-                className="w-full border border-gray-300 rounded-md p-2"
-              >
-                <option value="single">Single</option>
-                <option value="married">Married</option>
-              </select>
-            </div>
-            <Button
-              onClick={calculateTaxBreakdown}
-              className="w-full mt-4 bg-green-500 hover:bg-green-600 text-white"
-            >
-              Calculate
-            </Button>
-          </CardContent>
-        </Card>
-        </FeatureTooltip>
-  
-        {/* Saved Salaries Section */}
-        {savedBreakdowns.length > 0 ? (
-          <FeatureTooltip content="Your saved incomes with detailed breakdowns and tax rate chart.">
           <Card className="hover:shadow-md transition-shadow">
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-center">
-                Saved Incomes
+                Calculate Tax Breakdown
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {savedBreakdowns.map((income) => (
-                  <div
-                    key={income.id}
-                    className="border border-gray-300 rounded-md p-4 shadow-md"
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p>
-                          <strong>Salary:</strong> €{income.salary.toFixed(2)}
-                        </p>
-                        <p>
-                          <strong>Pension:</strong> €
-                          {income.pension_contribution.toFixed(2)}
-                        </p>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button
-                          className="bg-green-500 hover:bg-green-600 text-white"
-                          onClick={() => toggleCardExpansion(income.id)}
-                        >
-                          {expandedCardId === income.id ? "Collapse" : "Expand"}
-                        </Button>
-                        <Button
-                          className="bg-red-600 text-white"
-                          onClick={() => handleRemoveSalary(income.id)}
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    </div>
-                    {expandedCardId === income.id && (
-                    <div className="mt-4">
-                      <Carousel>
-                        <CarouselContent>
-                          <CarouselItem>
-                            <Table>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead className="text-left w-16">
-                                    Type
-                                  </TableHead>
-                                  <TableHead className="text-right">
-                                    Amount (€)
-                                  </TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {income ? (
-                                  <>
-                                    <TableRow>
-                                      <TableCell className="text-left">
-                                        Taxable Income
-                                      </TableCell>
-                                      <TableCell className="text-right">
-                                        {income.taxable_income.toFixed(2)}
-                                      </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                      <TableCell className="text-left">
-                                        Income Tax
-                                      </TableCell>
-                                      <TableCell className="text-right">
-                                        {income.income_tax.toFixed(2)}
-                                      </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                      <TableCell className="text-left">
-                                        Tax Credit
-                                      </TableCell>
-                                      <TableCell className="text-right">
-                                        {income.tax_credit.toFixed(2)}
-                                      </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                      <TableCell className="text-left">
-                                        Net Tax
-                                      </TableCell>
-                                      <TableCell className="text-right">
-                                        {income.net_tax.toFixed(2)}
-                                      </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                      <TableCell className="text-left">
-                                        USC
-                                      </TableCell>
-                                      <TableCell className="text-right">
-                                        {income.usc.toFixed(2)}
-                                      </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                      <TableCell className="text-left">
-                                        PRSI
-                                      </TableCell>
-                                      <TableCell className="text-right">
-                                        {income.prsi.toFixed(2)}
-                                      </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                      <TableCell className="text-left">
-                                        Total Deductions
-                                      </TableCell>
-                                      <TableCell className="text-right">
-                                        {income.total_deductions.toFixed(2)}
-                                      </TableCell>
-                                    </TableRow>
-                                    <TableRow className="bg-neutral-300 hover:bg-neutral-300">
-                                      <TableCell className="font-semibold text-left">
-                                        Net Salary
-                                      </TableCell>
-                                      <TableCell className="font-semibold text-right">
-                                        {income.net_salary.toFixed(2)}
-                                      </TableCell>
-                                    </TableRow>
-                                    <TableRow className="bg-neutral-300 hover:bg-neutral-300">
-                                      <TableCell className="font-semibold text-left">
-                                        Net Monthly
-                                      </TableCell>
-                                      <TableCell className="font-semibold text-right">
-                                        {income.net_monthly.toFixed(2)}
-                                      </TableCell>
-                                    </TableRow>
-                                    <TableRow className="bg-neutral-300 hover:bg-neutral-300">
-                                      <TableCell className="font-semibold text-left">
-                                        Net Weekly
-                                      </TableCell>
-                                      <TableCell className="font-semibold text-right">
-                                        {income.net_weekly.toFixed(2)}
-                                      </TableCell>
-                                    </TableRow>
-                                  </>
-                                ) : (
-                                  <TableRow>
-                                    <TableCell
-                                      colSpan={2}
-                                      className="text-center text-gray-500"
-                                    >
-                                      No breakdown available.
-                                    </TableCell>
-                                  </TableRow>
-                                )}
-                              </TableBody>
-                            </Table>
-                          </CarouselItem>
-                          <CarouselItem>
-                            {/* Income Breakdown Chart */}
-                            <div>
-                              <IncomeBreakdownChart
-                                grossSalary={income.taxable_income}
-                                netIncome={income.net_salary}
-                                taxesPaid={income.total_deductions}
-                                pensionContribution={
-                                  income.pension_contribution
-                                }
-                              />
-                            </div>
-                          </CarouselItem>
-                        </CarouselContent>
-                        <CarouselPrevious />
-                        <CarouselNext />
-                      </Carousel>
-                    </div>
-                  )}
-                  </div>
-                ))}
+                <Label htmlFor="salary">Enter Salary</Label>
+                <Input
+                  id="salary"
+                  type="number"
+                  min="0"
+                  value={salary}
+                  onChange={(e) =>
+                    setSalary(
+                      e.target.value == "" ? "" : Number(e.target.value)
+                    )
+                  }
+                  placeholder="Enter your gross salary amount per annum (€)"
+                  className="w-full"
+                />
               </div>
+              <div className="space-y-4 mt-4">
+                <Label htmlFor="pension">Enter Pension Contribution</Label>
+                <Input
+                  id="pension"
+                  type="number"
+                  min="0"
+                  value={pensionContribution}
+                  onChange={(e) =>
+                    setPensionContribution(
+                      e.target.value == "" ? "" : Number(e.target.value)
+                    )
+                  }
+                  placeholder="Enter your pension contribution amount per annum (€)"
+                  className="w-full"
+                />
+              </div>
+              <div className="space-y-4 mt-4">
+                <Label htmlFor="marital-status">Marital Status</Label>
+                <select
+                  id="marital-status"
+                  value={maritalStatus}
+                  onChange={(e) => setMaritalStatus(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md p-2"
+                >
+                  <option value="single">Single</option>
+                  <option value="married">Married</option>
+                </select>
+              </div>
+              <Button
+                onClick={calculateTaxBreakdown}
+                className="w-full mt-4 bg-green-500 hover:bg-green-600 text-white"
+              >
+                Calculate
+              </Button>
             </CardContent>
           </Card>
+        </FeatureTooltip>
+
+        {/* Saved Salaries Section */}
+        {savedBreakdowns.length > 0 ? (
+          <FeatureTooltip content="Your saved incomes with detailed breakdowns and tax rate chart.">
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold text-center">
+                  Saved Incomes
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {savedBreakdowns.map((income) => (
+                    <div
+                      key={income.id}
+                      className="border border-gray-300 rounded-md p-4 shadow-md"
+                    >
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p>
+                            <strong>Salary:</strong> €{income.salary.toFixed(2)}
+                          </p>
+                          <p>
+                            <strong>Pension:</strong> €
+                            {income.pension_contribution.toFixed(2)}
+                          </p>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button
+                            className="bg-green-500 hover:bg-green-600 text-white"
+                            onClick={() => toggleCardExpansion(income.id)}
+                          >
+                            {expandedCardId === income.id
+                              ? "Collapse"
+                              : "Expand"}
+                          </Button>
+                          <Button
+                            className="bg-red-600 text-white"
+                            onClick={() => handleRemoveSalary(income.id)}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      </div>
+                      {expandedCardId === income.id && (
+                        <div className="mt-4">
+                          <Carousel>
+                            <CarouselContent>
+                              <CarouselItem>
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead className="text-left w-16">
+                                        Type
+                                      </TableHead>
+                                      <TableHead className="text-right">
+                                        Amount (€)
+                                      </TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {income ? (
+                                      <>
+                                        <TableRow>
+                                          <TableCell className="text-left">
+                                            Taxable Income
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            {income.taxable_income.toFixed(2)}
+                                          </TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                          <TableCell className="text-left">
+                                            Income Tax
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            {income.income_tax.toFixed(2)}
+                                          </TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                          <TableCell className="text-left">
+                                            Tax Credit
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            {income.tax_credit.toFixed(2)}
+                                          </TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                          <TableCell className="text-left">
+                                            Net Tax
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            {income.net_tax.toFixed(2)}
+                                          </TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                          <TableCell className="text-left">
+                                            USC
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            {income.usc.toFixed(2)}
+                                          </TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                          <TableCell className="text-left">
+                                            PRSI
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            {income.prsi.toFixed(2)}
+                                          </TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                          <TableCell className="text-left">
+                                            Total Deductions
+                                          </TableCell>
+                                          <TableCell className="text-right">
+                                            {income.total_deductions.toFixed(2)}
+                                          </TableCell>
+                                        </TableRow>
+                                        <TableRow className="bg-neutral-300 hover:bg-neutral-300">
+                                          <TableCell className="font-semibold text-left">
+                                            Net Salary
+                                          </TableCell>
+                                          <TableCell className="font-semibold text-right">
+                                            {income.net_salary.toFixed(2)}
+                                          </TableCell>
+                                        </TableRow>
+                                        <TableRow className="bg-neutral-300 hover:bg-neutral-300">
+                                          <TableCell className="font-semibold text-left">
+                                            Net Monthly
+                                          </TableCell>
+                                          <TableCell className="font-semibold text-right">
+                                            {income.net_monthly.toFixed(2)}
+                                          </TableCell>
+                                        </TableRow>
+                                        <TableRow className="bg-neutral-300 hover:bg-neutral-300">
+                                          <TableCell className="font-semibold text-left">
+                                            Net Weekly
+                                          </TableCell>
+                                          <TableCell className="font-semibold text-right">
+                                            {income.net_weekly.toFixed(2)}
+                                          </TableCell>
+                                        </TableRow>
+                                      </>
+                                    ) : (
+                                      <TableRow>
+                                        <TableCell
+                                          colSpan={2}
+                                          className="text-center text-gray-500"
+                                        >
+                                          No breakdown available.
+                                        </TableCell>
+                                      </TableRow>
+                                    )}
+                                  </TableBody>
+                                </Table>
+                              </CarouselItem>
+                              <CarouselItem>
+                                {/* Income Breakdown Chart */}
+                                <div>
+                                  <IncomeBreakdownChart
+                                    grossSalary={income.taxable_income}
+                                    netIncome={income.net_salary}
+                                    taxesPaid={income.total_deductions}
+                                    pensionContribution={
+                                      income.pension_contribution
+                                    }
+                                  />
+                                </div>
+                              </CarouselItem>
+                            </CarouselContent>
+                            <CarouselPrevious />
+                            <CarouselNext />
+                          </Carousel>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </FeatureTooltip>
         ) : (
           <IncomePlaceholder type="breakdown" />
         )}
       </div>
-  
+
       {/* Breakdown Section (Below Inputs and Saved) */}
       {breakdown && (
-            <div className="border border-gray-300 rounded-md p-4 shadow-md mt-6">
-              <Carousel>
-                <CarouselContent>
-                  <CarouselItem>
-                    <h2 className="text-xl font-semibold mb-4">
-                      Tax Breakdown
-                    </h2>
-                    <Table>
-                      <TableHeader>
+        <div className="border border-gray-300 rounded-md p-4 shadow-md mt-6">
+          <Carousel>
+            <CarouselContent>
+              <CarouselItem>
+                <h2 className="text-xl font-semibold mb-4">Tax Breakdown</h2>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-left w-16">Type</TableHead>
+                      <TableHead className="text-right">Amount (€)</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {breakdown ? (
+                      <>
                         <TableRow>
-                          <TableHead className="text-left w-16">Type</TableHead>
-                          <TableHead className="text-right">
-                            Amount (€)
-                          </TableHead>
+                          <TableCell className="text-left">
+                            Taxable Income
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {breakdown.taxable_income.toFixed(2)}
+                          </TableCell>
                         </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {breakdown ? (
-                          <>
-                            <TableRow>
-                              <TableCell className="text-left">
-                                Taxable Income
-                              </TableCell>
-                              <TableCell className="text-right">
-                                {breakdown.taxable_income.toFixed(2)}
-                              </TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell className="text-left">
-                                Income Tax
-                              </TableCell>
-                              <TableCell className="text-right">
-                                {breakdown.income_tax.toFixed(2)}
-                              </TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell className="text-left">
-                                Tax Credit
-                              </TableCell>
-                              <TableCell className="text-right">
-                                {breakdown.tax_credit.toFixed(2)}
-                              </TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell className="text-left">
-                                Net Tax
-                              </TableCell>
-                              <TableCell className="text-right">
-                                {breakdown.net_tax.toFixed(2)}
-                              </TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell className="text-left">USC</TableCell>
-                              <TableCell className="text-right">
-                                {breakdown.usc.toFixed(2)}
-                              </TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell className="text-left">PRSI</TableCell>
-                              <TableCell className="text-right">
-                                {breakdown.prsi.toFixed(2)}
-                              </TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell className="text-left">
-                                Total Deductions
-                              </TableCell>
-                              <TableCell className="text-right">
-                                {breakdown.total_deductions.toFixed(2)}
-                              </TableCell>
-                            </TableRow>
-                            <TableRow className="bg-neutral-300 hover:bg-neutral-300">
-                              <TableCell className="font-semibold text-left">
-                                Net Salary
-                              </TableCell>
-                              <TableCell className="font-semibold text-right">
-                                {breakdown.net_salary.toFixed(2)}
-                              </TableCell>
-                            </TableRow>
-                            <TableRow className="bg-neutral-300 hover:bg-neutral-300">
-                              <TableCell className="font-semibold text-left">
-                                Net Monthly
-                              </TableCell>
-                              <TableCell className="font-semibold text-right">
-                                {breakdown.net_monthly.toFixed(2)}
-                              </TableCell>
-                            </TableRow>
-                            <TableRow className="bg-neutral-300 hover:bg-neutral-300">
-                              <TableCell className="font-semibold text-left">
-                                Net Weekly
-                              </TableCell>
-                              <TableCell className="font-semibold text-right">
-                                {breakdown.net_weekly.toFixed(2)}
-                              </TableCell>
-                            </TableRow>
-                          </>
-                        ) : (
-                          <TableRow>
-                            <TableCell
-                              colSpan={2}
-                              className="text-center text-gray-500"
-                            >
-                              No breakdown available.
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
+                        <TableRow>
+                          <TableCell className="text-left">
+                            Income Tax
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {breakdown.income_tax.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="text-left">
+                            Tax Credit
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {breakdown.tax_credit.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="text-left">Net Tax</TableCell>
+                          <TableCell className="text-right">
+                            {breakdown.net_tax.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="text-left">USC</TableCell>
+                          <TableCell className="text-right">
+                            {breakdown.usc.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="text-left">PRSI</TableCell>
+                          <TableCell className="text-right">
+                            {breakdown.prsi.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="text-left">
+                            Total Deductions
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {breakdown.total_deductions.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow className="bg-neutral-300 hover:bg-neutral-300">
+                          <TableCell className="font-semibold text-left">
+                            Net Salary
+                          </TableCell>
+                          <TableCell className="font-semibold text-right">
+                            {breakdown.net_salary.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow className="bg-neutral-300 hover:bg-neutral-300">
+                          <TableCell className="font-semibold text-left">
+                            Net Monthly
+                          </TableCell>
+                          <TableCell className="font-semibold text-right">
+                            {breakdown.net_monthly.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow className="bg-neutral-300 hover:bg-neutral-300">
+                          <TableCell className="font-semibold text-left">
+                            Net Weekly
+                          </TableCell>
+                          <TableCell className="font-semibold text-right">
+                            {breakdown.net_weekly.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                      </>
+                    ) : (
+                      <TableRow>
+                        <TableCell
+                          colSpan={2}
+                          className="text-center text-gray-500"
+                        >
+                          No breakdown available.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
 
-                    <Button
-                      onClick={saveBreakdown}
-                      className="mt-4 w-full bg-green-500 hover:bg-green-600 text-white"
-                    >
-                      {isSaving ? "Saving..." : "Save Breakdown"}
-                    </Button>
-                  </CarouselItem>
+                <Button
+                  onClick={saveBreakdown}
+                  className="mt-4 w-full bg-green-500 hover:bg-green-600 text-white"
+                >
+                  {isSaving ? "Saving..." : "Save Breakdown"}
+                </Button>
+              </CarouselItem>
 
-                  <CarouselItem>
-                    {/* Income Breakdown Chart */}
-                    <div>
-                      <IncomeBreakdownChart
-                        grossSalary={breakdown.taxable_income}
-                        netIncome={breakdown.net_salary}
-                        taxesPaid={breakdown.total_deductions}
-                        pensionContribution={breakdown.pension_contribution}
-                      />
-                    </div>
-                  </CarouselItem>
-                </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
-              </Carousel>
-            </div>
-          )}
-  
+              <CarouselItem>
+                {/* Income Breakdown Chart */}
+                <div>
+                  <IncomeBreakdownChart
+                    grossSalary={breakdown.taxable_income}
+                    netIncome={breakdown.net_salary}
+                    taxesPaid={breakdown.total_deductions}
+                    pensionContribution={breakdown.pension_contribution}
+                  />
+                </div>
+              </CarouselItem>
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
+        </div>
+      )}
+
       {/* Comparison Section */}
       {savedBreakdowns.length > 1 ? (
         <FeatureTooltip content="Compare different incomes to see how they can affect your every day life.">
-        <Card className="hover:shadow-md transition-shadow mt-8">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-center">
-              Compare Salaries
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <Label>Select Base Income</Label>
-              <Select onValueChange={(value) => setBaseIncomeId(Number(value))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Base Income" />
-                </SelectTrigger>
-                <SelectContent>
-                  {savedBreakdowns.map((income) => (
-                    <SelectItem key={income.id} value={String(income.id)}>
-                      Salary: €{income.salary.toFixed(2)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-  
-              <Label>Select New Income</Label>
-              <Select onValueChange={(value) => setNewIncomeId(Number(value))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select New Income" />
-                </SelectTrigger>
-                <SelectContent>
-                  {savedBreakdowns.map((income) => (
-                    <SelectItem key={income.id} value={String(income.id)}>
-                      Salary: €{income.salary.toFixed(2)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-  
-              <Button
-                onClick={compareIncomes}
-                className="w-full bg-green-500 hover:bg-green-600 text-white"
-              >
-                Compare
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          <Card className="hover:shadow-md transition-shadow mt-8">
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold text-center">
+                Compare Salaries
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <Label>Select Base Income</Label>
+                <Select
+                  onValueChange={(value) => setBaseIncomeId(Number(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Base Income" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {savedBreakdowns.map((income) => (
+                      <SelectItem key={income.id} value={String(income.id)}>
+                        Salary: €{income.salary.toFixed(2)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Label>Select New Income</Label>
+                <Select
+                  onValueChange={(value) => setNewIncomeId(Number(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select New Income" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {savedBreakdowns.map((income) => (
+                      <SelectItem key={income.id} value={String(income.id)}>
+                        Salary: €{income.salary.toFixed(2)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Button
+                  onClick={compareIncomes}
+                  className="w-full bg-green-500 hover:bg-green-600 text-white"
+                >
+                  Compare
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </FeatureTooltip>
       ) : (
-        <IncomePlaceholder type="comparison"/>
+        <IncomePlaceholder type="comparison" />
       )}
-  
+
       {comparisonData.baseIncome && comparisonData.newIncome && (
         <IncomeComparison
           data={{

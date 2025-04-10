@@ -34,7 +34,6 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget }) => {
       transaction_type: data.transaction_type,
     };
 
-    console.log("Submitting form data:", formData);
     onAddBudget(formData);
     reset({ transaction_type: "" }); 
   };
@@ -96,6 +95,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ onAddBudget }) => {
                 <SelectContent>
                   <SelectItem data-testid="select-item-income" value="income">Income</SelectItem>
                   <SelectItem data-testid="select-item-expense" value="expense">Expense</SelectItem>
+                  <SelectItem data-testid="select-item-savings" value="savings">Savings</SelectItem>
                   <SelectItem data-testid="select-item-debt" value="debt">Debt</SelectItem>
                 </SelectContent>
               </Select>

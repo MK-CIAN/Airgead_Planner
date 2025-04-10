@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Axios from "../Services/Axios";
-import TestBudgetChart from "./BudgetChart";
+import BudgetChart from "./BudgetChart";
 import BudgetRadarChart from "./BudgetRadarChart";
 import BudgetForm from "./BudgetForm";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,6 @@ const Budget: React.FC = () => {
     const formattedMonth = month.format("YYYY-MM-DD"); // Ensure correct format
 
     try {
-      console.log(`Fetching budget for: ${formattedMonth}`);
       const response = await Axios.get("data/budget/", {
         params: { month: formattedMonth },
       });
@@ -53,7 +52,6 @@ const Budget: React.FC = () => {
       if (response.data.length > 0) {
         const budget = response.data[0];
         setBudgetId(budget.id);
-        console.log(`Budget found: ${budget.id}`);
 
         const formattedData: BudgetData[] = (budget.items || []).map(
           (item: any) => ({
@@ -65,13 +63,11 @@ const Budget: React.FC = () => {
         );
         setBudgetData(formattedData);
       } else {
-        console.log("No budget found for this month. Creating a new one...");
         const budgetResponse = await Axios.post("data/budget/", {
           month: formattedMonth,
         }); // Corrected format
         const newBudgetId = budgetResponse.data.id;
         setBudgetId(newBudgetId);
-        console.log(`New budget created: ${newBudgetId}`);
 
         setBudgetData([]);
       }
@@ -138,8 +134,6 @@ const Budget: React.FC = () => {
   const handleRemoveBudgetItem = async (itemId: number) => {
     if (!budgetId) return;
     try {
-      console.log(`Removing item ${itemId} from budget ${budgetId}`);
-  
       await Axios.delete(`data/budget/${budgetId}/items/${itemId}/`);
   
       const response = await Axios.get(`data/budget/`, {
@@ -158,8 +152,6 @@ const Budget: React.FC = () => {
       } else {
         setBudgetData([]);
       }
-  
-      console.log("Budget item removed and UI updated.");
     } catch (error) {
       console.error("Error removing budget item:", error);
     }
@@ -252,6 +244,8 @@ const Budget: React.FC = () => {
                               ? "text-green-600"
                               : item.type === "debt"
                               ? "text-red-600"
+                              : item.type === "savings"
+                              ? "text-yellow-400"
                               : "text-blue-600"
                           }`}
                         >
@@ -294,7 +288,7 @@ const Budget: React.FC = () => {
           <Carousel className="w-full max-w-[90vw] sm:max-w-[80vw] md:max-w-[70vw] relative">
             <CarouselContent>
               <CarouselItem>
-                <TestBudgetChart data={budgetData} />
+                <BudgetChart data={budgetData} />
               </CarouselItem>
               <CarouselItem>
                 <BudgetRadarChart budgetData={budgetData} />

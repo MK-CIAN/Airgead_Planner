@@ -106,7 +106,7 @@ const SuggestedAction: React.FC<SuggestedActionProps> = ({
         }
       }
   
-      // Add the contributed amount as an expense in the user's budget with a better category label
+      // Adding the contributed amount as an expense in the user's budget with a better category label
       const budgetId = await fetchCurrentBudget();
       if (budgetId) {
         await Axios.post(`data/budget/${budgetId}/items/`, {

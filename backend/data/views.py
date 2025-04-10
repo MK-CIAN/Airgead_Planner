@@ -914,6 +914,10 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
         debt_total = MonthlyBudgetItem.objects.filter(
             budget=latest_budget, transaction_type="debt"
         ).aggregate(Sum("amount"))["amount__sum"] or Decimal("0")
+        
+        savings_total = MonthlyBudgetItem.objects.filter(
+            budget=latest_budget, transaction_type="savings"
+        ).aggregate(Sum("amount"))["amount__sum"] or Decimal("0")
 
         budget_surplus = income_total - (expense_total + debt_total)
         
@@ -981,8 +985,7 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
                     "Consider adjusting your budget to better allocate funds."
                 ),
                 suggestion_category="Suggestion",
-                suggestion_type=highspending_type
-                
+                suggestion_type=highspending_type    
             )
             
         # Suggesting Investments

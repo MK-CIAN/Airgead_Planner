@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Axios from "../Services/Axios";
 import { TypewriterEffectSmooth } from "../ui/typewriter-effect";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -64,6 +65,9 @@ const AuthPage = () => {
   const [currentSentence, setCurrentSentence] = useState(0);
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Forms: Separate `useForm` instances for Login and Register
   const {
@@ -167,56 +171,57 @@ const AuthPage = () => {
         password: data.password,
         password2: data.password2,
       });
-  
+
       toast({
         title: "Registration Successful!",
         description: "Logging you in now...",
         variant: "successfull",
       });
-  
+
       // Automatically logging the user in
       const loginResponse = await Axios.post("login/", {
         email: data.email,
         password: data.password,
       });
-  
+
       const token = loginResponse.data.token;
       localStorage.setItem("Token", token);
-  
+
       // Fetching user interests to determine next page
       const interestResponse = await Axios.get("data/interests/", {
         headers: { Authorization: `Bearer ${token}` },
       });
-  
+
       const interests = interestResponse.data.interests;
-  
+
       if (!interests || interests.length === 0) {
         navigate("/userinterests");
       } else {
         navigate("/home");
       }
-  
     } catch (error: any) {
       console.error("Registration/Login Error:", error.response?.data || error);
-  
+
       // Handle specific API errors
       if (error.response?.data) {
         const backendErrors = error.response.data;
         let errorMessages = [];
         for (const field in backendErrors) {
           if (Array.isArray(backendErrors[field])) {
-            errorMessages.push(`${field}: ${backendErrors[field].join(', ')}`);
-          } else if (typeof backendErrors[field] === 'string') {
+            errorMessages.push(`${field}: ${backendErrors[field].join(", ")}`);
+          } else if (typeof backendErrors[field] === "string") {
             errorMessages.push(`${field}: ${backendErrors[field]}`);
           }
         }
-  
-        const formattedMessage = errorMessages.join('\n');
-        setErrorMessage(formattedMessage || "Registration failed. Please check your inputs.");
+
+        const formattedMessage = errorMessages.join("\n");
+        setErrorMessage(
+          formattedMessage || "Registration failed. Please check your inputs."
+        );
       } else {
         setErrorMessage("Registration failed. Please check your inputs.");
       }
-  
+
       toast({
         title: "Registration Error",
         description: errorMessage || "Registration failed. Please try again.",
@@ -224,7 +229,6 @@ const AuthPage = () => {
       });
     }
   };
-  
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-background text-foreground">
@@ -273,7 +277,9 @@ const AuthPage = () => {
         <CardContent>
           {errorMessage && (
             <Alert variant="destructive" className="mb-4">
-              <AlertDescription className="whitespace-pre-line">{errorMessage}</AlertDescription>
+              <AlertDescription className="whitespace-pre-line">
+                {errorMessage}
+              </AlertDescription>
             </Alert>
           )}
 
@@ -297,19 +303,36 @@ const AuthPage = () => {
                 )}
               </div>
 
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  type="password"
-                  id="password"
-                  autoComplete="current-password"
-                  {...registerLogin("password")}
-                  className={`border ${
-                    loginErrors.password ? "border-red-500" : "border-gray-300"
-                  }`}
-                />
+              <div className="mb-4">
+                <Label htmlFor="password" className="mb-1 block">
+                  Password
+                </Label>
+                <div className="relative">
+                  <Input
+                    type={showLoginPassword ? "text" : "password"}
+                    id="password"
+                    autoComplete="current-password"
+                    {...registerLogin("password")}
+                    className={`pr-10 w-full ${
+                      loginErrors.password
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginPassword((prev) => !prev)}
+                    className="absolute inset-y-0 right-3 flex items-center justify-center text-gray-500 hover:text-gray-700"
+                  >
+                    {showLoginPassword ? (
+                      <Eye size={24} />
+                    ) : (
+                      <EyeOff size={24} />
+                    )}
+                  </button>
+                </div>
                 {loginErrors.password && (
-                  <p className="text-red-500 text-sm">
+                  <p className="text-red-500 text-sm mt-1">
                     {loginErrors.password.message}
                   </p>
                 )}
@@ -354,7 +377,9 @@ const AuthPage = () => {
                   id="username"
                   {...registerRegister("username")}
                   className={`border ${
-                    registerErrors.username ? "border-red-500" : "border-gray-300"
+                    registerErrors.username
+                      ? "border-red-500"
+                      : "border-gray-300"
                   }`}
                 />
                 {registerErrors.username && (
@@ -364,37 +389,71 @@ const AuthPage = () => {
                 )}
               </div>
 
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  type="password"
-                  id="register-password"
-                  autoComplete="new-password"
-                  {...registerRegister("password")}
-                  className={`border ${
-                    registerErrors.password ? "border-red-500" : "border-gray-300"
-                  }`}
-                />
+              <div className="mb-4">
+                <Label htmlFor="password" className="mb-1 block">
+                  Password
+                </Label>
+                <div className="relative">
+                  <Input
+                    type={showRegisterPassword ? "text" : "password"}
+                    id="password"
+                    autoComplete="new-password"
+                    {...registerRegister("password")}
+                    className={`pr-10 w-full ${
+                      registerErrors.password
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowRegisterPassword((prev) => !prev)}
+                    className="absolute inset-y-0 right-3 flex items-center justify-center text-gray-500 hover:text-gray-700"
+                  >
+                    {showRegisterPassword ? (
+                      <Eye size={24} />
+                    ) : (
+                      <EyeOff size={24} />
+                    )}
+                  </button>
+                </div>
                 {registerErrors.password && (
-                  <p className="text-red-500 text-sm">
+                  <p className="text-red-500 text-sm mt-1">
                     {registerErrors.password.message}
                   </p>
                 )}
               </div>
 
-              <div>
-                <Label htmlFor="password2">Confirm Password</Label>
-                <Input
-                  type="password"
-                  id="register-password2"
-                  autoComplete="new-password"
-                  {...registerRegister("password2")}
-                  className={`border ${
-                    registerErrors.password2 ? "border-red-500" : "border-gray-300"
-                  }`}
-                />
+              <div className="mb-4">
+                <Label htmlFor="register-password2" className="mb-1 block">
+                  Confirm Password
+                </Label>
+                <div className="relative">
+                  <Input
+                    type={showConfirmPassword ? "text" : "password"}
+                    id="register-password2"
+                    autoComplete="new-password"
+                    {...registerRegister("password2")}
+                    className={`pr-10 w-full ${
+                      registerErrors.password2
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    className="absolute inset-y-0 right-3 flex items-center justify-center text-gray-500 hover:text-gray-700"
+                  >
+                    {showConfirmPassword ? (
+                      <Eye size={24} />
+                    ) : (
+                      <EyeOff size={24} />
+                    )}
+                  </button>
+                </div>
                 {registerErrors.password2 && (
-                  <p className="text-red-500 text-sm">
+                  <p className="text-red-500 text-sm mt-1">
                     {registerErrors.password2.message}
                   </p>
                 )}

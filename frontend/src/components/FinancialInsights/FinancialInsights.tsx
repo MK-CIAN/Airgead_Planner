@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
 import { Lightbulb, ChartColumn, RefreshCcw, Check, X } from "lucide-react";
-import ClassificationCard from "../Placeholders/ClassificationPlaceholder";
+import ClassificationCard from "./ClassificationPlaceholder";
 import SuggestedAction from "./SuggestedAction";
 import AnalyzationChart from "./AnalyzationChart";
 import FeatureTooltip from "../ui/featureTooltip";
@@ -143,7 +143,7 @@ const FinancialInsights: React.FC = () => {
           variant: "successfull",
         });
 
-        // savings or loan suggestion, open the drawer
+        // Savings or loan suggestion, open the drawer
         if (suggestion.savings_goal || suggestion.loan_id) {
           setSelectedSuggestion(suggestion);
           setIsModalOpen(true);

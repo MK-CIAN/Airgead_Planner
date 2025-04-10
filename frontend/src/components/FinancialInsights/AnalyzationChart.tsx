@@ -10,13 +10,12 @@ import {
 } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 
-
 interface AnalyzationChartProps {
-    needs: number;
-    wants: number;
-    savings: number;
+  needs: number;
+  wants: number;
+  savings: number;
 }
-  
+
 // Utility for dynamic chart sizing
 const getChartSize = (containerWidth: number) => {
   const size = Math.min(containerWidth * 0.7, 400); // Scale chart dynamically
@@ -28,13 +27,13 @@ const budgetColors = {
   needs: "rgba(255, 13, 0, 0.85)", // Red for needs
   wants: "rgb(255, 204, 102)", // Orange for wants
   savings: "rgb(0, 170, 255)", // Blue for savings
-  leftover:"rgba(6,170,19,0.85)", // Green for leftover
+  leftover: "rgba(6,170,19,0.85)", // Green for leftover
 };
 
 // Budget guideline markers (50% / 30% / 20%)
 const guidelineMarkers = [
   { name: "Needs Guideline(50%)", value: 50, color: "rgb(255, 0, 0)" },
-  { name: "Wants Guideline(30%)", value: 30, color: "rgb(255, 204, 102)" },
+  { name: "Wants Guideline(30%)", value: 30, color: "rgb(243, 231, 0)" },
   { name: "Savings Guideline (20%)", value: 20, color: "rgb(0, 170, 255)" },
 ];
 
@@ -45,7 +44,11 @@ interface AnalyzationChartProps {
   savings: number;
 }
 
-const AnalyzationChart: React.FC<AnalyzationChartProps> = ({ needs, wants, savings }) => {
+const AnalyzationChart: React.FC<AnalyzationChartProps> = ({
+  needs,
+  wants,
+  savings,
+}) => {
   const [containerWidth, setContainerWidth] = useState(500);
   const [chartSize, setChartSize] = useState(getChartSize(containerWidth));
 
@@ -82,17 +85,38 @@ const AnalyzationChart: React.FC<AnalyzationChartProps> = ({ needs, wants, savin
   // Center label component
   const CenterLabel = (props: { viewBox?: any }) => {
     const { viewBox } = props;
-    if (!viewBox || typeof viewBox.cx !== "number" || typeof viewBox.cy !== "number") return null;
-  
+    if (
+      !viewBox ||
+      typeof viewBox.cx !== "number" ||
+      typeof viewBox.cy !== "number"
+    )
+      return null;
+
     const { cx, cy } = viewBox;
     const fontSize = Math.max(chartSize.width * 0.07, 14); // Adjust text size dynamically
-  
+
     return (
-      <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" className="fill-foreground text-center">
-        <tspan x={cx} y={cy - fontSize * 0.2} className="font-bold" style={{ fontSize: `${fontSize}px` }}>
+      <text
+        x={cx}
+        y={cy}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        className="fill-foreground text-center"
+      >
+        <tspan
+          x={cx}
+          y={cy - fontSize * 0.2}
+          className="font-bold"
+          style={{ fontSize: `${fontSize}px` }}
+        >
           Your Budget
         </tspan>
-        <tspan x={cx} y={cy + fontSize * 0.5} className="fill-muted-foreground" style={{ fontSize: `${fontSize * 0.5}px` }}>
+        <tspan
+          x={cx}
+          y={cy + fontSize * 0.5}
+          className="fill-muted-foreground"
+          style={{ fontSize: `${fontSize * 0.5}px` }}
+        >
           Broken Down by Category
         </tspan>
       </text>
@@ -106,7 +130,10 @@ const AnalyzationChart: React.FC<AnalyzationChartProps> = ({ needs, wants, savin
         <CardDescription>Compare your budget distribution</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
-        <ChartContainer className="mx-auto aspect-square chart-container" config={{}}>
+        <ChartContainer
+          className="mx-auto aspect-square chart-container"
+          config={{}}
+        >
           <PieChart width={chartSize.width} height={chartSize.width}>
             <ChartTooltip
               cursor={false}
@@ -141,7 +168,7 @@ const AnalyzationChart: React.FC<AnalyzationChartProps> = ({ needs, wants, savin
               stroke="#ffffff"
               strokeWidth={1}
             >
-                <Label content={(props) => <CenterLabel {...props} />} />
+              <Label content={(props) => <CenterLabel {...props} />} />
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.fill} />
               ))}
@@ -167,8 +194,30 @@ const AnalyzationChart: React.FC<AnalyzationChartProps> = ({ needs, wants, savin
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="leading-none text-muted-foreground">
-        <p className="p-2">Needs: {needs.toFixed(1)}% | Wants: {wants.toFixed(1)}% | Savings: {savings.toFixed(1)}% | Leftover: {leftover.toFixed(1)}%</p>
-        <p>*Some Values May be Off Due to Incorrect Categorisation of Items*</p>
+          <p className="p-2">
+            <span style={{ color: "rgba(255, 13, 0, 0.85)" }}>
+              Needs: {needs.toFixed(1)}%
+            </span>{" "}
+            |{" "}
+            <span style={{ color: "rgb(255, 204, 102)" }}>
+              Wants: {wants.toFixed(1)}%
+            </span>{" "}
+            |{" "}
+            <span style={{ color: "rgb(0, 170, 255)" }}>
+              Savings: {savings.toFixed(1)}%
+            </span>{" "}
+            |{" "}
+            <span style={{ color: "rgba(6,170,19,0.85)" }}>
+              Leftover: {leftover.toFixed(1)}%
+            </span>
+          </p>
+
+          <p>
+            Guidelines are based on the 50% Needs, 30% Wants, 20% Savings rule
+          </p>
+          <p>
+            *Some Values May be Off Due to Incorrect Labelling of Items*
+          </p>
         </div>
       </CardFooter>
     </Card>

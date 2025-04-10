@@ -53,7 +53,6 @@ const CustomBudgetDetails: React.FC = () => {
     try {
       const response = await Axios.get(`data/custom-budget/${id}/`);
       const data = response.data;
-
       setBudgetName(data.name);
 
       // Map items safely
@@ -190,6 +189,8 @@ const CustomBudgetDetails: React.FC = () => {
                               ? "text-green-600"
                               : item.type === "debt"
                               ? "text-red-600"
+                              : item.type === "savings"
+                              ? "text-yellow-400"
                               : "text-blue-600"
                           }`}
                         >

@@ -61,15 +61,12 @@ const MainBudgetPage: React.FC = () => {
   const fetchMonthlyBudget = async (month: Dayjs) => {
     setLoading(true);
     try {
-      console.log(`Fetching budget for: ${month.format("YYYY-MM")}`);
       const response = await Axios.get("data/budget/", {
         params: { month: month.format("YYYY-MM") },
       });
 
       if (response.data.length > 0) {
         const budget = response.data[0]; // Assume one budget per user per month
-
-        console.log("Budget found:", budget);
 
         // Ensure items are mapped correctly
         const formattedData: BudgetData[] = budget.items
@@ -83,7 +80,6 @@ const MainBudgetPage: React.FC = () => {
 
         setBudgetData(formattedData);
       } else {
-        console.log("No budget found for this month.");
         setBudgetData([]); // Ensure state is reset if no budget exists
       }
     } catch (error) {
@@ -96,8 +92,6 @@ const MainBudgetPage: React.FC = () => {
   const fetchCustomBudgets = () => {
     Axios.get("data/custom-budget/")
       .then((response) => {
-        console.log("Fetched custom budgets:", response.data);
-
         // Validate items structure before setting state
         const formattedBudgets = response.data.map((budget: any) => ({
           ...budget,
@@ -110,7 +104,6 @@ const MainBudgetPage: React.FC = () => {
         }));
 
         setCustomBudgets(formattedBudgets);
-        console.log("Processed custom budgets:", formattedBudgets);
       })
       .catch((error) => console.error("Error fetching custom budgets:", error));
   };
@@ -119,10 +112,6 @@ const MainBudgetPage: React.FC = () => {
     fetchMonthlyBudget(currentMonth);
     fetchCustomBudgets();
   }, [currentMonth]);
-
-  useEffect(() => {
-    console.log("Processed budgetData:", budgetData); // Debugging output
-  }, [budgetData]);
 
   // Create New Custom Budget
   const handleCreateCustomBudget = () => {
@@ -152,7 +141,7 @@ const MainBudgetPage: React.FC = () => {
 
     try {
       await Axios.post(`data/custom-budget/${budgetId}/leave-budget/`);
-      fetchCustomBudgets(); // Refresh budgets after leaving
+      fetchCustomBudgets(); // Refreshing budgets after leaving
       toast({
         title: "Left Budget",
         description: "You have successfully left the budget.",
@@ -173,7 +162,7 @@ const MainBudgetPage: React.FC = () => {
 
     try {
       await Axios.delete(`data/custom-budget/${budgetId}/delete-budget/`);
-      fetchCustomBudgets(); // Refresh budgets after deletion
+      fetchCustomBudgets(); // Refreshing budgets after deletion
       toast({
         title: "Budget Deleted",
         description: "The budget has been deleted successfully.",
@@ -280,7 +269,7 @@ const MainBudgetPage: React.FC = () => {
         </Card>
       )}
 
-      {/* Budgets Display - Encapsulated in Cards */}
+      {/* Budgets Display */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Monthly Budgets Section */}
         <FeatureTooltip content="Your active monthly budget.">
@@ -336,7 +325,6 @@ const MainBudgetPage: React.FC = () => {
                       <CarouselItem key={budget.id}>
                         <Card
                           data-testid="custom-budget-card"
-                          /**/
                         >
                           <CardHeader>
                             <CardTitle>{budget.name}</CardTitle>

@@ -138,6 +138,7 @@ class MonthlyBudgetItem(models.Model):
     CATEGORY_CHOICES = [
         ('income', 'Income'),
         ('expense', 'Expense'),
+        ('savings', 'Savings'),
         ('debt', 'Debt'),
     ]
     budget = models.ForeignKey(
@@ -170,6 +171,7 @@ class BudgetItem(models.Model):
     CATEGORY_CHOICES = [
         ('income', 'Income'),
         ('expense', 'Expense'),
+        ('savings', 'Savings'),
         ('debt', 'Debt'),
     ]
     budget = models.ForeignKey(

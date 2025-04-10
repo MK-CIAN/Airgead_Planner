@@ -24,6 +24,7 @@ const expenseColors = [
 
 // Function to generate a consistent color for a label
 const getColorForLabel = (label: string) => {
+  if (label.toLowerCase() === "savings") return "#FFD700";
   let hash = 0;
   for (let i = 0; i < label.length; i++) {
     hash = (hash * 31 + label.charCodeAt(i)) % expenseColors.length;
@@ -45,7 +46,7 @@ interface BudgetChartProps {
   useCard?: boolean;
 }
 
-const TestBudgetChart: React.FC<BudgetChartProps> = ({
+const BudgetChart: React.FC<BudgetChartProps> = ({
   data,
   showTitle = true,
   useCard = true,
@@ -76,7 +77,7 @@ const TestBudgetChart: React.FC<BudgetChartProps> = ({
       .filter((item) => item.type === "income")
       .reduce((sum, item) => sum + item.value, 0);
     const expensesAndDebt = data
-      .filter((item) => item.type === "expense" || item.type === "debt")
+      .filter((item) => item.type === "expense" || item.type === "debt" || item.type === "savings")
       .reduce((sum, item) => sum + item.value, 0);
     return { income, expensesAndDebt };
   }, [data]);
@@ -123,8 +124,6 @@ const TestBudgetChart: React.FC<BudgetChartProps> = ({
     );
   };
   
-  
-
   // Chart Component
   const ChartComponent = (
     <ChartContainer className="mx-auto aspect-square chart-container" config={{}}>
@@ -188,4 +187,4 @@ const TestBudgetChart: React.FC<BudgetChartProps> = ({
   );
 };
 
-export default TestBudgetChart;
+export default BudgetChart;

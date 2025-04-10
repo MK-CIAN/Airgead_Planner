@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-// **Validation Schema for Password Reset**
+// Validation Schema for Password Reset
 const passwordResetSchema = yup.object({
   password: yup
     .string()
@@ -53,7 +53,7 @@ const PasswordReset = () => {
   const submission: SubmitHandler<PasswordResetForm> = async (data) => {
     setErrorMessage(null);
     setSuccessMessage(null);
-
+    // Resetting the error message before submission
     try {
       await Axios.post("password_reset/confirm/", {
         password: data.password,
