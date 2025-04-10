@@ -57,6 +57,7 @@ const chartConfig = {
   },
 } as const;
 
+// AreaChart component for visualizing loan repayments
 const ActiveLoanChart: React.FC<LoanChartProps> = ({
   repaymentSchedule,
   totalInterest,

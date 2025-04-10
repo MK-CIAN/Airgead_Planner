@@ -39,7 +39,6 @@ interface IncomeComparisonProps {
 
 export const IncomeComparison: React.FC<IncomeComparisonProps> = ({ data }) => {
   const { baseIncome, newIncome } = data;
-
   const yearlyDifference = newIncome.net_salary - baseIncome.net_salary;
   const monthlyDifference = newIncome.net_salary - baseIncome.net_salary;
   const netMonthlyDifference = yearlyDifference / 12;

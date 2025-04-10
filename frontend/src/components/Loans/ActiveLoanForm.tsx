@@ -17,6 +17,7 @@ interface ActiveLoanFormProps {
   }) => void;
 }
 
+// The ActiveLoanForm component allows users to input loan details
 const ActiveLoanForm: React.FC<ActiveLoanFormProps> = ({ onSaveLoan }) => {
   const { control, handleSubmit, reset, setValue } = useForm();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();

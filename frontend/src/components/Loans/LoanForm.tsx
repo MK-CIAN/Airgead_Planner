@@ -9,6 +9,7 @@ interface LoanFormProps {
   onCalculateRepayment: (data: { name: string; balance: number; interestRate: number; termLength: number }) => void;
 }
 
+// The LoanForm component allows users to input loan details
 const LoanForm: React.FC<LoanFormProps> = ({ onCalculateRepayment }) => {
   const { control, handleSubmit, reset } = useForm();
 

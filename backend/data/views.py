@@ -14,7 +14,7 @@ from data.utils.news_utils import recommend_articles
 from django.contrib.auth import get_user_model
 from users.models import Notification
 from chat.models import ChatRoom
-CustomUser = get_user_model()  # Retrieve the custom user model
+CustomUser = get_user_model()  # Retrieving the custom user model
 
 # Monthly Budget Viewset
 class MonthlyBudgetViewSet(viewsets.ModelViewSet):
@@ -80,9 +80,7 @@ class CustomBudgetViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        """
-        Fetch all budgets created by the user or where the user is a contributor.
-        """
+        # Fetch budgets only belonging to the logged-in user or their contributors
         return CustomBudget.objects.filter(
             models.Q(user=self.request.user) | models.Q(contributors=self.request.user)
         ).distinct()
@@ -94,13 +92,11 @@ class CustomBudgetViewSet(viewsets.ModelViewSet):
         return context
 
     def perform_create(self, serializer):
-        """
-        Create a custom budget explicitly only when requested.
-        """
+        # Automatically associate the budget with the authenticated user
         budget = serializer.save(user=self.request.user)
         ChatRoom.objects.create(budget=budget)
         
-
+    # Custom action to fetch all items for a specific budget
     @action(detail=True, methods=['post'], url_path='items')
     def add_item(self, request, pk=None):
         """
@@ -115,6 +111,7 @@ class CustomBudgetViewSet(viewsets.ModelViewSet):
             return Response(BudgetItemSerializer(saved_item).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+    # Custom action to fetch all items for a specific budget
     @action(detail=True, methods=['delete'], url_path='items/(?P<item_id>[^/.]+)')
     def delete_item(self, request, pk=None, item_id=None):
         """
@@ -128,12 +125,9 @@ class CustomBudgetViewSet(viewsets.ModelViewSet):
         except BudgetItem.DoesNotExist:
             return Response({"error": "Item not found."}, status=status.HTTP_404_NOT_FOUND)
 
-
+    # Custom action to fetch all items for a specific budget
     @action(detail=True, methods=['post'], url_path='invite-friend')
     def invite_friend(self, request, pk=None):
-        """
-        Invite a friend to join a budget.
-        """
         budget = self.get_object()
         friend_id = request.data.get('friend_id')
 
@@ -164,7 +158,8 @@ class CustomBudgetViewSet(viewsets.ModelViewSet):
             return Response({"message": "Invitation sent successfully."}, status=status.HTTP_200_OK)
         except CustomUser.DoesNotExist:
             return Response({"error": "Friend not found."}, status=status.HTTP_404_NOT_FOUND)
-        
+    
+    # Custom action to fetch all items for a specific budget   
     @action(detail=True, methods=['post'], url_path='leave-budget')
     def leave_budget(self, request, pk=None):
         """
@@ -183,6 +178,7 @@ class CustomBudgetViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
+    # Custom action to fetch all items for a specific budget
     @action(detail=True, methods=['delete'], url_path='delete-budget')
     def delete_budget(self, request, pk=None):
         """
@@ -219,7 +215,8 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
         return SavingsGoal.objects.filter(
             models.Q(user=user) | models.Q(contributors=user)
         ).distinct()
-        
+    
+    # Custom action to fetch contributions for a specific savings goal
     @action(detail=True, methods=['GET'])
     def contributions(self, request, pk=None):
         """Fetch contribution history for a specific savings goal."""
@@ -228,6 +225,7 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
         serializer = SavingsContributionSerializer(contributions, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+    # Custom action to make a contribution for a specific savings goal
     @action(detail=True, methods=['POST'])
     def add_contribution(self, request, pk=None):
         # Contribution towards a savings goal
@@ -254,10 +252,12 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+    # Creating the chat room for a savings goal
     def perform_create(self, serializer):
         savings_goal = serializer.save(user=self.request.user)
         ChatRoom.objects.create(savings_goal=savings_goal)
-        
+    
+    # Custom action to update the current amount of a savings goal
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
 
@@ -271,6 +271,7 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
         instance.save()
         return Response(SavingsGoalSerializer(instance).data, status=status.HTTP_200_OK)
     
+    # Custom action to upload an image for a specific savings goal
     @action(detail=True, methods=["post"], url_path="upload-image")
     def upload_image(self, request, pk=None):
         savings_goal = self.get_object()
@@ -282,7 +283,8 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
         savings_goal.image = image
         savings_goal.save()
         return Response({"image_url": savings_goal.image.url})
-        
+    
+    # Custom action to invite a friend to a specific savings goal
     @action(detail=True, methods=['post'], url_path='invite-friend')
     def invite_friend(self, request, pk=None):
         savings_goal = self.get_object()
@@ -293,7 +295,6 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
 
         try:
             friend = CustomUser.objects.get(id=friend_id)
-            
             existing_notification = Notification.objects.filter(
                 user=friend,
                 sender=request.user,
@@ -328,7 +329,8 @@ class LoanViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Automatically associate the loan with the authenticated user
         serializer.save(user=self.request.user)
-        
+    
+# Active loan viewset
 class ActiveLoanViewSet(viewsets.ModelViewSet):
     serializer_class = ActiveLoanSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -341,7 +343,8 @@ class ActiveLoanViewSet(viewsets.ModelViewSet):
         if loan.original_balance == 0:
             loan.original_balance = loan.balance  # Set original balance on creation
             loan.save()
-        
+    
+    # Custom action to fetch all payments for a specific active loan
     @action(detail=True, methods=['GET'])
     def payments(self, request, pk=None):
         #Fetching payment history for a specific active loan.
@@ -350,6 +353,7 @@ class ActiveLoanViewSet(viewsets.ModelViewSet):
         serializer = LoanPaymentSerializer(payments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    # Custom action to make a payment towards an active loan
     @action(detail=True, methods=['POST'])
     def make_payment(self, request, pk=None):
         # Handling making a payment towards an active loan
@@ -372,7 +376,8 @@ class ActiveLoanViewSet(viewsets.ModelViewSet):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
+    
+    # Custom action to delete an active loan and its associated payments
     @action(detail=True, methods=['delete'])
     def delete_loan(self, request, pk=None):
         loan = get_object_or_404(ActiveLoan, id=pk, user=request.user)
@@ -380,11 +385,12 @@ class ActiveLoanViewSet(viewsets.ModelViewSet):
         # First, delete all associated payments
         LoanPayment.objects.filter(loan=loan).delete()
 
-        # Then, delete the loan itself
+        # Then, deleting the loan itself
         loan.delete()
 
         return Response({"message": "Loan and associated payments deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 
+# Income Tax Viewset
 class IncomeTaxViewSet(viewsets.ModelViewSet):
     serializer_class = IncomeTaxSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -395,6 +401,7 @@ class IncomeTaxViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+# Pension Projection Viewset
 class PensionProjectionViewSet(viewsets.ModelViewSet):
     serializer_class = PensionProjectionSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -404,7 +411,6 @@ class PensionProjectionViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-
 
 # Stock Data Viewset
 class StockDataViewSet(viewsets.ViewSet):
@@ -428,7 +434,8 @@ class StockDataViewSet(viewsets.ViewSet):
 
         serializer = StockDataSerializer(stock_data, many=True)
         return Response(serializer.data)
-    
+  
+# Stock Real-Time Data Viewset  
 class StockRealTimeDataViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -453,6 +460,7 @@ class PortfolioViewSet(viewsets.ViewSet):
         latest_stock = StockRealTimeData.objects.filter(ticker=ticker).order_by('-timestamp').first()
         return latest_stock.close_price if latest_stock else 0
 
+    # Get portfolio details
     def list(self, request):
         portfolio_type = request.query_params.get('portfolio_type', 'personal')
         league_id = request.query_params.get('league_id')
@@ -492,7 +500,7 @@ class PortfolioViewSet(viewsets.ViewSet):
         }
         return Response(response_data)
 
-
+    # Create a new portfolio or update an existing one
     def create(self, request):
         portfolio_type = request.data.get("portfolio_type", "personal")
         league_id = request.data.get("league_id")
@@ -520,7 +528,7 @@ class PortfolioViewSet(viewsets.ViewSet):
         else:
             return Response({"error": "Invalid transaction type"}, status=400)
 
-
+    # Update portfolio balance
     def update_total_balance(self, portfolio):
         holdings = StockHolding.objects.filter(portfolio=portfolio)
         total_holdings_value = sum(
@@ -530,7 +538,7 @@ class PortfolioViewSet(viewsets.ViewSet):
         portfolio.totalbalance = Decimal(str(portfolio.balance)) + total_holdings_value
         portfolio.save()
 
-    
+    # Buying stocks
     def _buy_stock(self, portfolio, ticker, quantity, price_per_share):
         total_cost = Decimal(quantity) * Decimal(price_per_share)
         if portfolio.balance < total_cost:
@@ -555,6 +563,7 @@ class PortfolioViewSet(viewsets.ViewSet):
         self._update_portfolio_history(portfolio, "BUY", ticker, quantity)
         return Response(TransactionSerializer(transaction).data)
 
+    # Selling stocks
     def _sell_stock(self, portfolio, ticker, quantity, price_per_share):
         quantity = Decimal(quantity)
         price_per_share = Decimal(price_per_share)
@@ -586,6 +595,7 @@ class PortfolioViewSet(viewsets.ViewSet):
 
         return Response(TransactionSerializer(transaction).data)
         
+    # Update portfolio history
     def _update_portfolio_history(self, portfolio, transaction_type=None, ticker=None, quantity=None):
         self.update_total_balance(portfolio)
 
@@ -596,7 +606,7 @@ class PortfolioViewSet(viewsets.ViewSet):
 
         today = now().date()
 
-        # ✅ Find today's existing entry for the portfolio
+        # Find today's existing entry for the portfolio
         history_entry = PortfolioHistory.objects.filter(
             portfolio=portfolio, timestamp__date=today, league=portfolio.league
         ).order_by('-timestamp').first()
@@ -608,7 +618,7 @@ class PortfolioViewSet(viewsets.ViewSet):
             history_entry.timestamp = now()
             history_entry.save()
         else:
-            # ✅ Ensure no duplicates before creating a new entry
+            # Ensure no duplicates before creating a new entry
             if not PortfolioHistory.objects.filter(portfolio=portfolio, timestamp__date=today, league=portfolio.league).exists():
                 PortfolioHistory.objects.create(
                     user=portfolio.user,
@@ -620,21 +630,16 @@ class PortfolioViewSet(viewsets.ViewSet):
                     timestamp=now(),
                 )
 
-
+# Portfolio History View
 class PortfolioHistoryView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def _get_stock_price(self, ticker):
-        """
-        Retrieve the latest stock price for the given ticker.
-        """
         latest_stock = StockRealTimeData.objects.filter(ticker=ticker).order_by('-timestamp').first()
         return latest_stock.close_price if latest_stock else 0  # Return 0 if no stock data is available
 
+    # Calculate portfolio value
     def _calculate_portfolio_value(self, user, portfolio_type, league_id=None):
-        """
-        Calculate the current total value of the portfolio.
-        """
         if portfolio_type == "league" and league_id:
             holdings = StockHolding.objects.filter(portfolio__user=user, portfolio__league_id=league_id)
             portfolio = Portfolio.objects.filter(user=user, league_id=league_id, portfolio_type=Portfolio.LEAGUE).first()
@@ -650,6 +655,7 @@ class PortfolioHistoryView(APIView):
         )
         return portfolio.balance + total_holdings_value
 
+    # Get portfolio history
     def get(self, request):
         user = request.user
         portfolio_type = request.query_params.get("portfolio_type", "personal")
@@ -693,7 +699,6 @@ class PortfolioHistoryView(APIView):
         return Response(serializer.data)
 
     def _generate_date_range(self, start_date, end_date):
-        
         # Generating a list of dates from start_date to end_date (inclusive).
         delta = timedelta(days=1)
         current_date = start_date
@@ -703,6 +708,7 @@ class PortfolioHistoryView(APIView):
             current_date += delta
         return dates
     
+# Stock League Viewset
 class StockLeagueViewSet(viewsets.ModelViewSet):
     queryset = StockLeague.objects.all()
     serializer_class = StockLeagueSerializer
@@ -711,6 +717,7 @@ class StockLeagueViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return StockLeague.objects.filter(members=self.request.user)
     
+    # Custom action to fetch all members of a specific league
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, context={"request": request})
@@ -721,7 +728,7 @@ class StockLeagueViewSet(viewsets.ModelViewSet):
         data["is_creator"] = request.user.id == instance.created_by.id
         return Response(data)
 
-
+    # Custom action to create a new league
     def perform_create(self, serializer):
         league = serializer.save(created_by=self.request.user)
         league.members.add(self.request.user)
@@ -734,7 +741,7 @@ class StockLeagueViewSet(viewsets.ModelViewSet):
         ChatRoom.objects.get_or_create(stock_league=league)
         return Response({"message": "League created successfully", "league_id": league.id}, status=201)
 
-    
+    # Custom action to add a member to a league
     @action(detail=True, methods=['post'], url_path='invite-friend')
     def invite_friend(self, request, pk=None):
         league = self.get_object()
@@ -768,10 +775,10 @@ class StockLeagueViewSet(viewsets.ModelViewSet):
             return Response({"message": "Invitation sent successfully."}, status=status.HTTP_200_OK)
         except CustomUser.DoesNotExist:
             return Response({"error": "Friend not found."}, status=status.HTTP_404_NOT_FOUND)
-        
+    
+    # Custom action to leave a league
     @action(detail=True, methods=['post'], url_path='leave-league')
     def leave_league(self, request, pk=None):
-        """ Allows a user to leave a stock league, deleting their portfolio & holdings. """
         league = self.get_object()
         user = request.user
 
@@ -792,10 +799,10 @@ class StockLeagueViewSet(viewsets.ModelViewSet):
             return Response({"message": "Successfully left the league."}, status=200)
         except Exception as e:
             return Response({"error": str(e)}, status=500)
-        
+    
+    # Custom action to delete a league
     @action(detail=True, methods=['delete'], url_path='delete-league')
     def delete_league(self, request, pk=None):
-        """ Allows the league creator to delete the entire league & all related data. """
         league = self.get_object()
         user = request.user
 
@@ -819,22 +826,20 @@ class StockLeagueViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({"error": str(e)}, status=500)
         
+    # Custom action to fetch the leaderboard of a league
     @action(detail=True, methods=['get'], url_path='leaderboard')
     def leaderboard(self, request, pk=None):
-        """ Retrieves league members sorted by total balance. """
         league = self.get_object()
         
-        # ✅ Get all league members with their total balance
+        # Get all league members with their total balance
         leaderboard = (
             Portfolio.objects.filter(league=league)
             .values("user__username")
             .annotate(total_balance=Sum("totalbalance"))
-            .order_by("-total_balance")  # ✅ Sort descending
+            .order_by("-total_balance")  # Sort descending
         )
-
         return Response(leaderboard, status=200)
-
-    
+  
 # Financial Articles View
 class RecommendedArticlesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -851,7 +856,7 @@ class RecommendedArticlesView(APIView):
             print(f"Error in recommendation: {str(e)}")
             return Response([], status=status.HTTP_200_OK)
 
-    
+# User Interests View
 class UserInterestsView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -874,12 +879,14 @@ class UserInterestsView(APIView):
         if user_interests:
             return Response({"interests": user_interests.interests}, status='200')
         return Response({"interests": []}, status='200')
-    
+
+# Financial Suggestions Viewset
 class FinancialSuggestionViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
     queryset = FinancialSuggestion.objects.all()
     serializer_class = FinancialSuggestionSerializer
-
+    
+    # Keywords for categorizing suggestions
     NEEDS_KEYWORDS = ["rent", "bills", "utilities", "groceries", "insurance", "phone", "food", "transport", "petrol", "diesel", "gas"]
     WANTS_KEYWORDS = ["gym", "entertainment", "spotify", "netflix", "dining", "shopping", "vacation", "subscriptions", "movies", "clothes"]
     SAVINGS_DEBT_KEYWORDS = ["savings", "investment", "loan", "debt", "emergency fund"]
@@ -888,6 +895,7 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
     def delete_redundant_suggestions(self, user, suggestion_category):
         FinancialSuggestion.objects.filter(user=user, status="NEW", user_feedback__isnull=True, suggestion_category=suggestion_category).delete()
     
+    # Function to generate suggestions based on user's financial data
     def generate_suggestions(self, user):
         self.delete_redundant_suggestions(user, suggestion_category="Suggestion")
         today = date.today()
@@ -903,6 +911,7 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
             print("No budget data")
             return  # No budget found, skip suggestions
 
+        # Calculating totals for income, expenses, debt, and savings
         income_total = MonthlyBudgetItem.objects.filter(
             budget=latest_budget, transaction_type="income"
         ).aggregate(Sum("amount"))["amount__sum"] or Decimal("0")
@@ -919,8 +928,8 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
             budget=latest_budget, transaction_type="savings"
         ).aggregate(Sum("amount"))["amount__sum"] or Decimal("0")
 
+        # Calculating budget surplus and types
         budget_surplus = income_total - (expense_total + debt_total)
-        
         savings_type = SuggestionType.objects.get_or_create(category="SAVINGS")[0]
         loan_type = SuggestionType.objects.get_or_create(category="LOANS")[0]
         budget_type = SuggestionType.objects.get_or_create(category="BUDGET_ADJUSTMENT")[0]
@@ -998,6 +1007,7 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
                 suggestion_type=investment_type
             )
     
+    # Categorizing items based on keywords on items labels
     def categorize_item(self, category_label):
         label = category_label.lower()
         if any(keyword in label for keyword in self.NEEDS_KEYWORDS):
@@ -1009,6 +1019,7 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
         else:
             return "uncategorized"
         
+    # Custom action to analyze spending and provide suggestions
     @action(detail=False, methods=["GET"])
     def analyze_spending(self, request):
         user = request.user
@@ -1051,6 +1062,7 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
             "suggestions": serialized_suggestions
         })
 
+    # Custom action to fetch all suggestions
     @action(detail=False, methods=["GET"])
     def get_suggestions(self, request):
         user = request.user
@@ -1058,6 +1070,7 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
         serializer = FinancialSuggestionSerializer(suggestions, many=True)
         return Response(serializer.data)
     
+    # Custom action to fetch all analyzations
     @action(detail=False, methods=["GET"])
     def get_analyzation(self, request):
         user = request.user
@@ -1065,27 +1078,22 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
         serializer = FinancialSuggestionSerializer(suggestions, many=True)
         return Response(serializer.data)
     
+    # Custom action classify user based on their financial data
     @action(detail=False, methods=["GET"])
     def classify(self, request):
-        """
-        Classify the user without generating financial suggestions.
-        """
         from data.utils.user_classification import classify_user
         user = request.user
         user_category = classify_user(user)
         return Response({"user_category": user_category if user_category else "No Classification"})
 
-    
+    # Custom action to generate new financial suggestions
     @action(detail=False, methods=["GET"])
     def generate(self, request):
-        """
-        Generate new financial suggestions for the user (without classifying).
-        """
         user = request.user
         self.generate_suggestions(user)
         return Response({"message": "New financial suggestions have been generated!"})
 
-    
+    # Custom action to accept a suggestion
     @action(detail=True, methods=["POST"])
     def accept_suggestion(self, request, pk=None):
         suggestion = get_object_or_404(FinancialSuggestion, id=pk, user=request.user)  # Handle missing suggestion
@@ -1098,11 +1106,12 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
         # Increment the total accepted count in SuggestionType
         if suggestion.suggestion_type:
             suggestion_type = suggestion.suggestion_type
-            suggestion_type.total_accepted = F('total_accepted') + 1  # Use F() expression for atomic updates
-            suggestion_type.save(update_fields=['total_accepted'])  # Save only the updated field
+            suggestion_type.total_accepted = F('total_accepted') + 1 
+            suggestion_type.save(update_fields=['total_accepted']) 
 
         return Response({"message": "Suggestion accepted successfully."})
 
+    # Custom action to dismiss a suggestion
     @action(detail=True, methods=["POST"])
     def dismiss_suggestion(self, request, pk=None):
         suggestion = get_object_or_404(FinancialSuggestion, id=pk, user=request.user)  # Handle missing suggestion
@@ -1115,7 +1124,7 @@ class FinancialSuggestionViewSet(viewsets.ViewSet):
         # Increment the total declined count in SuggestionType
         if suggestion.suggestion_type:
             suggestion_type = suggestion.suggestion_type
-            suggestion_type.total_declined = F('total_declined') + 1  # Use F() expression for atomic updates
-            suggestion_type.save(update_fields=['total_declined'])  # Save only the updated field
+            suggestion_type.total_declined = F('total_declined') + 1
+            suggestion_type.save(update_fields=['total_declined'])
 
         return Response({"message": "Suggestion dismissed successfully."})

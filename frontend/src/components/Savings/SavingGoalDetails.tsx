@@ -49,6 +49,7 @@ const SavingsGoalDetails: React.FC = () => {
     SavingsContribution[]
   >([]);
 
+  // Fetch the savings goal details and contribution history
   useEffect(() => {
     Axios.get(`data/savings/${id}/`)
       .then((response) => {
@@ -72,6 +73,7 @@ const SavingsGoalDetails: React.FC = () => {
       );
   }, [id]);
 
+  // Handle updates to the savings goal and contribution history
   const handleUpdate = async (
     updatedGoal: SavingsGoal,
     newContribution?: SavingsContribution
@@ -100,6 +102,7 @@ const SavingsGoalDetails: React.FC = () => {
     }
   };
 
+  // Handle image upload
   const handleImageUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!image || !savingsGoal) return;
@@ -136,8 +139,6 @@ const SavingsGoalDetails: React.FC = () => {
   if (!savingsGoal) {
     return <Typography data-testid="loading-state">Loading...</Typography>;
   }
-
-  console.log(savingsGoal);
 
   const progress =
     (savingsGoal.current_amount / savingsGoal.target_amount) * 100;

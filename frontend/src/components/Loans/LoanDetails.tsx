@@ -29,6 +29,7 @@ interface LoanPayment {
   payment_date: string;
 }
 
+// Function to generate a repayment schedule
 const generateRepaymentSchedule = (
   balance: number,
   _rate: number,

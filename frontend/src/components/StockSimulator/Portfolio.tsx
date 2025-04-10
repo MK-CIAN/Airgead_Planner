@@ -41,6 +41,7 @@ const Portfolio: React.FC<PortfolioProps> = ({
   const [error, setError] = useState<string | null>(null);
   const fetchCalled = useRef(false);
 
+  // Fetch portfolio data
   const fetchPortfolio = async () => {
     try {
       setLoading(true);
@@ -68,6 +69,7 @@ const Portfolio: React.FC<PortfolioProps> = ({
     setQuantity(parseFloat(amount) / pricePerShare);
   }, [amount, ticker, stocks]);
 
+  // Handle transaction submission
   const handleTransaction = async () => {
     if (!ticker || quantity <= 0) {
       toast({
@@ -79,7 +81,6 @@ const Portfolio: React.FC<PortfolioProps> = ({
 
     try {
       setLoading(true);
-
       const pricePerShare = stocks[ticker]?.close_price || 0;
       if (pricePerShare <= 0) {
         toast({ title: "Invalid stock price.", variant: "destructive" });
@@ -88,7 +89,7 @@ const Portfolio: React.FC<PortfolioProps> = ({
 
       const calculatedQuantity = parseFloat(
         (parseFloat(amount) / pricePerShare).toFixed(6)
-      ); // ✅ Ensure it's a valid float
+      );
 
       const response = await Axios.post(`data/portfolio/`, {
         ticker,

@@ -17,6 +17,7 @@ const SearchUsers: React.FC = () => {
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState<User[]>([]);
 
+  // Fetch search results based on the query
   useEffect(() => {
     const fetchSearchResults = async () => {
       if (query.trim() === "") {
@@ -38,6 +39,7 @@ const SearchUsers: React.FC = () => {
     return () => clearTimeout(debounceTimer);
   }, [query]);
 
+  // Send a friend request to the selected user
   const sendFriendRequest = async (receiverId: number) => {
     try {
       await Axios.post(

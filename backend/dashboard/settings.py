@@ -45,13 +45,13 @@ else:
 #'NAME': config("POSTGRES_DB"),
 #'USER': config("POSTGRES_USER"),
 #'PASSWORD': config("POSTGRES_PASSWORD"),
-IS_LOCAL = True
+IS_LOCAL = False
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': "postgres",
-        'USER': "admin",
-        'PASSWORD': "password123",
+        'NAME': config("POSTGRES_DB"),
+        'USER': config("POSTGRES_USER"),
+        'PASSWORD': config("POSTGRES_PASSWORD"),
         'HOST': "localhost" if IS_LOCAL else "postgres",  # Use 'postgis' as host in Docker
         'PORT': POSTGRES_PORT if IS_LOCAL else "5432",
         'OPTIONS': {
@@ -75,7 +75,7 @@ TEMPLATES = [{
 }]
 
 # =======================
-# 🔹 DEBUG & SECURITY SETTINGS
+# DEBUG & SECURITY SETTINGS
 # =======================
 if DEPLOY_SECURE:
     DEBUG = False
@@ -102,7 +102,7 @@ else:
 
 
 # =======================
-# 🔹 APPLICATION CONFIGURATION
+# APPLICATION CONFIGURATION
 # =======================
 INSTALLED_APPS = [
     'django.contrib.admin',

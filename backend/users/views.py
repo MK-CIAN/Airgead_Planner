@@ -13,6 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
 User = get_user_model()
 
+# View to toggle tooltips
 class ToggleTooltipsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -22,7 +23,7 @@ class ToggleTooltipsView(APIView):
         user.save()
         return Response({"tooltips_enabled": user.tooltips_enabled}, status=status.HTTP_200_OK)
 
-#Login Viewset
+# Login Viewset
 class LoginViewset(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
     serializer_class = LoginSerializer
@@ -51,7 +52,7 @@ class LoginViewset(viewsets.ViewSet):
         else:
             return Response(serializer.errors, status=400)
 
-#Register Viewset
+# Register Viewset
 class RegisterViewset(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
     queryset = User.objects.all()
@@ -74,7 +75,7 @@ class RegisterViewset(viewsets.ViewSet):
             # Return validation errors
             return Response(serializer.errors, status=400)
         
-
+# View to get user details
 class UserDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -83,7 +84,7 @@ class UserDetailView(APIView):
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
-
+# View to search for users
 class UserSearchView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -114,7 +115,8 @@ class UserSearchView(APIView):
             })
 
         return Response(results)
-    
+
+# View to send a friend request
 class SendFriendRequestView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -142,7 +144,8 @@ class SendFriendRequestView(APIView):
             return Response({"message": "Friend request sent."})
         except User.DoesNotExist:
             return Response({"error": "User not found."}, status=404)
-        
+    
+# Notification List View    
 class NotificationListView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -165,7 +168,7 @@ class NotificationListView(APIView):
             data.append(notification_data)
         return Response(data)
 
-
+# View to accept notifications
 class AcceptNotificationView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -226,6 +229,7 @@ class AcceptNotificationView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=400)
         
+# View to deny notifications
 class DenyNotificationView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -244,12 +248,6 @@ class DenyNotificationView(APIView):
                 friend_request.status = "rejected"
                 friend_request.save()
 
-            elif notification.type == "budget_invite" and budget_id:
-                # Deny a budget invite (mark the notification as read)
-                # No changes are made to the CustomBudget as the invite is simply ignored.
-
-                pass  # Optional: Log or track that the budget invite was denied.
-
             # Mark the notification as read or processed
             notification.is_read = True
             notification.save()
@@ -263,6 +261,7 @@ class DenyNotificationView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=400)
         
+# View to get pending invites for a specific entity
 class PendingInvitesView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -294,7 +293,7 @@ class PendingInvitesView(APIView):
 
         return Response([{"friend_id": invite["user_id"]} for invite in pending_invites])
 
-        
+# View to get a list of friends
 class FriendsListView(APIView):
     permission_classes = [IsAuthenticated]
 

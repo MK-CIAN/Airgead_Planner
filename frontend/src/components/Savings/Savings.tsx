@@ -24,6 +24,7 @@ const Savings: React.FC = () => {
 
   const navigate = useNavigate();
 
+  // Fetch savings data from the backend
   const getSavingsData = () => {
     Axios.get(`data/savings`)
       .then((response) => {
@@ -46,6 +47,7 @@ const Savings: React.FC = () => {
     getSavingsData();
   }, []);
 
+  // Handle adding a new savings goal
   const handleAddSavingsGoal = (
     newGoal: Omit<SavingsGoalData, "id" | "progress" | "displayed_amount">
   ) => {
@@ -59,6 +61,7 @@ const Savings: React.FC = () => {
       });
   };
 
+  // Handle removing a savings goal
   const handleRemoveSavingsGoal = (id: string) => {
     Axios.delete(`data/savings/${id}/`)
       .then(() => {

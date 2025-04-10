@@ -176,6 +176,7 @@ const IncomeTaxCalculator: React.FC = () => {
     setBreakdown(calculatedBreakdown); // Update state
   };
 
+  // Save the breakdown to the backend
   const saveBreakdown = () => {
     if (!breakdown || isSaving) return;
 
@@ -207,6 +208,7 @@ const IncomeTaxCalculator: React.FC = () => {
       });
   };
 
+  // Remove a saved salary
   const handleRemoveSalary = (id: number) => {
     Axios.delete(`/data/income-tax/${id}/`)
       .then(() => {
@@ -227,10 +229,12 @@ const IncomeTaxCalculator: React.FC = () => {
       });
   };
 
+  // Toggle the expansion of the card
   const toggleCardExpansion = (id: number) => {
     setExpandedCardId(expandedCardId === id ? null : id);
   };
 
+  // Compare two incomes
   const compareIncomes = () => {
     const baseIncome = savedBreakdowns.find(
       (income) => income.id === baseIncomeId

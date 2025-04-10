@@ -22,7 +22,7 @@ interface StockChartProps {
 }
 
 const StockChart: React.FC<StockChartProps> = ({ data, ticker }) => {
-  // ✅ Format Data for Recharts
+  // Formatting the Data for Recharts
   const formattedData = data.map((entry) => ({
     rawTimestamp: new Date(entry.date).getTime(),
     date: new Date(entry.date).toLocaleDateString("en-US", {
@@ -46,10 +46,10 @@ const StockChart: React.FC<StockChartProps> = ({ data, ticker }) => {
     ? ((priceChange / firstEntry) * 100).toFixed(2)
     : "0";
 
-  // **Check if screen is mobile-sized**
+  // Checking if screen is mobile-sized
   const isMobile = window.innerWidth < 768;
   const axisFontSize = isMobile ? 8 : 12;
-  const leftMargin = isMobile ? -35 : 10; // ✅ Fixes left shifting issue
+  const leftMargin = isMobile ? -35 : 10;
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
@@ -57,12 +57,12 @@ const StockChart: React.FC<StockChartProps> = ({ data, ticker }) => {
         <h3 className="text-xl font-semibold text-center mb-2">
           {ticker} Stock Price Over Time
         </h3>
-        {/* ✅ Ensure full-width on mobile */}
+        {/* Ensuring full-width on mobile */}
         <div className="w-full sm:min-w-full mx-auto h-[300px] md:h-[380px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={formattedData}
-              margin={{ top: 10, right: 10, left: leftMargin, bottom: 10 }} // ✅ Correct conditional left margin
+              margin={{ top: 10, right: 10, left: leftMargin, bottom: 10 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis

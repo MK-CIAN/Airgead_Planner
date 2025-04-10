@@ -67,6 +67,7 @@ const PensionPlanner: React.FC = () => {
       );
   }, []);
 
+  // Calculate the pension projection
   const calculateProjection = () => {
     if (
       !startingAge ||
@@ -119,7 +120,8 @@ const PensionPlanner: React.FC = () => {
       }
     }, 300);
   };
-
+  
+  // Toggle the expansion of a saved projection card
   const toggleCardExpansion = (id: number) => {
     if (expandedCardId === id) {
       setExpandedCardId(null);
@@ -145,6 +147,7 @@ const PensionPlanner: React.FC = () => {
     }
   };
 
+  // Remove a saved projection
   const handleRemovePension = (id: number) => {
     Axios.delete(`/data/pension-planner/${id}/`)
       .then(() => {
@@ -170,9 +173,9 @@ const PensionPlanner: React.FC = () => {
       });
   };
 
+  // Save the current projection
   const saveProjection = () => {
     if (!projection || isSaving) return;
-
     setIsSaving(true);
 
     Axios.post("/data/pension-planner/", projection)

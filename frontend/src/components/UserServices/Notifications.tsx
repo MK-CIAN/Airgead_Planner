@@ -18,6 +18,7 @@ interface Notification {
 const Notifications: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
+  // Fetch notifications from the backend
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
@@ -32,6 +33,7 @@ const Notifications: React.FC = () => {
     fetchNotifications();
   }, []);
 
+  // Handle accepting a notifications
   const handleAccept = async (notification: Notification) => {
     try {
       const payload: any = { notification_id: notification.id };
@@ -62,6 +64,7 @@ const Notifications: React.FC = () => {
     }
   };
 
+  // Handle denying a notification
   const handleDeny = async (id: number) => {
     try {
       await Axios.post(

@@ -25,6 +25,7 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
   const [, setContributors] = useState<number[]>([]);
   const [pendingInvites, setPendingInvites] = useState<number[]>([]);
 
+  // Fetch friends and contributors when the component mounts or when entityId changes
   useEffect(() => {
     const fetchFriendsAndContributors = async () => {
       try {
@@ -76,6 +77,7 @@ const ShowFriends: React.FC<ShowFriendsProps> = ({
     if (entityId) fetchFriendsAndContributors();
   }, [entityId, entityType]);
 
+  // Function to handle inviting a friend
   const handleInvite = async (friendId: number) => {
     if (pendingInvites.includes(friendId)) {
       return; // Preventing sending duplicate invites

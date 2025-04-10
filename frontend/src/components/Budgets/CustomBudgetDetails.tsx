@@ -41,7 +41,6 @@ interface Contributor {
 
 const CustomBudgetDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-
   const [budgetName, setBudgetName] = useState<string | null>(null);
   const [budgetData, setBudgetData] = useState<BudgetData[]>([]);
   const [, setContributors] = useState<Contributor[]>([]);
@@ -72,11 +71,13 @@ const CustomBudgetDetails: React.FC = () => {
       setLoading(false);
     }
   };
-
+  
+  // Fetch budget details on component mount
   useEffect(() => {
     fetchBudgetDetails();
   }, [id]);
 
+  // Handle adding a new budget item
   const handleAddBudgetItem = (newItem: {
     amount: string;
     category: string;
@@ -108,6 +109,7 @@ const CustomBudgetDetails: React.FC = () => {
       });
   };
 
+  // Handle removing a budget item
   const handleRemoveBudgetItem = (itemId: number) => {
     Axios.delete(`data/custom-budget/${id}/items/${itemId}/`)
       .then(() => {

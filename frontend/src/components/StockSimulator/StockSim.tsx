@@ -61,6 +61,7 @@ const StockSim: React.FC = () => {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState<boolean>(true);
 
+  // Function to fetch current day data
   const fetchCurrentDayData = async (ticker: string) => {
     try {
       const response = await Axios.get(`data/stock-realtime`, {
@@ -85,6 +86,7 @@ const StockSim: React.FC = () => {
     }
   };
 
+  // Function to fetch previous day data
   const fetchPreviousDayData = async (ticker: string) => {
     let daysBack = 1; // Start searching from yesterday
     let previousClose = null;
@@ -92,7 +94,6 @@ const StockSim: React.FC = () => {
     while (!previousClose && daysBack < 7) {
       // Limit to 7 days to avoid infinite loops
       const checkDate = dayjs().subtract(daysBack, "day").format("YYYY-MM-DD");
-      console.log(`Checking date: ${checkDate} for ${ticker}`);
 
       try {
         const response = await Axios.get(`data/stocks/`, {
@@ -110,15 +111,13 @@ const StockSim: React.FC = () => {
 
     if (!previousClose) {
       console.warn(
-        `⚠️ No previous close found for ${ticker} in the last 7 days!`
+        `No previous close found for ${ticker} in the last 7 days!`
       );
     }
-
-    console.log(`Previous Close: ${previousClose} for ${ticker}`);
-
-    return previousClose; // ✅ Ensure the function returns previousClose
+    return previousClose; // Ensure the function returns previousClose
   };
 
+  // Function to fetch yearly data
   const fetchYearlyData = async (ticker: string) => {
     setExpandedLoading(true);
     const startDate = dayjs().subtract(1, "year").format("YYYY-MM-DD");
@@ -140,7 +139,6 @@ const StockSim: React.FC = () => {
 
       if (stocks[ticker]) fullData.push(stocks[ticker] as StockData);
       setExpandedStockData(fullData);
-      console.log(`Full Data Loaded for ${ticker}`);
     } catch (error) {
       setError("Failed to load full data.");
     } finally {
@@ -148,6 +146,7 @@ const StockSim: React.FC = () => {
     }
   };
 
+  // Function to fetch initial data
   useEffect(() => {
     const loadInitialData = async () => {
       setLoading(true);
@@ -169,8 +168,6 @@ const StockSim: React.FC = () => {
             previous_close: previousClose, // Ensure undefined is set explicitly if not found
           };
 
-          console.log(`Final Stock Data for ${ticker}:`, stockEntry); // Ensure correct logging
-
           return stockEntry;
         });
         const results = await Promise.all(stockDataPromises);
@@ -189,6 +186,7 @@ const StockSim: React.FC = () => {
     loadInitialData();
   }, []);
 
+  // Fetch league details and leaderboard if in league mode
   useEffect(() => {
     if (portfolioType === "league" && leagueId) {
       const fetchLeagueDetails = async () => {
@@ -231,7 +229,7 @@ const StockSim: React.FC = () => {
   return (
     <div className="p-6">
       <h1 className="text-center text-3xl font-bold">Stock Market Simulator</h1>
-      {/* ✅ Show which portfolio is selected */}
+      {/* Show which portfolio is selected */}
       <h2 className="text-center text-lg font-semibold text-gray-600">
         Viewing{" "}
         {portfolioType === "personal"
@@ -252,7 +250,7 @@ const StockSim: React.FC = () => {
         )}
       </h2>
 
-      {/* ✅ Pass portfolio type & league ID to Portfolio */}
+      {/* Pass portfolio type & league ID to Portfolio */}
       <Portfolio
         portfolioType={portfolioType}
         leagueId={leagueId}
@@ -265,9 +263,9 @@ const StockSim: React.FC = () => {
             League Overview
           </h3>
 
-          {/* ✅ Responsive Grid Layout */}
+          {/* Responsive Grid Layout */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* ✅ Leaderboard Section */}
+            {/* Leaderboard Section */}
             <FeatureTooltip content="See how you rank against other league members.">
             <Card>
               <CardContent className="p-4">
@@ -318,7 +316,7 @@ const StockSim: React.FC = () => {
             </Card>
             </FeatureTooltip>
 
-            {/* ✅ Chatroom Section */}
+            {/* Chatroom Section */}
             <FeatureTooltip content="Chat with other league members.">
             <Card>
               <CardContent className="p-4">

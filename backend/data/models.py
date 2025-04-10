@@ -166,7 +166,8 @@ class CustomBudget(models.Model):
 
     class Meta:
         db_table = 'custom_budget'
-        
+
+# Budget Item
 class BudgetItem(models.Model):
     CATEGORY_CHOICES = [
         ('income', 'Income'),
@@ -187,7 +188,6 @@ class BudgetItem(models.Model):
     class Meta:
         db_table = 'budget_item'
 
-
 # Savings Goal
 class SavingsGoal(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -203,7 +203,8 @@ class SavingsGoal(models.Model):
 
     class Meta:
         db_table = 'savings_goal'
-        
+
+# Savings Contribution    
 class SavingsContribution(models.Model):
     savings_goal = models.ForeignKey(SavingsGoal, on_delete=models.CASCADE, related_name="contributions")
     amount = models.DecimalField(max_digits=12, decimal_places=2)
@@ -214,7 +215,6 @@ class SavingsContribution(models.Model):
     
     def __str__(self):
         return f"€{self.amount} on {self.contribution_date.strftime('%Y-%m-%d')} for {self.savings_goal.name}"
-
 
 # Loan
 class Loan(models.Model):
@@ -232,7 +232,8 @@ class Loan(models.Model):
 
     def __str__(self):
         return self.name
-    
+
+# Active Loan
 class ActiveLoan(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
@@ -262,7 +263,8 @@ class ActiveLoan(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.user.username}"
-    
+
+# Loan Payment  
 class LoanPayment(models.Model):
     loan = models.ForeignKey(ActiveLoan, on_delete=models.CASCADE, related_name="payments")
     amount = models.DecimalField(max_digits=12, decimal_places=2)
@@ -274,7 +276,7 @@ class LoanPayment(models.Model):
     def __str__(self):
         return f"€{self.amount} on {self.payment_date.strftime('%Y-%m-%d')} for {self.loan.name}"
 
-    
+# Income Tax 
 class IncomeTax(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     salary = models.DecimalField(max_digits=12, decimal_places=2)
@@ -293,7 +295,8 @@ class IncomeTax(models.Model):
 
     class Meta:
         db_table = 'income_tax'
-        
+
+# Pension Projection       
 class PensionProjection(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     starting_age = models.IntegerField()
@@ -309,7 +312,6 @@ class PensionProjection(models.Model):
 
     class Meta:
         db_table = 'pension_projection'
-
 
 # Stock Data
 class StockData(models.Model):
@@ -328,8 +330,8 @@ class StockData(models.Model):
     def __str__(self):
         return f"{self.ticker} on {self.date}"
     
+# Real-time Stock Data
 class StockRealTimeData(models.Model):
-    """Stores real-time 30-minute stock updates."""
     ticker = models.CharField(max_length=10)
     timestamp = models.DateTimeField()  # ✅ Uses full date-time
     open_price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -343,8 +345,7 @@ class StockRealTimeData(models.Model):
 
     def __str__(self):
         return f"{self.ticker} at {self.timestamp}"
-    
-        
+         
 # Portfolio 
 class Portfolio(models.Model):
     PERSONAL = 'personal'
@@ -374,7 +375,8 @@ class StockHolding(models.Model):
         """Fetch the latest price for this stock"""
         latest_stock = StockRealTimeData.objects.filter(ticker=self.ticker).order_by('-timestamp').first()
         return latest_stock.close_price if latest_stock else Decimal(0)
-    
+
+# Stock League
 class StockLeague(models.Model):
     name = models.CharField(max_length=100, unique=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -403,7 +405,6 @@ class PortfolioHistory(models.Model):
     def __str__(self):
         return f"{self.portfolio} - {self.timestamp}"
 
-    
 # Financial Articles
 class FinancialArticle(models.Model):
     article_id = models.CharField(max_length=255, unique=True)
@@ -418,12 +419,7 @@ class FinancialArticle(models.Model):
     def __str__(self):
         return self.title
     
-class UserArticleInteraction(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    article = models.ForeignKey(FinancialArticle, on_delete=models.CASCADE)
-    clicked = models.BooleanField(default=False)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    
+# User Interests
 class UserInterest(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, 
@@ -437,7 +433,8 @@ class UserInterest(models.Model):
 
     class Meta:
         db_table = 'user_interest'
-        
+
+# Suggestion Type
 class SuggestionType(models.Model):
     CATEGORY_CHOICES = [
         ("SAVINGS", "Savings"),
@@ -457,7 +454,8 @@ class SuggestionType(models.Model):
 
     def __str__(self):
         return f"{self.category}: {self.calculate_acceptance_rate():.2f}% accepted"
-        
+
+# Financial Suggestion
 class FinancialSuggestion(models.Model):
     STATUS_CHOICES = [
         ("NEW", "New"),
@@ -486,7 +484,7 @@ class FinancialSuggestion(models.Model):
     def __str__(self):
         return f"Suggestion for {self.user.username}: {self.suggestion_text[:50]}..."    
     
-    
+# User Profile 
 class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
     category = models.CharField(

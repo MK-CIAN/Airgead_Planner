@@ -36,13 +36,11 @@ const UpdateSavingsForm: React.FC<UpdateSavingsFormProps> = ({
       setContribution("");
       return;
     }
-
     // Prevent contributions from reducing balance below zero
     const maxWithdrawal = -savingsGoal.current_amount;
     if (value < maxWithdrawal) {
       value = maxWithdrawal;
     }
-
     // Prevent contributions exceeding remaining amount
     if (value > remainingAmount) {
       value = remainingAmount;

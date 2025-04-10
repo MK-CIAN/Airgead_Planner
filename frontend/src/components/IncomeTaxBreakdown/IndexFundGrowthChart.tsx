@@ -17,11 +17,11 @@ interface IndexFundGrowthChartProps {
 const chartConfig = {
   invested: {
     label: "Amount Invested",
-    color: "hsl(150, 70%, 45%)", // Green hue
+    color: "hsl(150, 70%, 45%)",
   },
   total: {
     label: "Total Amount",
-    color: "hsl(120, 60%, 40%)", // Darker green hue
+    color: "hsl(120, 60%, 40%)",
   },
 } satisfies ChartConfig;
 
@@ -29,7 +29,7 @@ export function IndexFundGrowthChart({
   totalContributions,
   futureValue,
 }: IndexFundGrowthChartProps) {
-  // Generate chart data for visualization
+  // Generating chart data for visualization
   const chartData = Array.from({ length: 5 }, (_, i) => {
     const year = i + 1;
     const invested = totalContributions * (year / 5); // Progressively grows over 10 years

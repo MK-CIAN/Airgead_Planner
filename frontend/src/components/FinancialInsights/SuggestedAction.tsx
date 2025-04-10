@@ -69,6 +69,7 @@ const SuggestedAction: React.FC<SuggestedActionProps> = ({
     }
   };
 
+  // Handle the confirmation of the action
   const handleConfirm = async () => {
     console.log("Confirming Action for:", suggestion);
   
@@ -91,7 +92,7 @@ const SuggestedAction: React.FC<SuggestedActionProps> = ({
           navigate(`/savings/${suggestion.savings_goal}`);
         }
       }
-  
+      
       if (suggestion.loan_id) {
         const loan = await fetchLoan(suggestion.loan_id);
         if (loan) {

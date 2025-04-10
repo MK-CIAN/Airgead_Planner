@@ -47,6 +47,7 @@ const FinancialInsights: React.FC = () => {
     fetchSuggestions();
   }, []);
 
+  // Fetch user category
   const fetchUserCategory = () => {
     Axios.get(`/data/financial-suggestions/classify/`)
       .then((response) => {
@@ -58,6 +59,7 @@ const FinancialInsights: React.FC = () => {
       });
   };
 
+  // Fetch financial suggestions
   const fetchSuggestions = () => {
     setLoading(true);
     Axios.get(`/data/financial-suggestions/get-suggestions`)
@@ -71,6 +73,7 @@ const FinancialInsights: React.FC = () => {
       .finally(() => setLoading(false));
   };
 
+  // Fetch financial analyzations
   const fetchAnalyzations = () => {
     setLoading(true);
 
@@ -106,6 +109,7 @@ const FinancialInsights: React.FC = () => {
       .finally(() => setLoading(false));
   };
 
+  // Handle suggestion generation and analyzation
   const handleGenerateSuggestions = () => {
     Axios.get(`/data/financial-suggestions/generate/`)
       .then(() => {
@@ -115,13 +119,14 @@ const FinancialInsights: React.FC = () => {
       .catch((err) => console.error("Error generating suggestions:", err));
   };
 
+  // Handle spending analysis
   const handleAnalyzeSpending = () => {
-    setAnalysisRequested(true); // Ensure chart appears only after clicking Analyze Spending
+    setAnalysisRequested(true); // Ensuring chart appears only after clicking Analyze Spending
 
     Axios.get(`/data/financial-suggestions/analyze/`)
       .then(() => {
         toast({ title: "New analyzations generated!" });
-        fetchAnalyzations(); // Correctly fetch budget breakdown & suggestions
+        fetchAnalyzations(); // Correctly fetching budget breakdown & suggestions
       })
       .catch((err) => console.error("Error analyzing spending:", err));
   };
@@ -134,7 +139,7 @@ const FinancialInsights: React.FC = () => {
       return;
     }
 
-    // First, send the accept request to the backend
+    // Send the accept request to the backend
     Axios.post(`/data/financial-suggestions/${suggestion.id}/accept/`)
       .then(() => {
         toast({
@@ -143,7 +148,7 @@ const FinancialInsights: React.FC = () => {
           variant: "successfull",
         });
 
-        // Savings or loan suggestion, open the drawer
+        // Savings or loan suggestion, open the action drawer
         if (suggestion.savings_goal || suggestion.loan_id) {
           setSelectedSuggestion(suggestion);
           setIsModalOpen(true);
@@ -154,6 +159,7 @@ const FinancialInsights: React.FC = () => {
       .catch((err) => console.error("Error accepting suggestion:", err));
   };
 
+  // Handle suggestion dismissal
   const handleDismiss = (id: number) => {
     Axios.post(`/data/financial-suggestions/${id}/dismiss/`)
       .then(() => {

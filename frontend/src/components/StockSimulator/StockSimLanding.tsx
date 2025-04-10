@@ -25,7 +25,7 @@ const StockSimLanding: React.FC = () => {
 
   const navigate = useNavigate();
 
-  // ✅ Fetch leagues the user is a member of
+  // Fetch leagues the user is a member of
   const fetchLeagues = async () => {
     try {
       const response = await Axios.get(`data/leagues/`);
@@ -54,7 +54,7 @@ const StockSimLanding: React.FC = () => {
     fetchPersonalPortfolio();
   }, []);
 
-  // ✅ Handle league creation
+  // Handle league creation
   const handleCreateLeague = async () => {
     if (!name.trim()) {
       alert("League name is required.");
@@ -67,13 +67,13 @@ const StockSimLanding: React.FC = () => {
 
       if (response.status === 201) {
         setShowForm(false);
-        setName(""); // ✅ Reset form
-        fetchLeagues(); // ✅ Reload leagues to show the new one
+        setName(""); 
+        fetchLeagues();
         toast({
           title: "League created successfully!",
           description: "Refreshing Page",
           variant: "successfull",
-        }); // ✅ Inform user
+        });
       }
     } catch (error) {
       console.error("Error creating league:", error);
@@ -94,6 +94,7 @@ const StockSimLanding: React.FC = () => {
     );
   };
 
+  // Handle leaving a league
   const handleLeaveLeague = async (leagueId: string) => {
     if (!window.confirm("Are you sure you want to leave this league?")) return;
 
@@ -105,6 +106,7 @@ const StockSimLanding: React.FC = () => {
     }
   };
 
+  // Handle deleting a league
   const handleDeleteLeague = async (leagueId: string) => {
     if (
       !window.confirm(
@@ -112,7 +114,6 @@ const StockSimLanding: React.FC = () => {
       )
     )
       return;
-
     try {
       await Axios.delete(`data/leagues/${leagueId}/delete-league/`);
       fetchLeagues(); // Refresh leagues after deletion

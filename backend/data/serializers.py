@@ -24,7 +24,6 @@ class MonthlyBudgetSerializer(serializers.ModelSerializer):
 
         return data
 
-        
 class BudgetItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = BudgetItem
@@ -91,7 +90,6 @@ class SavingsGoalSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(obj.image.url)
         return None
 
-
 class LoanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Loan
@@ -142,7 +140,6 @@ class StockRealTimeDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = StockRealTimeData
         fields = ['ticker', 'timestamp', 'open_price', 'high_price', 'low_price', 'close_price', 'volume']
-
 
 class StockHoldingSerializer(serializers.ModelSerializer):
     class Meta:

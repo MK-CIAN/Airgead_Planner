@@ -45,6 +45,7 @@ interface ActiveLoanData {
   remainingMonths: number;
 }
 
+// Function to generate repayment schedule
 const generateRepaymentSchedule = (
   balance: number,
   _rate: number,
@@ -63,6 +64,7 @@ const generateRepaymentSchedule = (
   return schedule;
 };
 
+// LoanCalculator component
 const LoanCalculator: React.FC = () => {
   const [loans, setLoans] = useState<LoanData[]>([]);
   const [activeLoans, setActiveLoans] = useState<ActiveLoanData[]>([]);
@@ -188,6 +190,7 @@ const LoanCalculator: React.FC = () => {
       termLength
     );
 
+    // Creating a new loan object
     const newLoan: LoanData = {
       id: `${loans.length + 1}`,
       name,
@@ -225,6 +228,7 @@ const LoanCalculator: React.FC = () => {
       });
   };
 
+  // Function to save active loan
   const handleSaveActiveLoan = (data: {
     name: string;
     balance: number | string;
@@ -314,6 +318,7 @@ const LoanCalculator: React.FC = () => {
       });
   };
 
+  // Function to remove active loan
   const handleRemoveActiveLoan = (id: string) => {
     Axios.delete(`data/active-loan/${id}/delete_loan/`)
       .then(() => {

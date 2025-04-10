@@ -21,7 +21,7 @@ const CreateLeague: React.FC = () => {
     try {
       const response = await Axios.post("data/leagues/", { name });
 
-      // ✅ Navigate to the new league's portfolio
+      // Navigating to the new league's portfolio
       if (response.status === 201) {
         const { league_id } = response.data;
         navigate(`/stocksim?portfolio_type=league&league_id=${league_id}`);

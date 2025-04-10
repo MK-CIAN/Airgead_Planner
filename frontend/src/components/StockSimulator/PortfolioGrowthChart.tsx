@@ -52,7 +52,7 @@ const PortfolioGrowthChart: React.FC<PortfolioGrowthChartProps> = ({
 
   console.log(history);
 
-  // ✅ Step 1: Format Data Correctly
+  // Formatting the Data Correctly
   const formattedData = history
     .map((entry) => ({
       rawTimestamp: new Date(entry.timestamp).getTime(),
@@ -71,10 +71,10 @@ const PortfolioGrowthChart: React.FC<PortfolioGrowthChartProps> = ({
     }))
     .sort((a, b) => a.rawTimestamp - b.rawTimestamp);
 
-  // **Check if screen is mobile-sized**
+  // Checking if screen is mobile-sized
   const isMobile = window.innerWidth < 768;
   const axisFontSize = isMobile ? 8 : 12;
-  const leftMargin = isMobile ? -27.5 : 10; // ✅ Fixes left shifting issue
+  const leftMargin = isMobile ? -27.5 : 10;
 
   return showCardContainer ? (
     <Card className="w-full max-w-4xl mx-auto">
