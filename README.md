@@ -89,37 +89,37 @@ The app integrates core financial tools in one intuitive interface including:
 - Add/remove custom items
 - Navigate through historical budgets
 - Visual spending breakdown via charts
-![alt text](image-1.png)
+![alt text](./readme_images/image-1.png)
 
 ### Saving Goals
 - Create and track progress towards goals
 - Visual milestone breakdown
 - Custom image upload
-![alt text](image.png)
+![alt text](./readme_images/image.png)
 
 ### Loan Repayment
 - Enter loan details and view repayment breakdown
 - Visual comparison of interest vs. principal
-![alt text](image-2.png)
+![alt text](./readme_images/image-2.png)
 
 ### Income Tax Breakdown
 - Enter salary and view net vs. gross income along with detailed tax breakdowns
 - Visual comparison of two income levels with tax effects
-![alt text](image-3.png)
+![alt text](./readme_images/image-3.png)
 
 ### Stock Market Simulator
 - Simulated $10,000 trading account
 - Real-time stock data updated every 30 mins
 - Buy/sell stock functionality
 - Friend leagues and rankings
-![alt text](image-4.png)
-![alt text](image-5.png)
-![alt text](image-6.png)
+![alt text](./readme_images/image-4.png)
+![alt text](./readme_images/image-5.png)
+![alt text](./readme_images/image-6.png)
 
 ### Personalized News Feed
 - Irish financial news
 - Content-based recommendation based on user interests and user spending habits
-![alt text](image-7.png)
+![alt text](./readme_images/image-7.png)
 
 ### Collaboration Tools
 - Shareable Budgets
@@ -130,8 +130,8 @@ The app integrates core financial tools in one intuitive interface including:
 - Users classifed into categories based on historical budgets
 - Suggested Actions based on current budget
 - Current budget analysations
-![alt text](image-8.png)
-![alt text](image-9.png)
+![alt text](./readme_images/image-8.png)
+![alt text](./readme_images/image-9.png)
 
 ---
 
