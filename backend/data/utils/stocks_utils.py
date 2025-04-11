@@ -104,6 +104,11 @@ def fetch_realtime_stock_data():
     yf = get_yfinance()
     logger.info("Fetching latest stock & crypto prices...")
     now = make_aware(datetime.now())
+    
+    # First Cleaning up old data
+    cutoff = now - timedelta(days=1)
+    deleted_count, _ = StockRealTimeData.objects.filter(timestamp__lt=cutoff).delete()
+    logger.info(f"Deleted {deleted_count} outdated real-time stock/crypto records.")
 
     # Fetching stock prices in batches
     for i in range(0, len(STOCK_TICKERS), BATCH_SIZE):
@@ -177,7 +182,6 @@ def fetch_realtime_stock_data():
                     'volume': int(latest["Volume"]),
                 }
             )
-
             # Cache crypto price for 30 minutes
             cache.set(cache_key, current_price, timeout=1800)
 

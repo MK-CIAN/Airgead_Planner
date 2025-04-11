@@ -21,6 +21,7 @@ interface PasswordResetForm {
   email: string;
 }
 
+// PasswordResetRequest component
 const PasswordResetRequest = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -34,6 +35,7 @@ const PasswordResetRequest = () => {
     resolver: yupResolver(passwordResetSchema),
   });
 
+  // Submission handler
   const submission: SubmitHandler<PasswordResetForm> = async (data) => {
     setErrorMessage(null);
     setSuccessMessage(null);

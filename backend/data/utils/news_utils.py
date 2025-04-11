@@ -1,5 +1,5 @@
 from venv import logger
-from ..models import FinancialArticle, UserArticleInteraction, UserInterest, UserProfile
+from ..models import FinancialArticle, UserInterest, UserProfile
 from decouple import config
 import logging
 import requests
